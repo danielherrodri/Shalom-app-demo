@@ -43,7 +43,7 @@ assert.match(accessibility, /data-shalom-large-text="true"[\s\S]*?\.mobile-botto
 console.log('UX guardrails: responsive Kids cards, persistent mobile nav, areas and accessibility passed.');
 
 const kidsCss=read('design/kids-paneles.css');
-assert.match(kidsCss,/header nav\\s*\\{[\\s\\S]*?grid-template-columns:repeat\\(2,minmax\\(0,1fr\\)\\)/, 'Kids uses grid without horizontal nav scrolling');
+assert.match(kidsCss,/header nav\s*\{[\s\S]*?grid-template-columns:repeat\(2,minmax\(0,1fr\)\)/, 'Kids uses grid without horizontal nav scrolling');
 assert.match(kidsCss,/scroll-snap-type:none/, 'Kids does not use a swipe-only menu');
 const main=read('index.html');
 assert.match(main,/const priorities=isAdmin/, 'home has contextual priorities');
@@ -53,6 +53,6 @@ const family=read('assets/shalom-family-service.js');
 assert.match(family,/Resumen de inscripción familiar/, 'family enrollment has confirmation summary');
 assert.match(family,/Corregir selección/, 'family summary allows correction');
 const visual=read('assets/shalom-visual-2026.css');
-assert.match(visual,/--sh-status:var\\(--sh-attention\\)/, 'pending is not coral community');
-assert.match(visual,/quick-action\\[data-detail="incident"\\]/, 'incidents have distinct attention semantics');
+assert.match(visual,/--sh-status:var\(--sh-attention\)/, 'pending is not coral community');
+assert.match(visual,/quick-action\[data-detail="incident"\]/, 'incidents have distinct attention semantics');
 console.log('PASS: SPARK main priorities, Kids reflow, accessible typography and family summary');
