@@ -1,1 +1,32 @@
-<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Tu opinión en Shalom</title><link rel="stylesheet" href="assets/feedback.css"></head><body><header><a href="index.html">← Volver a Shalom</a><p>SHALOM · ESCUCHA Y MEJORA</p><h1>Tu opinión en Shalom</h1><p>Comparte qué salió bien y qué podemos mejorar.</p><p class="notice">Demostración con datos ficticios. No envía mensajes ni recibe reportes reales. Las opiniones se borran al recargar. Los perfiles de demostración no son permisos reales.</p></header><main id="feedback-app"></main><script src="assets/feedback.js"></script></body></html>
+<!doctype html>
+<html lang="es-MX">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#faf7f2">
+  <title>Tu opinión · Shalom</title>
+  <link rel="stylesheet" href="assets/feedback.css">
+  <link rel="stylesheet" href="assets/ux-unificado.css">
+  <link rel="stylesheet" href="assets/shalom-theme.css">
+  <link rel="stylesheet" href="assets/shalom-navigation.css">
+  <script src="assets/shalom-theme.js"></script>
+  <script src="assets/shalom-navigation.js"></script>
+</head>
+<body data-shalom-space="feedback">
+  <script>window.ShalomTheme.apply();</script>
+  <a class="shalom-feedback-skip" href="#feedback-app">Saltar al formulario</a>
+  <header class="shalom-feedback-header">
+    <div class="shalom-feedback-heading">
+      <a href="index.html">← Inicio Shalom</a>
+      <button type="button" data-shalom-theme-toggle class="shalom-theme-control">Cambiar tema</button>
+    </div>
+    <p class="shalom-feedback-eyebrow">SHALOM · ESCUCHA Y MEJORA</p>
+    <h1>Tu opinión en Shalom</h1>
+    <p>Comparte qué salió bien y qué podemos mejorar.</p>
+    <p class="notice">Esta es una demostración con datos ficticios: no envía mensajes ni recibe reportes reales. Las opiniones se borran al recargar y los perfiles de ejemplo no dan permisos reales.</p>
+  </header>
+  <script>window.ShalomNavigation.mount(document.querySelector(".shalom-feedback-header"),{service:"other"});</script>
+  <main id="feedback-app" tabindex="-1"></main>
+  <script src="assets/feedback.js"></script>
+</body>
+</html>
