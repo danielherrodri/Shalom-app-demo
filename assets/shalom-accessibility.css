@@ -6,7 +6,33 @@ html[data-shalom-large-text="true"] body :is(h2,.section-title) {font-size:26px!
 html[data-shalom-large-text="true"] body h3 {font-size:22px!important;line-height:1.4!important}
 html[data-shalom-large-text="true"] body :is(button,a,.rowline,.item-foot,.top-actions) {white-space:normal;overflow-wrap:anywhere;height:auto}
 html[data-shalom-large-text="true"] body :is(.btnrow,.topline,.rowline,.item-foot) {flex-wrap:wrap}
-html[data-shalom-large-text="true"] body .mobile-bottom {flex-wrap:wrap;position:static}
+/* El texto ampliado no debe desmontar ni desplazar la navegación inferior. */
+@media(max-width:860px) {
+  html[data-shalom-large-text="true"] body[data-shalom-space="main"] .mobile-bottom {
+    position:fixed;display:grid;grid-template-columns:repeat(5,minmax(0,1fr));
+  }
+  html[data-shalom-large-text="true"] body[data-shalom-space="main"] .mobile-bottom button,
+  html[data-shalom-large-text="true"] body[data-shalom-space="main"] .mobile-bottom button span {
+    font-size:clamp(12px,3.2vw,14px)!important;line-height:1.25!important;
+    white-space:normal;overflow-wrap:normal;
+  }
+  html[data-shalom-large-text="true"] body[data-shalom-space="main"] .app-content {
+    padding-bottom:135px;
+  }
+}
+/* Las tarjetas de menores requieren una columna completa en teléfono,
+   incluso con textos grandes o zoom del navegador. */
+@media(max-width:640px) {
+  body[data-shalom-space="main"] .kids-context > .grid {
+    grid-template-columns:minmax(0,1fr);
+  }
+  body[data-shalom-space="main"] .kids-context .item-main {
+    min-width:0;overflow-wrap:normal;
+  }
+  body[data-shalom-space="main"] .kids-context > .grid > .panel {
+    min-width:0;
+  }
+}
 .family-choice {display:flex;align-items:center;gap:12px;padding:14px 0;border-bottom:1px solid var(--border,#aaa)}
 .family-choice input {width:24px;min-width:24px;height:24px;accent-color:#a57650}
 .family-choice span {flex:1;min-width:0}
