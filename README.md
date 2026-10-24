@@ -24,7 +24,7 @@ Avisos de texto/imagen/video con categorías, vigencias, fijación, audiencias y
 
 Preferencias optativas independientes, revocación, correos esenciales diferenciados, aviso versionado de borrador, autorizaciones separadas de imagen interna/difusión de menores y solicitudes de exportación/eliminación **sin enviar ni ejecutar**. No se afirma cumplimiento legal.
 
-**Comunicaciones vive solo en memoria**: sus cambios desaparecen al recargar. No guarda decisiones en localStorage/sessionStorage ni manda formularios. La app anterior y cafetería conservan ejemplos locales en el mismo navegador; no se sincronizan entre dispositivos. Nunca introducir información real. La administración de demo es pública y sus roles no son seguridad.
+**Comunicaciones vive solo en memoria**: sus cambios funcionales desaparecen al recargar. No guarda decisiones de correo o privacidad en localStorage/sessionStorage ni manda formularios. La única preferencia compartida que se almacena es el tema visual claro/oscuro. La app anterior y cafetería conservan ejemplos locales en el mismo navegador; no se sincronizan entre dispositivos. Nunca introducir información real. La administración de demo es pública y sus roles no son seguridad.
 
 El [centro de procesamiento demo](https://danielherrodri.github.io/Shalom-app-demo/comunicaciones.html#procesamiento) permite probar prioridades, lotes, cuota, reintentos, correo muerto y conciliación. Todo su estado desaparece al recargar.
 

@@ -52,3 +52,4 @@ jobs:
       - run: npm ci --prefix frontend
       - run: npm run build --prefix frontend
       - run: node tests/ux-guardrails.cjs
+      - run: node tests/theme-persistence.cjs
