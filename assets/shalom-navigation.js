@@ -34,7 +34,11 @@
         url.searchParams.set('service', options.service);
       link.href = url.href;
       link.textContent = section.label;
-      if (section.id === area) link.setAttribute('aria-current', 'page');
+      if (section.id === area) {
+        link.setAttribute('aria-current', 'page');
+        // No recargar el formulario o reiniciar datos al pulsar el area activa.
+        link.addEventListener('click', event => event.preventDefault());
+      }
       links.append(link);
     }
     nav.append(links);

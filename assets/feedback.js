@@ -1,4 +1,4 @@
-/* Demostración compartida: sin almacenamiento ni llamadas de red. */
+/* Las opiniones son efimeras y no se envian. Solo el tema visual se conserva por separado. */
 (() => {
   "use strict";
   const services = {
