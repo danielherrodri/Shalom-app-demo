@@ -38,3 +38,12 @@ El CI comprueba el build TypeScript/React y las reglas de integración básica. 
 2. Validar con usuarios la portada contextual de congregante, voluntario, operación y administración; no añadir rutas sin un flujo funcional.
 3. Probar los recorridos críticos: asistencia Kids, comanda de cafetería, consulta de avisos; para entregas de menores mantener verificación explícita de adulto.
 4. Publicar una vista de cliente real de cafetería solo cuando exista sincronización entre dispositivos; el modal actual no lo es.
+
+
+## Preferencia visual compartida
+
+El tema Noche/Crema se conserva entre las cuatro páginas mediante `assets/shalom-theme.js` y la clave `localStorage['shalom-ui-theme-v1']`. Inicio migra la preferencia guardada anteriormente en `shalom-demo-v03.theme` solo cuando la clave nueva aún no existe. El nuevo selector se ofrece también en Cafetería y mockups Kids; Comunicaciones reutiliza su selector. Los cambios se reflejan en otras pestañas del mismo origen mediante el evento `storage`, sin guardar formularios ni consentimientos. El botón de restablecer datos ficticios no borra el tema.
+
+La persistencia depende del almacenamiento local habilitado y funciona entre rutas del **mismo origen**. GitHub Pages y un dominio `chatgpt.site` son orígenes diferentes: no comparten su almacenamiento; cada despliegue recuerda su propia elección. Si la app se abre en modo privado o el navegador elimina datos, vuelve al tema por defecto.
+
+Verificaciones: `npm run test:theme` y exploración manual en teléfono entre Inicio → Kids → Cafetería → Comunicaciones → Inicio para cada tema.

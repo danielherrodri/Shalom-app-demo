@@ -508,7 +508,7 @@ document.addEventListener("click", (e) => {
   const id = b.dataset.id;
   switch (b.dataset.action) {
     case "theme":
-      document.body.classList.toggle("night");
+      window.ShalomTheme.toggle();
       break;
     case "close":
       close();
@@ -815,8 +815,8 @@ document.addEventListener("submit", (e) => {
     "Aviso guardado solo en esta pestaña. No se publicó en GitHub ni se enviaron correos.",
   );
 });
-// El tema inicial sigue la guía. Ninguna preferencia ni autorización utiliza storage.
-document.body.classList.add("night");
+// Solo se conserva el tema visual; preferencias y consentimientos siguen en memoria.
+window.ShalomTheme.apply();
 render();
 
 // El ciclo de Tab permanece dentro del diálogo, incluso en el límite del navegador.
