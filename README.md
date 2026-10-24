@@ -4,6 +4,8 @@ Inter, Noche, Crema y cobre. **Solo ejemplos ficticios. Sin backend, autenticaci
 
 ## Explorar
 
+- [Mockups actualizados: Kids, cocina, equipo y aportaciones](https://danielherrodri.github.io/Shalom-app-demo/design/kids-paneles.html#inicio)
+
 - [App principal](https://danielherrodri.github.io/Shalom-app-demo/)
 - [Avisos y comunicaciones](https://danielherrodri.github.io/Shalom-app-demo/comunicaciones.html#avisos)
 - [Preferencias](https://danielherrodri.github.io/Shalom-app-demo/comunicaciones.html#preferencias)
