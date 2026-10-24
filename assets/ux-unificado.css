@@ -1,0 +1,68 @@
+/* Shalom · mejoras UX de primera fase para las cuatro experiencias publicas.
+ * No redefine la identidad visual ni los permisos. Se carga despues de los estilos existentes. */
+:root {
+  --shalom-touch-target: 48px;
+  --shalom-text-body: 1rem;
+  --shalom-text-support: .9375rem;
+  --shalom-text-nav: .875rem;
+}
+body[data-shalom-space] { font-size: var(--shalom-text-body); }
+body[data-shalom-space] :is(button, input, select, textarea, a) { touch-action: manipulation; }
+body[data-shalom-space] :is(input, select, textarea) { font-size: 1rem; }
+body[data-shalom-space] :is(button, a, input, select, textarea):focus-visible {
+  outline-width: 3px;
+  outline-style: solid;
+  outline-offset: 3px;
+}
+body[data-shalom-space="main"] .nav-link { font-size: 1rem; min-height: var(--shalom-touch-target); }
+body[data-shalom-space="main"] :is(.lead, .announcement-body p, .tile p) { font-size: var(--shalom-text-support); }
+body[data-shalom-space="main"] .tile h3 { font-size: 1rem; }
+body[data-shalom-space="main"] .announcement-meta { font-size: .875rem; letter-spacing: .02em; }
+body[data-shalom-space="main"] :is(.btn, .tiny-btn) { min-height: var(--shalom-touch-target); }
+body[data-shalom-space="cafe"] :is(.lead, .note, .product .pprice, .order-line strong, .ticket-line strong, .list-row strong) { font-size: var(--shalom-text-support); }
+body[data-shalom-space="cafe"] :is(.product .pname, .field label, .checkline) { font-size: 1rem; }
+body[data-shalom-space="cafe"] :is(.product .psub, .order-line .details, .input-hint, .stat small, .stat .meta, .ticket-line small, .section-title small) { font-size: .875rem; }
+body[data-shalom-space="cafe"] :is(.btn, .outline, .chip, .qty button, .icon-btn) { min-height: var(--shalom-touch-target); }
+body[data-shalom-space="cafe"] .qty button { min-width: var(--shalom-touch-target); }
+body[data-shalom-space="cafe"] .product { min-height: 164px; }
+body[data-shalom-space="cafe"] .mobile-return { display: none; }
+body[data-shalom-space="comms"] :is(.card p, .demo-note, .notice, .help, .error, .success) { font-size: var(--shalom-text-support); }
+body[data-shalom-space="comms"] :is(label, legend) { font-size: 1rem; }
+body[data-shalom-space="comms"] :is(.meta, .breadcrumb, .overline) { font-size: .875rem; }
+body[data-shalom-space="kids"] :is(.module-demo, .module-toolbar p, .teacher-role, .meeting-summary) { font-size: var(--shalom-text-support) !important; }
+body[data-shalom-space="kids"] header nav a { font-size: var(--shalom-text-nav); min-height: var(--shalom-touch-target); }
+@media (max-width: 850px) {
+  body[data-shalom-space="main"] .mobile-bottom button {
+    font-size: .8125rem; line-height: 1.25; min-height: 60px; padding: 6px 2px;
+  }
+  body[data-shalom-space="main"] .app-content { padding-bottom: 120px; }
+  body[data-shalom-space="cafe"] .mobile-nav { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  body[data-shalom-space="cafe"] .mobile-nav button {
+    min-height: 58px; font-size: var(--shalom-text-nav); line-height: 1.2; gap: 4px;
+  }
+  body[data-shalom-space="cafe"] .mobile-return {
+    display: inline-flex; align-items: center; justify-content: center;
+    min-height: var(--shalom-touch-target); padding: 9px 10px;
+    font-size: var(--shalom-text-nav); text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+  body[data-shalom-space="comms"] .mobile-nav { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  body[data-shalom-space="comms"] .mobile-nav a {
+    min-height: 58px; display: flex; justify-content: center; align-items: center;
+    font-size: var(--shalom-text-nav); line-height: 1.25;
+  }
+  body[data-shalom-space="kids"] header nav a { font-size: var(--shalom-text-nav); }
+}
+@media (max-width: 540px) {
+  body[data-shalom-space="main"] .tile h3 { font-size: 1rem; }
+  body[data-shalom-space="main"] .tile p { font-size: var(--shalom-text-support); }
+  body[data-shalom-space="cafe"] .product { min-height: 175px; }
+  body[data-shalom-space="cafe"] .top-actions .outline { min-height: var(--shalom-touch-target); font-size: .875rem; }
+  body[data-shalom-space="comms"] .demo-note { font-size: var(--shalom-text-support); }
+}
+@media (prefers-reduced-motion: reduce) {
+  body[data-shalom-space] *, body[data-shalom-space] *::before, body[data-shalom-space] *::after {
+    animation-duration: .01ms !important; transition-duration: .01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
