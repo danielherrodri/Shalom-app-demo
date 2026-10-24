@@ -24,7 +24,12 @@
     const heading = document.createElement('span');
     heading.className = 'shalom-area-caption';
     heading.textContent = 'Áreas de Shalom';
-    nav.append(heading);
+    const top = document.createElement('div');
+    top.className = 'shalom-area-top';
+    const actions = document.createElement('div');
+    actions.className = 'shalom-area-actions';
+    top.append(heading, actions);
+    nav.append(top);
     const links = document.createElement('div');
     links.className = 'shalom-area-links';
     for (const section of sections) {
@@ -44,9 +49,14 @@
     nav.append(links);
     if (options.after) {
       const anchor = container.querySelector(options.after);
-      if (anchor) { anchor.insertAdjacentElement('afterend', nav); return; }
+      if (anchor) {
+        anchor.insertAdjacentElement('afterend', nav);
+        window.ShalomNotifications?.mountInNavigation?.();
+        return;
+      }
     }
     container.prepend(nav);
+    window.ShalomNotifications?.mountInNavigation?.();
   }
   window.ShalomNavigation = Object.freeze({ mount });
 })();
