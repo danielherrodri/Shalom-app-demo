@@ -31,6 +31,7 @@ function element(tag) {
   return {
     tag, children:[], attributes:{}, className:'', textContent:'', href:'',
     setAttribute(k,v){this.attributes[k]=v;},
+    addEventListener(k,fn){this.events||={};this.events[k]=fn;},
     append(...items){for(const item of items){item.parent=this;this.children.push(item);}},
     prepend(item){item.parent=this;this.children.unshift(item);},
     remove(){ if(this.parent) this.parent.children=this.parent.children.filter(item=>item!==this); },
@@ -58,6 +59,9 @@ const list=nav.children[1].children;
 assert.equal(list.length,5);
 assert.deepEqual(list.map(x=>x.textContent).join('|'),'Inicio|Shalom Kids|Cafetería|Avisos|Tu opinión');
 assert.equal(list[2].attributes['aria-current'],'page');
+let prevented=false;
+list[2].events.click({preventDefault(){prevented=true;}});
+assert.ok(prevented,'active section does not reload the current form');
 assert.ok(list[4].href.endsWith('/Shalom-app-demo/feedback.html?service=cafe'));
 window.ShalomNavigation.mount(host,{service:'kids'});
 assert.equal(host.children[0].children[1].children[4].href.includes('service=kids'),true);
