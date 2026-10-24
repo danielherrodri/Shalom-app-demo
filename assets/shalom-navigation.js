@@ -57,7 +57,7 @@
     links.className = 'shalom-area-links';
     // La navegación inferior de Inicio ya contiene Inicio y Avisos.
     // Los enlaces compartidos solo llevan a otras áreas, nunca al módulo actual.
-    const otherAreas = sections.filter(section => section.id !== area && !(area === 'main' && section.id === 'comms'));
+    const otherAreas = sections.filter(section => section.id !== area && !(area === 'main' && section.id === 'comms' && options.noticesInLocalNav === true));
     for (const section of otherAreas) {
       const link = document.createElement('a');
       const url = new URL(section.path, root);
