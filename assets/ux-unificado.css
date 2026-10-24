@@ -68,7 +68,6 @@ body[data-shalom-space="kids"] header nav a { font-size: var(--shalom-text-nav);
 }
 
 /* Cierre compacto en los diálogos de Comunicaciones, con nombre accesible. */
-body[data-shalom-space="comms"] #dialog {position:relative;}
 body[data-shalom-space="comms"] #dialog .dialog-dismiss {
   position:absolute;top:12px;right:12px;display:inline-flex;align-items:center;justify-content:center;
   min-width:44px;width:44px;min-height:44px;height:44px;padding:0;
