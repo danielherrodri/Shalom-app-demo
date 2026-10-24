@@ -66,3 +66,12 @@ body[data-shalom-space="kids"] header nav a { font-size: var(--shalom-text-nav);
     scroll-behavior: auto !important;
   }
 }
+
+/* Cierre compacto en los diálogos de Comunicaciones, con nombre accesible. */
+body[data-shalom-space="comms"] #dialog .dialog-dismiss {
+  position:absolute;top:12px;right:12px;display:inline-flex;align-items:center;justify-content:center;
+  min-width:44px;width:44px;min-height:44px;height:44px;padding:0;
+  background:transparent;color:inherit;border:1px solid var(--border);border-radius:10px;
+  font:400 28px/1 Inter,system-ui,sans-serif;cursor:pointer;
+}
+body[data-shalom-space="comms"] #dialog-content>h2:first-child {padding-right:54px;}
