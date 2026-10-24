@@ -29,3 +29,11 @@ El pastor/organizador administra reuniones y aprueba minutas. Una persona de apo
 
 Persistencia, autenticación, permisos por reunión y autor, guardado de borradores con aviso de errores/conflictos, almacenamiento privado de adjuntos y minuta versionada. Después: invitaciones, recordatorios optativos y vista de acuerdos por responsable. Definir con el pastor quién prepara, quién participa, quién aprueba y cuánto tiempo se conservan reuniones y documentos antes de habilitar uso real.
 
+## Bitácora de sesiones por pastor
+
+Se contemplan tres perfiles: dos pastores y una pastora, representados por Pastor de ejemplo A, Pastor de ejemplo B y Pastora de ejemplo C. No se usan nombres ni registros reales.
+
+Cada perfil tiene un borrador de sesión y una bitácora independientes. Cambiar de perfil conserva en memoria el borrador; registrar guarda una instantánea de datos, agenda, referencias a documentos, notas y acuerdos dentro de esa bitácora de prueba. Registrar de nuevo una sesión abierta actualiza el mismo registro, sin duplicarlo. Nueva sesión conserva la anterior si tiene título y fecha; si faltan, solicita completarlos para evitar descartar cambios. Abrir una sesión recupera su contenido; la búsqueda filtra título y objetivo dentro del perfil seleccionado. El historial ordena por fecha descendente y resume documentos, acuerdos y pendientes.
+
+La minuta identifica al pastor responsable y continúa excluyendo notas personales. En producción, el perfil pastoral debe vincularse a una cuenta autorizada y todas las consultas, documentos y exportaciones validarán permisos en servidor. El selector de la demo no ofrece aislamiento de seguridad. El acceso a notas personales se limita a su autor, incluso si hay sesiones con varios pastores. La bitácora es de reuniones de coordinación: no constituye un expediente de consejería. Persistencia, historial de versiones y permisos reales siguen pendientes.
+

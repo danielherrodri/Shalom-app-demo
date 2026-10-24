@@ -34,10 +34,64 @@
   get('meeting-file').addEventListener('change',e=>{const file=e.target.files[0];if(!file)return;if(!/\.(pdf|docx|txt)$/i.test(file.name)||file.size>10*1024*1024){get('meeting-file-status').textContent='Selecciona un PDF, DOCX o TXT de hasta 10 MB.';e.target.value='';return;}docs.push({name:file.name,size:Math.max(1,Math.ceil(file.size/1024))+' KB · referencia local'});renderDocs();get('meeting-file-status').textContent='Referencia añadida. El archivo no se ha subido ni guardado.';e.target.value='';});
   get('meeting-start').addEventListener('click',()=>{get('meeting-state').textContent='En curso · demostración';});
   get('agreement-form').addEventListener('submit',e=>{e.preventDefault();const action=get('agreement-action').value.trim(),owner=get('agreement-owner').value.trim(),due=get('agreement-due').value;if(!action||!owner||!due)return;agreements.push({action,owner,due,state:'Pendiente'});get('agreement-form').reset();renderAgreements();get('agreement-status').textContent='Acuerdo de ejemplo añadido. No se enviaron recordatorios.';});
-  function minutesText(){return ['BORRADOR DE MINUTA · DEMOSTRACIÓN · REQUIERE REVISIÓN',get('meeting-title').value,'Fecha: '+(get('meeting-date').value||'Por definir')+' · '+(get('meeting-time').value||'Por definir'),'Lugar: '+get('meeting-place').value,'Participantes previstos (no confirma asistencia): '+get('meeting-people').value,'\nOBJETIVO',get('meeting-objective').value,'\nAGENDA',...agenda.map((a,i)=>(i+1)+'. '+a.topic+' · '+a.minutes+' min'),'\nNOTAS COMPARTIBLES',get('meeting-notes').value||'Sin notas.','\nDOCUMENTOS (referencias; no se adjuntan al TXT)',...docs.map(d=>d.name),'\nACUERDOS',...(agreements.length?agreements.map((a,i)=>(i+1)+'. '+a.action+'\nResponsable: '+a.owner+' · Compromiso: '+a.due+' · '+a.state):['Sin acuerdos registrados.'])].join('\n');}
+  function minutesText(){return ['BORRADOR DE MINUTA · DEMOSTRACIÓN · REQUIERE REVISIÓN',get('meeting-title').value,'Pastor responsable: '+get('meeting-pastor').selectedOptions[0].textContent,'Fecha: '+(get('meeting-date').value||'Por definir')+' · '+(get('meeting-time').value||'Por definir'),'Lugar: '+get('meeting-place').value,'Participantes previstos (no confirma asistencia): '+get('meeting-people').value,'\nOBJETIVO',get('meeting-objective').value,'\nAGENDA',...agenda.map((a,i)=>(i+1)+'. '+a.topic+' · '+a.minutes+' min'),'\nNOTAS COMPARTIBLES',get('meeting-notes').value||'Sin notas.','\nDOCUMENTOS (referencias; no se adjuntan al TXT)',...docs.map(d=>d.name),'\nACUERDOS',...(agreements.length?agreements.map((a,i)=>(i+1)+'. '+a.action+'\nResponsable: '+a.owner+' · Compromiso: '+a.due+' · '+a.state):['Sin acuerdos registrados.'])].join('\n');}
   get('meeting-preview').addEventListener('click',()=>preview('Borrador de minuta',minutesText()));
   get('meeting-dialog-close').addEventListener('click',()=>get('meeting-dialog').close());
   get('meeting-download').addEventListener('click',()=>{const url=URL.createObjectURL(new Blob([minutesText()],{type:'text/plain;charset=utf-8'}));const a=document.createElement('a');a.href=url;a.download='shalom-minuta-ejemplo.txt';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);});
+
+  // Espacios y bitácoras independientes por perfil, solo en memoria de demostración.
+  const pastors = [
+    {id:'pastor-a',name:'Pastor de ejemplo A'},
+    {id:'pastor-b',name:'Pastor de ejemplo B'},
+    {id:'pastora-c',name:'Pastora de ejemplo C'}
+  ];
+  let activePastor = pastors[0].id;
+  let sequence = 0;
+  let activeSession = 'nueva-0';
+  const workspaces = new Map();
+  const journals = new Map(pastors.map((p,i)=>[p.id,[{
+    id:'ejemplo-'+p.id,
+    fields:{'meeting-title':'Coordinación de equipos · ejemplo '+String.fromCharCode(65+i),'meeting-objective':'Revisar materiales y organizar las tareas del equipo.','meeting-date':'2026-10-'+String(20+i),'meeting-time':'18:00','meeting-place':'Sala de ejemplo','meeting-people':p.name+', Equipo de ejemplo','meeting-notes':'Se revisaron las prioridades de ejemplo y se acordó preparar materiales.','meeting-personal':''},
+    agenda:[{topic:'Prioridades del equipo',minutes:20}],
+    docs:[{name:'Agenda de ejemplo.txt',size:'Documento ficticio',sample:true}],
+    agreements:[{action:'Preparar materiales de ejemplo',owner:'Coordinación de ejemplo',due:'2026-11-05',state:'Pendiente'}],
+    phase:'Registrada · demostración'
+  }]]));
+  const fieldIds=['meeting-title','meeting-objective','meeting-date','meeting-time','meeting-place','meeting-people','meeting-notes','meeting-personal'];
+  const toolbar=document.createElement('section');toolbar.className='card meeting-pastor-card';toolbar.setAttribute('aria-labelledby','pastor-workspace-title');
+  toolbar.innerHTML='<h2 id="pastor-workspace-title">Bitácora por pastor</h2><p>Dos pastores y una pastora. Cada perfil reúne sus sesiones, documentos y acuerdos de ejemplo.</p><label for="meeting-pastor">Consultar y preparar sesiones de</label><select id="meeting-pastor"></select><p id="pastor-workspace-name" role="status"></p><div class="meeting-tabs"><button type="button" class="button" id="meeting-new">Nueva sesión</button><button type="button" class="button primary" id="meeting-register">Registrar sesión en bitácora de prueba</button></div><p id="meeting-register-status" role="status" class="form-status">Los tres perfiles son ficticios. Cambiar de perfil conserva sus borradores solo durante esta visita.</p>';
+  panel.querySelector('.meeting-summary').before(toolbar);
+  pastors.forEach(p=>{const option=make('option',p.name);option.value=p.id;get('meeting-pastor').append(option);});
+  const journalSection=document.createElement('section');journalSection.className='card meeting-journal';journalSection.setAttribute('aria-labelledby','meeting-journal-title');
+  journalSection.innerHTML='<h2 id="meeting-journal-title">Historial de sesiones</h2><label for="meeting-journal-search">Buscar por título u objetivo en esta bitácora</label><input id="meeting-journal-search" type="search" maxlength="150" placeholder="Buscar sesión de ejemplo"><p id="meeting-journal-count" role="status"></p><div id="meeting-journal-entries"></div><p class="muted">Bitácora de demostración: todo se reinicia al recargar. Los perfiles no representan cuentas ni permisos reales.</p>';
+  panel.append(journalSection);
+  const clone=value=>JSON.parse(JSON.stringify(value));
+  const pastorName=()=>pastors.find(p=>p.id===activePastor).name;
+  function captureSession(){return {id:activeSession,fields:Object.fromEntries(fieldIds.map(id=>[id,get(id).value])),agenda:clone(agenda),docs:clone(docs),agreements:clone(agreements),phase:get('meeting-state').textContent};}
+  function restoreSession(session){activeSession=session.id;fieldIds.forEach(id=>{get(id).value=session.fields[id]||'';});agenda.splice(0,agenda.length,...clone(session.agenda));docs.splice(0,docs.length,...clone(session.docs));agreements.splice(0,agreements.length,...clone(session.agreements));get('meeting-state').textContent=session.phase;get('meeting-file').value='';get('meeting-file-status').textContent='';get('agreement-status').textContent='';get('agenda-form').reset();get('agreement-form').reset();renderAgenda();renderDocs();renderAgreements();}
+  const initialSession=captureSession();
+  function freshSession(){const session=clone(initialSession);session.id='nueva-'+(++sequence);session.fields['meeting-title']='Nueva sesión · '+pastorName();session.fields['meeting-people']=pastorName()+', Equipo de ejemplo';session.fields['meeting-date']='';session.fields['meeting-time']='';session.fields['meeting-notes']='';session.fields['meeting-personal']='';session.phase='En preparación';return session;}
+  function renderJournal(){
+    get('pastor-workspace-name').textContent='Espacio de '+pastorName();
+    get('meeting-journal-title').textContent='Bitácora · '+pastorName();
+    const search=get('meeting-journal-search').value.trim().toLocaleLowerCase('es');
+    const entries=journals.get(activePastor).filter(s=>(s.fields['meeting-title']+' '+s.fields['meeting-objective']).toLocaleLowerCase('es').includes(search)).slice().sort((a,b)=>b.fields['meeting-date'].localeCompare(a.fields['meeting-date'])||b.id.localeCompare(a.id));
+    get('meeting-journal-count').textContent=entries.length+' sesiones mostradas · '+journals.get(activePastor).length+' en esta bitácora';get('meeting-journal-entries').replaceChildren();
+    if(!entries.length)get('meeting-journal-entries').append(make('p','No hay sesiones que coincidan con la búsqueda.','muted'));
+    entries.forEach(session=>{const row=make('article','','planning-line');const pending=session.agreements.filter(a=>a.state!=='Completado').length;
+      row.append(make('h3',session.fields['meeting-title']),make('p',session.fields['meeting-date']+' · '+session.fields['meeting-time']+' · '+session.phase),make('p',session.fields['meeting-objective']),make('p',session.docs.length+' documentos de referencia · '+session.agreements.length+' acuerdos · '+pending+' por completar'));
+      row.append(button('Abrir sesión',()=>{restoreSession(clone(session));workspaces.set(activePastor,captureSession());get('meeting-register-status').textContent='Sesión cargada. Puedes revisar sus documentos, notas y acuerdos.';panel.querySelector('[data-stage="preparar"]').click();get('meeting-title').focus();}));get('meeting-journal-entries').append(row);
+    });
+  }
+  get('meeting-pastor').addEventListener('change',()=>{workspaces.set(activePastor,captureSession());activePastor=get('meeting-pastor').value;restoreSession(workspaces.get(activePastor)||freshSession());panel.querySelector('[data-stage=preparar]').click();get('meeting-journal-search').value='';get('meeting-register-status').textContent='Perfil seleccionado. Los borradores de los demás perfiles se conservan durante esta visita.';renderJournal();});
+  get('meeting-new').addEventListener('click',()=>{get('meeting-register-status').textContent='Registra la sesión actual antes de crear otra para conservarla en la bitácora de prueba.';const current=captureSession();if(current.fields['meeting-title'].trim()&&current.fields['meeting-date']){const entries=journals.get(activePastor);const existing=entries.findIndex(s=>s.id===current.id);if(existing<0)entries.push(clone(current));else entries[existing]=clone(current);restoreSession(freshSession());get('meeting-register-status').textContent='Sesión anterior conservada en la bitácora de prueba. Nueva sesión lista.';renderJournal();panel.querySelector('[data-stage="preparar"]').click();get('meeting-title').focus();}else{get('meeting-register-status').textContent='Completa título y fecha de la sesión actual antes de crear otra; así conservamos su borrador.';panel.querySelector('[data-stage="preparar"]').click();get('meeting-date').focus();}});
+  get('meeting-register').addEventListener('click',()=>{if(!get('meeting-title').value.trim()||!get('meeting-date').value){get('meeting-register-status').textContent='Completa el título y la fecha para registrar esta sesión.';panel.querySelector('[data-stage="preparar"]').click();get('meeting-date').focus();return;}const session=captureSession();const entries=journals.get(activePastor);const existing=entries.findIndex(s=>s.id===session.id);if(existing<0)entries.push(clone(session));else entries[existing]=clone(session);workspaces.set(activePastor,clone(session));get('meeting-register-status').textContent='Sesión registrada en la bitácora de prueba de '+pastorName()+'. Se perderá al recargar.';renderJournal();});
+  get('meeting-journal-search').addEventListener('input',renderJournal);
+  get('meeting-people').value=pastorName()+', Coordinación A, Coordinación B';
+  renderJournal();
+
   renderAgenda();renderDocs();renderAgreements();if(location.hash==='#reuniones')showView('reuniones');
 })();
+
+
 
