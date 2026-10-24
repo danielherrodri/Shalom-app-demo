@@ -12,6 +12,8 @@ const { chromium } = require("playwright"),
   const b = await chromium.launch();
   const p = await b.newPage({ reducedMotion: "reduce" });
   const rows = [];
+  const out = path.resolve(__dirname, "../test-results/logos-v07");
+  fs.mkdirSync(out, {recursive:true});
   try {
     for (const width of [390, 1366]) {
       await p.setViewportSize({ width, height: 950 });
@@ -29,6 +31,11 @@ const { chromium } = require("playwright"),
             },
             { theme, role },
           );
+          await p.waitForFunction(() =>
+            [
+              ...document.querySelectorAll(".brand-wrap img,.mobile-top img"),
+            ].every((i) => i.complete && i.naturalWidth > 0),
+          );
           const data = await p
             .locator(".brand-wrap img:visible,.mobile-top img:visible")
             .evaluateAll((imgs) =>
@@ -40,7 +47,11 @@ const { chromium } = require("playwright"),
                 ).backgroundColor,
               })),
             );
-          assert.equal(data.length, 1);
+          assert.equal(
+            data.length,
+            1,
+            JSON.stringify({ width, theme, role, data }),
+          );
           assert(data[0].loaded);
           assert.equal(
             data[0].src,
@@ -67,8 +78,8 @@ const { chromium } = require("playwright"),
           rows.push({ width, theme, role, ...data[0], axeViolations: 0 });
           if (role === "visitante" || role === "admin")
             await p.screenshot({
-              path: path.resolve(
-                "../Entregables-Shalom-v06/Logo-" +
+              path: path.join(out,
+                "Logo-" +
                   theme +
                   "-" +
                   role +
@@ -98,7 +109,7 @@ const { chromium } = require("playwright"),
       }
     }
     fs.writeFileSync(
-      path.resolve("../Entregables-Shalom-v06/Evidencia-logotipos.json"),
+      path.join(out,"Evidencia-logotipos.json"),
       JSON.stringify(rows, null, 2),
     );
     console.log(

@@ -1,3 +1,5 @@
+> Documento histórico v0.6. En v0.7 las descargas de información/CSV se sustituyen por solicitudes simuladas en cola. Las descargas HTML/TXT de diseño se conservan. Ver [cambios vigentes](pipelines-releases-v07.md) y [pruebas v0.7](pruebas-v07.md).
+
 # Plantillas de correo · Shalom v0.6
 
 Ocho ejemplos HTML y texto plano, sin destinatarios, credenciales, envío o integración productiva. [Abrir galería](../comunicaciones.html#correos).

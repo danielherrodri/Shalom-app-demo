@@ -1,3 +1,5 @@
+> Documento histórico v0.6. En v0.7 las descargas de información/CSV se sustituyen por solicitudes simuladas en cola. Las descargas HTML/TXT de diseño se conservan. Ver [cambios vigentes](pipelines-releases-v07.md) y [pruebas v0.7](pruebas-v07.md).
+
 # Pruebas de revisión · v0.6
 
 23 de octubre de 2026. Chromium automatizado en Windows. Estos resultados son controles del prototipo, no una certificación de accesibilidad, seguridad, consentimiento o cumplimiento legal.

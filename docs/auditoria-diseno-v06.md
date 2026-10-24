@@ -1,3 +1,5 @@
+> Documento histórico v0.6. En v0.7 las descargas de información/CSV se sustituyen por solicitudes simuladas en cola. Las descargas HTML/TXT de diseño se conservan. Ver [cambios vigentes](pipelines-releases-v07.md) y [pruebas v0.7](pruebas-v07.md).
+
 # Auditoría visual y accesibilidad · Shalom v0.5 → v0.6
 
 23 de octubre de 2026. Base pública: e9aa3e4, README v0.5. Guía aportada: octubre 2026, 12 páginas; se leyó completa y se contrastó visualmente la página de tokens. Logo y variantes suministrados por el usuario. El PDF fuente se mantiene fuera del repositorio público.

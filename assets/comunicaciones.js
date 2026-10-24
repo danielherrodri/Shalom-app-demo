@@ -278,67 +278,39 @@ function results() {
     pager(list.length, noticePage, pageSize, "avisos")
   );
 }
-function csvCell(value) {
-  let text = String(value ?? "");
-  if (/^[\s\u0000-\u001f]*[=+@-]/.test(text)) text = "'" + text;
-  return '"' + text.replace(/"/g, '""') + '"';
-}
-function downloadCSV(scope) {
+function requestCSV(scope) {
   if (scope === "avisos" && viewState !== "normal") {
-    say("Vuelve al estado normal para descargar resultados.");
+    say("Vuelve al estado normal para solicitar resultados.");
     return;
   }
-  const rows = scope === "admin" ? filteredAdmin() : filteredPosts();
-  if (!rows.length) {
-    say("No hay resultados filtrados para descargar.");
-    return;
-  }
-  const keys = [
-    "id",
-    "title",
-    "body",
-    "category",
-    "audience",
-    "ministry",
-    "kind",
-    "start",
-    "end",
-  ];
-  const csv = [
-    [
-      "Origen",
-      "Folio",
-      "Título",
-      "Mensaje",
-      "Categoría",
-      "Audiencia",
-      "Ministerio",
-      "Formato",
-      "Inicio",
-      "Fin",
-      "Estado",
-      "Fijado",
-    ],
-    ...rows.map((p) => [
-      "DEMO",
-      ...keys.map((k) => p[k]),
-      stateOf(p),
-      p.pin ? "Sí" : "No",
-    ]),
-  ]
-    .map((row) => row.map(csvCell).join(","))
-    .join("\r\n");
-  const blob = new Blob(["\ufeff" + csv], { type: "text/csv;charset=utf-8" }),
-    url = URL.createObjectURL(blob),
-    a = document.createElement("a");
-  a.href = url;
-  a.download = "shalom-" + scope + "-filtrados-DEMO.csv";
-  document.body.append(a);
-  a.click();
-  a.remove();
-  setTimeout(() => URL.revokeObjectURL(url), 60000);
-  say(
-    "CSV descargado con todos los resultados filtrados, no solo esta página. Solo datos de demo.",
+  const list = scope === "admin" ? filteredAdmin() : filteredPosts();
+  window.ShalomProcessing.requestExport({
+    source:
+      scope === "admin"
+        ? "Avisos de administración ficticia"
+        : "Avisos de experiencia " + audience,
+    count: list.length,
+    filters: {
+      search: scope === "admin" ? adminSearch : search,
+      category: scope === "admin" ? adminCategory : category,
+      audience,
+      ministry,
+      status: scope === "admin" ? adminFilter : "publicado",
+      clock,
+      ids: list.map((p) => p.id),
+    },
+  });
+}
+function renderProcessing() {
+  return (
+    heading(
+      "OPERACIÓN EN SEGUNDO PLANO",
+      "Cada trabajo, a su ritmo.",
+      "Solicitudes de exportación y correos por prioridades, lotes y reintentos. Esta pantalla solo representa el comportamiento futuro.",
+    ) +
+    '<p><a href="docs/pipelines-releases-v07.md">Arquitectura, límites y releases →</a></p><div data-processing-panel>' +
+    window.ShalomProcessing.render() +
+    "</div>"
   );
 }
 function renderNotices() {
@@ -348,7 +320,7 @@ function renderNotices() {
       "Cerca de lo que importa.",
       "Avisos y próximos encuentros. Un lugar para enterarte, participar y acompañarnos.",
     ) +
-    `<div class="split"><section aria-label="Listado de avisos"><div class="toolbar"><div class="field"><label for="search">Buscar un aviso</label><input type="search" id="search" value="${esc(search)}" placeholder="Escribe una palabra" maxlength="90"></div>${select("category", "Categoría", ["Todos", ...categories], category)}</div><div class="row list-actions">${select("page-size", "Avisos por página", ["2", "5", "10"], String(pageSize))}${btn("csv", "Descargar CSV", "avisos")}</div><div id="results">${results()}</div></section><aside aria-label="Tu experiencia"><section class="panel quiet-panel"><p class="overline">A TU RITMO</p><h2>Tú eliges cómo recibirnos.</h2><p class="small">Consultar avisos públicos no te suscribe a correos. Elige solo los temas que te interesan.</p><a href="#preferencias" class="button secondary">Elegir preferencias →</a></section><section class="panel"><p class="overline">EXPLORAR LA DEMO</p><h2>Una vista para cada persona</h2>${select("audience", "Experiencia simulada", audiences, audience)}${select("ministry", "Ministerio de prueba", ministries, ministry)}<p class="small">El listado público solo muestra contenido público. Las otras vistas son ejemplos abiertos: no existe control de acceso real.</p><p class="small">Fecha de prueba: <strong>${date(clock)}</strong></p><a href="#admin">Administrar y probar programación</a></section></aside></div><details class="state-controls"><summary>Probar carga, vacío y error</summary><div class="row">${["normal", "carga", "vacío", "error"].map((s) => btn("state", s[0].toUpperCase() + s.slice(1), s)).join("")}</div></details>`
+    `<div class="split"><section aria-label="Listado de avisos"><div class="toolbar"><div class="field"><label for="search">Buscar un aviso</label><input type="search" id="search" value="${esc(search)}" placeholder="Escribe una palabra" maxlength="90"></div>${select("category", "Categoría", ["Todos", ...categories], category)}</div><div class="row list-actions">${select("page-size", "Avisos por página", ["2", "5", "10"], String(pageSize))}${btn("csv", "Solicitar CSV por correo", "avisos")}</div><div id="results">${results()}</div></section><aside aria-label="Tu experiencia"><section class="panel quiet-panel"><p class="overline">A TU RITMO</p><h2>Tú eliges cómo recibirnos.</h2><p class="small">Consultar avisos públicos no te suscribe a correos. Elige solo los temas que te interesan.</p><a href="#preferencias" class="button secondary">Elegir preferencias →</a></section><section class="panel"><p class="overline">EXPLORAR LA DEMO</p><h2>Una vista para cada persona</h2>${select("audience", "Experiencia simulada", audiences, audience)}${select("ministry", "Ministerio de prueba", ministries, ministry)}<p class="small">El listado público solo muestra contenido público. Las otras vistas son ejemplos abiertos: no existe control de acceso real.</p><p class="small">Fecha de prueba: <strong>${date(clock)}</strong></p><a href="#admin">Administrar y probar programación</a></section></aside></div><details class="state-controls"><summary>Probar carga, vacío y error</summary><div class="row">${["normal", "carga", "vacío", "error"].map((s) => btn("state", s[0].toUpperCase() + s.slice(1), s)).join("")}</div></details>`
   );
 }
 function renderPreferences() {
@@ -404,7 +376,7 @@ function renderAdmin() {
       "Un mensaje, bien cuidado.",
       "Crea, revisa y programa ejemplos. Todo ocurre en esta pestaña; no se publica contenido ni se envían mensajes desde este formulario.",
     ) +
-    `<section class="panel quiet-panel"><div class="form-grid">${field("clock", "Fecha simulada · Ciudad de México", clock, "date", 'required min="2026-01-01" max="2030-12-31"')}<div><p class="small">La vigencia incluye el día final. Cambia la fecha para probar publicaciones programadas y vencidas. No hay tarea automática en segundo plano.</p>${btn("new", "Crear aviso", "", "")}</div></div><p class="small">Cualquier visitante puede abrir esta administración de prueba. No contiene información privada.</p></section><div class="toolbar">${field("admin-search", "Buscar por texto, audiencia o ministerio", adminSearch, "search", 'maxlength="90"')}${select("admin-category", "Categoría", ["Todos", ...categories], adminCategory)}</div><div class="chips" aria-label="Filtrar estado">${["Todos", "borrador", "programado", "publicado", "vencido", "archivado"].map((s) => `<button data-action="admin-filter" data-id="${s}" aria-pressed="${s === adminFilter}">${s[0].toUpperCase() + s.slice(1)}</button>`).join("")}</div><div class="row list-actions">${select("admin-size", "Avisos por página", ["2", "5", "10"], String(adminSize))}${btn("csv", "Descargar CSV", "admin")}</div><div id="admin-results">${adminResults()}</div><p class="small">El CSV incluye todos los resultados filtrados. Para comprobar segmentación, usa las experiencias de prueba en <a href="#avisos">Avisos</a>. Una publicación nunca concede suscripción por correo.</p>`
+    `<section class="panel quiet-panel"><div class="form-grid">${field("clock", "Fecha simulada · Ciudad de México", clock, "date", 'required min="2026-01-01" max="2030-12-31"')}<div><p class="small">La vigencia incluye el día final. Cambia la fecha para probar publicaciones programadas y vencidas. No hay tarea automática en segundo plano.</p>${btn("new", "Crear aviso", "", "")}</div></div><p class="small">Cualquier visitante puede abrir esta administración de prueba. No contiene información privada.</p></section><div class="toolbar">${field("admin-search", "Buscar por texto, audiencia o ministerio", adminSearch, "search", 'maxlength="90"')}${select("admin-category", "Categoría", ["Todos", ...categories], adminCategory)}</div><div class="chips" aria-label="Filtrar estado">${["Todos", "borrador", "programado", "publicado", "vencido", "archivado"].map((s) => `<button data-action="admin-filter" data-id="${s}" aria-pressed="${s === adminFilter}">${s[0].toUpperCase() + s.slice(1)}</button>`).join("")}</div><div class="row list-actions">${select("admin-size", "Avisos por página", ["2", "5", "10"], String(adminSize))}${btn("csv", "Solicitar CSV por correo", "admin")}</div><div id="admin-results">${adminResults()}</div><p class="small">La solicitud incluye todos los resultados filtrados, de todas las páginas. Su entrega sería por correo. Para comprobar segmentación, usa las experiencias de prueba en <a href="#avisos">Avisos</a>. Una publicación nunca concede suscripción por correo.</p>`
   );
 }
 function filteredEmails() {
@@ -440,7 +412,7 @@ function renderEmails() {
       "Mensajes que se sienten de casa.",
       "Plantillas editables inspiradas en el HTML que compartiste. Shalom conserva Noche, Crema y cobre; Kids usa blanco, fuego y oro.",
     ) +
-    `<section class="panel quiet-panel"><p>Esta galería no envía correos ni valida destinatarios. Los campos entre corchetes quedan pendientes. Los enlaces abren demostraciones.</p><p class="small">Los correos optativos incluyen preferencias y baja de ejemplo; los transaccionales explican su relación con una acción solicitada. La baja real de un clic requiere backend y proveedor de correo.</p><a href="docs/plantillas-correo-v06.md">Guía de edición y compatibilidad →</a></section><div class="toolbar">${field("mail-search", "Buscar plantilla o tipo", mailSearch, "search", 'maxlength="90"')}${select("mail-theme", "Temática", ["Todos", "Shalom", "Kids"], mailTheme)}</div><div class="row list-actions">${btn("csv-emails", "Descargar catálogo CSV")}<a href="#admin">Volver a administración</a></div><div id="email-results">${emailResults()}</div>`
+    `<section class="panel quiet-panel"><p>Esta galería no envía correos ni valida destinatarios. Los campos entre corchetes quedan pendientes. Los enlaces abren demostraciones.</p><p class="small">Los correos optativos incluyen preferencias y baja de ejemplo; los transaccionales explican su relación con una acción solicitada. La baja real de un clic requiere backend y proveedor de correo.</p><a href="docs/plantillas-correo-v06.md">Guía de edición y compatibilidad →</a></section><div class="toolbar">${field("mail-search", "Buscar plantilla o tipo", mailSearch, "search", 'maxlength="90"')}${select("mail-theme", "Temática", ["Todos", "Shalom", "Kids"], mailTheme)}</div><div class="row list-actions">${btn("csv-emails", "Solicitar catálogo por correo")}<a href="#admin">Volver a administración</a></div><div id="email-results">${emailResults()}</div>`
   );
 }
 function editPost(id) {
@@ -474,9 +446,14 @@ function showVideo(id) {
 }
 function route() {
   const r = location.hash.slice(1);
-  return ["avisos", "preferencias", "privacidad", "admin", "correos"].includes(
-    r,
-  )
+  return [
+    "avisos",
+    "preferencias",
+    "privacidad",
+    "admin",
+    "correos",
+    "procesamiento",
+  ].includes(r)
     ? r
     : "avisos";
 }
@@ -488,6 +465,7 @@ function render(focus = false) {
     privacidad: renderPrivacy,
     admin: renderAdmin,
     correos: renderEmails,
+    procesamiento: renderProcessing,
   }[r]();
   document.querySelectorAll("[data-route]").forEach((a) => {
     if (a.dataset.route === r) a.setAttribute("aria-current", "page");
@@ -500,7 +478,8 @@ function render(focus = false) {
       privacidad: "Privacidad",
       admin: "Administración demo",
       correos: "Plantillas de correo",
-    }[r] + " · Shalom v0.6";
+      procesamiento: "Procesamiento demo",
+    }[r] + " · Shalom v0.7";
   if (focus) $("#main").focus();
   prefsDirty = false;
 }
@@ -581,7 +560,7 @@ document.addEventListener("click", (e) => {
       $("#admin-results").focus();
       break;
     case "csv":
-      downloadCSV(id);
+      requestCSV(id);
       break;
     case "page-correos":
       mailPage = Math.max(1, Number(id));
@@ -599,31 +578,13 @@ document.addEventListener("click", (e) => {
       break;
     }
     case "csv-emails": {
-      const list = filteredEmails();
-      if (!list.length) {
-        say("No hay plantillas para descargar.");
-        break;
-      }
-      const csv = [
-        ["Origen", "Plantilla", "Tema", "Tipo", "Asunto"],
-        ...list.map((x) => ["DEMO", x.id, x.theme, x.type, x.subject]),
-      ]
-        .map((r) => r.map(csvCell).join(","))
-        .join("\r\n");
-      const url = URL.createObjectURL(
-          new Blob(["\ufeff" + csv], { type: "text/csv;charset=utf-8" }),
-        ),
-        a = document.createElement("a");
-      a.href = url;
-      a.download = "shalom-plantillas-filtradas-DEMO.csv";
-      document.body.append(a);
-      a.click();
-      a.remove();
-      setTimeout(() => URL.revokeObjectURL(url), 60000);
-      say("Catálogo CSV generado con todas las plantillas filtradas.");
+      window.ShalomProcessing.requestExport({
+        source: "Catálogo ficticio de plantillas",
+        count: filteredEmails().length,
+        filters: { search: mailSearch, theme: mailTheme },
+      });
       break;
     }
-
     case "archive":
       posts.find((p) => p.id === id).status = "archivado";
       render();
@@ -674,6 +635,11 @@ document.addEventListener("click", (e) => {
       say(
         "Solicitud simulada creada. Ningún dato real fue exportado o eliminado.",
       );
+      if (id === "exportación")
+        window.ShalomProcessing.requestExport({
+          source: "Solicitud de privacidad ficticia",
+          count: 1,
+        });
       break;
   }
 });

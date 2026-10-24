@@ -37,14 +37,6 @@ const ok = (name, value = true) => {
     viewport: { width: 1366, height: 950 },
     reducedMotion: "reduce",
   });
-  await context.addInitScript(() => {
-    const original = URL.createObjectURL.bind(URL);
-    window.__csvBlobs = [];
-    URL.createObjectURL = function (blob) {
-      if (blob.type.startsWith("text/csv")) window.__csvBlobs.push(blob.text());
-      return original(blob);
-    };
-  });
   const page = await context.newPage();
   const errors = [];
   page.on("pageerror", (e) => errors.push(e.message));
@@ -62,25 +54,17 @@ const ok = (name, value = true) => {
     (await page.locator("#results article").count()) === 1,
   );
   await page.getByRole("button", { name: "Anterior", exact: true }).click();
-  let download = page.waitForEvent("download");
   await page
-    .getByRole("button", { name: "Descargar CSV", exact: true })
+    .getByRole("button", { name: "Solicitar CSV por correo", exact: true })
     .click();
-  let file = await download;
-  let nativeFailure = await file.failure();
-  let csv = await page.evaluate(() => window.__csvBlobs.at(-1));
-  fs.writeFileSync(path.join(out, "avisos.csv"), csv);
-  report.downloadEnvironment = {
-    nativeFailure,
-    method:
-      "Blob bytes captured from real CSV button click; native browser download canceled in managed environment",
-  };
-  ok(
-    "CSV público contiene todos los resultados filtrados, sin segmentados",
-    csv.includes("A03") &&
-      !csv.includes("A04") &&
-      csv.split("\r\n").length === 4,
+  const requested = await page.evaluate(
+    () => ShalomProcessing.snapshot().jobs[0],
   );
+  ok(
+    "Solicitud pública contiene todos los resultados filtrados de todas las páginas",
+    requested.count === 3 && requested.kind === "exportación",
+  );
+  await page.locator("#processing-dialog [data-process=close]").click();
   await page.getByLabel("Buscar un aviso").fill("mesa");
   ok(
     "Búsqueda de avisos",
@@ -188,6 +172,8 @@ const ok = (name, value = true) => {
     await page
       .getByRole("button", { name: "Crear solicitud simulada" })
       .click();
+    if (type === "exportación")
+      await page.locator("#processing-dialog [data-process=close]").click();
   }
   ok(
     "Solicitudes con folio ficticio y sin ejecutar eliminación",
@@ -227,7 +213,7 @@ const ok = (name, value = true) => {
   await page.getByRole("button", { name: "Guardar ejemplo" }).click();
   ok(
     "Programación guardada solo en memoria",
-    !(await page.locator("dialog").isVisible()),
+    !(await page.locator("#dialog").isVisible()),
   );
   await page.getByLabel("Buscar por texto, audiencia o ministerio").fill("SUM");
   ok(
@@ -235,18 +221,16 @@ const ok = (name, value = true) => {
     (await page.locator("#admin-results article").count()) === 1 &&
       !(await page.locator("#admin-results img").count()),
   );
-  download = page.waitForEvent("download");
   await page
-    .getByRole("button", { name: "Descargar CSV", exact: true })
+    .getByRole("button", { name: "Solicitar CSV por correo", exact: true })
     .click();
-  file = await download;
-  await file.failure();
-  csv = await page.evaluate(() => window.__csvBlobs.at(-1));
-  fs.writeFileSync(path.join(out, "admin.csv"), csv);
   ok(
-    "CSV neutraliza fórmulas y respeta texto entre comillas",
-    csv.includes("' =SUM") || csv.includes("'=SUM(1,2)"),
+    "Solicitud administrativa conserva filtros sin crear archivo",
+    await page.evaluate(
+      () => ShalomProcessing.snapshot().jobs.at(-1).filters.search === "SUM",
+    ),
   );
+  await page.locator("#processing-dialog [data-process=close]").click();
   await page.getByLabel("Fecha simulada · Ciudad de México").fill("2026-10-28");
   await page.getByLabel("Fecha simulada · Ciudad de México").press("Tab");
   await page.getByRole("button", { name: "Publicado", exact: true }).click();
@@ -321,7 +305,7 @@ const ok = (name, value = true) => {
   await page.keyboard.press("Escape");
   ok(
     "Escape cierra el modal y restaura foco",
-    !(await page.locator("dialog").isVisible()) &&
+    !(await page.locator("#dialog").isVisible()) &&
       (await page
         .getByRole("button", { name: "Ver video de ejemplo" })
         .evaluate((b) => b === document.activeElement)),
@@ -335,7 +319,13 @@ const ok = (name, value = true) => {
         (t) => document.body.classList.toggle("night", t === "night"),
         theme,
       );
-      for (const route of ["avisos", "preferencias", "privacidad", "admin"]) {
+      for (const route of [
+        "avisos",
+        "preferencias",
+        "privacidad",
+        "admin",
+        "procesamiento",
+      ]) {
         await page.goto(base + "/comunicaciones.html#" + route);
         await page.waitForFunction(
           (r) =>
@@ -382,7 +372,7 @@ const ok = (name, value = true) => {
     }
   }
   ok(
-    "32 revisiones responsive/tema/ruta sin violaciones axe WCAG A/AA ni overflow",
+    "40 revisiones responsive/tema/ruta sin violaciones axe WCAG A/AA ni overflow",
   );
   await page.setViewportSize({ width: 1366, height: 950 });
   await page.goto(base + "/comunicaciones.html#admin");
@@ -402,7 +392,7 @@ const ok = (name, value = true) => {
     ok(
       "Foco modal contenido " + n,
       await page.evaluate(() =>
-        document.querySelector("dialog").contains(document.activeElement),
+        document.querySelector("#dialog").contains(document.activeElement),
       ),
     );
   }

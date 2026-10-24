@@ -282,6 +282,18 @@ let b;
       .textContent()
       .then((x) => x.includes("Capuchino")),
   );
+  await p.locator("[data-action=print]").click();
+  ok(
+    "Recibo se solicita por cola sin imprimir ni descargar",
+    await p.evaluate(() =>
+      ShalomProcessing.snapshot().jobs.some(
+        (j) =>
+          j.source === "Recibo ficticio de cafetería" &&
+          j.count === 1 &&
+          !!j.filters.order,
+      ),
+    ),
+  );
   await p.keyboard.press("Escape");
   await p.screenshot({
     path: path.join(out, "cafe-regression.png"),

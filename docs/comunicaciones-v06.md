@@ -1,3 +1,5 @@
+> Documento histórico v0.6. En v0.7 las descargas de información/CSV se sustituyen por solicitudes simuladas en cola. Las descargas HTML/TXT de diseño se conservan. Ver [cambios vigentes](pipelines-releases-v07.md) y [pruebas v0.7](pruebas-v07.md).
+
 # Shalom · Comunicaciones y privacidad · DEMO v0.6
 
 23 de octubre de 2026. Base inspeccionada: `main` v0.5, commit `e9aa3e4ab5da314ce93e0ca554a9755989d2ff16`. v0.5 es la versión declarada en README; no había una etiqueta Git v0.5. Ver [auditoría](auditoria-diseno-v06.md) y [pruebas](pruebas-v06.md).

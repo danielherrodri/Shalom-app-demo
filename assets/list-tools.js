@@ -6,11 +6,6 @@
     copy.querySelectorAll("button,a,svg,form").forEach((n) => n.remove());
     return copy.textContent.replace(/\s+/g, " ").trim();
   };
-  const cell = (v) => {
-    let s = String(v ?? "");
-    if (/^[\s\u0000-\u001f]*[=+@-]/.test(s)) s = "'" + s;
-    return '"' + s.replace(/"/g, '""') + '"';
-  };
   let count = 0;
   function attach(container, items, title, columns = []) {
     if (!items.length) return;
@@ -31,7 +26,7 @@
     const ui = document.createElement("section");
     ui.className = "list-tools";
     ui.setAttribute("aria-label", "Herramientas de " + title);
-    ui.innerHTML = `<div class="list-toolbar"><label>Buscar en ${title}<input type="search" maxlength="100" placeholder="Escribe para buscar" data-list="search"></label><label>Filtrar por estado<select data-list="filter"><option>Todos</option></select></label><label>Por página<select data-list="size"><option>5</option><option>10</option><option>25</option></select></label><button type="button" class="btn secondary" data-list="csv">Descargar CSV</button></div><div class="list-pagination"><span role="status" data-list="status"></span><div class="btnrow"><button type="button" class="btn secondary sm" data-list="prev">Anterior</button><button type="button" class="btn secondary sm" data-list="next">Siguiente</button></div></div><p class="empty" data-list="empty" hidden>Sin resultados. Cambia la búsqueda o el filtro.</p>`;
+    ui.innerHTML = `<div class="list-toolbar"><label>Buscar en ${title}<input type="search" maxlength="100" placeholder="Escribe para buscar" data-list="search"></label><label>Filtrar por estado<select data-list="filter"><option>Todos</option></select></label><label>Por página<select data-list="size"><option>5</option><option>10</option><option>25</option></select></label><button type="button" class="btn secondary" data-list="csv">Solicitar CSV por correo</button></div><div class="list-pagination"><span role="status" data-list="status"></span><div class="btnrow"><button type="button" class="btn secondary sm" data-list="prev">Anterior</button><button type="button" class="btn secondary sm" data-list="next">Siguiente</button></div></div><p class="empty" data-list="empty" hidden>Sin resultados. Cambia la búsqueda o el filtro.</p>`;
     for (const tag of tags) {
       const o = document.createElement("option");
       o.textContent = tag;
@@ -96,23 +91,16 @@
         draw();
       }
       if (action === "csv") {
-        const rows = filtered().map((e) => ["DEMO", ...e.values]);
-        const heads = ["Origen", ...(columns.length ? columns : ["Contenido"])];
-        const csv = [heads, ...rows]
-          .map((r) => r.map(cell).join(","))
-          .join("\r\n");
-        const url = URL.createObjectURL(
-          new Blob(["\ufeff" + csv], { type: "text/csv;charset=utf-8" }),
-        );
-        const a = document.createElement("a");
-        a.href = url;
-        a.download = "shalom-" + id + "-filtrados-DEMO.csv";
-        a.click();
-        setTimeout(() => URL.revokeObjectURL(url), 1000);
-        find("status").textContent =
-          "CSV con " +
-          rows.length +
-          " resultados filtrados de todas las páginas. Solo datos de demo.";
+        const job = window.ShalomProcessing.requestExport({
+          source: title,
+          count: filtered().length,
+          filters: { query, filter },
+        });
+        find("status").textContent = job
+          ? "Solicitud " +
+            job.id +
+            " simulada. La entrega sería por correo; no se descarga información."
+          : "No hay resultados para solicitar.";
       }
     });
     draw();

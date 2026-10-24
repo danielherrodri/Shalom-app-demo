@@ -1,4 +1,4 @@
-# Shalom App · Prototipo público v0.6
+# Shalom App · Prototipo público v0.7
 
 Inter, Noche, Crema y cobre. **Solo ejemplos ficticios. Sin backend, autenticación, correos, cobros o consentimientos reales.** El sistema real Shalom Kids no se modifica.
 
@@ -12,13 +12,15 @@ Inter, Noche, Crema y cobre. **Solo ejemplos ficticios. Sin backend, autenticaci
 - [Ocho plantillas de correo](https://danielherrodri.github.io/Shalom-app-demo/comunicaciones.html#correos)
 - [Cafetería v0.5](https://danielherrodri.github.io/Shalom-app-demo/cafeteria.html)
 
-## Qué cambia en v0.6
+## Qué cambia en v0.7
 
-Avisos de texto/imagen/video con categorías, vigencias, fijación, audiencias y ministerios de ejemplo; borradores, edición, programación por reloj simulado y archivo reversible. Búsqueda, filtros, paginación y CSV de todos los resultados filtrados, tanto en comunicaciones como en los listados principales. Galería de correos Shalom/Kids, HTML y texto plano editables, con búsqueda, filtro y catálogo CSV.
+Avisos de texto/imagen/video con categorías, vigencias, fijación, audiencias y ministerios de ejemplo; borradores, edición, programación por reloj simulado y archivo reversible. Búsqueda, filtros y paginación conservados. Las exportaciones de información ahora son solicitudes en cola de todos los resultados filtrados, con entrega por correo simulada, sin descargar ni crear archivos de datos. Galería de correos Shalom/Kids, HTML y texto plano editables, con búsqueda y filtro; las descargas HTML/TXT siguen disponibles como material de diseño.
 
 Preferencias optativas independientes, revocación, correos esenciales diferenciados, aviso versionado de borrador, autorizaciones separadas de imagen interna/difusión de menores y solicitudes de exportación/eliminación **sin enviar ni ejecutar**. No se afirma cumplimiento legal.
 
 **Comunicaciones vive solo en memoria**: sus cambios desaparecen al recargar. No guarda decisiones en localStorage/sessionStorage ni manda formularios. La app anterior y cafetería conservan ejemplos locales en el mismo navegador; no se sincronizan entre dispositivos. Nunca introducir información real. La administración de demo es pública y sus roles no son seguridad.
+
+El [centro de procesamiento demo](https://danielherrodri.github.io/Shalom-app-demo/comunicaciones.html#procesamiento) permite probar prioridades, lotes, cuota, reintentos, correo muerto y conciliación. Todo su estado desaparece al recargar.
 
 ## Ejecutar localmente y editar
 
@@ -30,7 +32,7 @@ Requiere Node.js 20 o posterior. `npm ci`, después `npm run serve`, y abrir htt
 - `emails/catalogo.json` + `python tests/build-emails.py`: edición y generación de plantillas.
 - `emails/*.html` y `emails/*.txt`: archivos editables/descargables. Los links relativos son para demo y deben sustituirse al preparar un envío real.
 
-Pruebas: `npx playwright install chromium`, `npm test` y `npm run test:additional`. Los navegadores de pruebas pueden instalarse en `.pw-browsers` (ignorado); ver [pruebas y límites](docs/pruebas-v06.md).
+Pruebas: `npx playwright install chromium`, `npm test`, `npm run test:processing`, `npm run test:additional` y `npm run test:logos`. Los navegadores de pruebas pueden instalarse en `.pw-browsers` (ignorado); ver [pruebas y límites](docs/pruebas-v06.md).
 
 ## Entregables y decisiones
 
@@ -38,7 +40,9 @@ Pruebas: `npx playwright install chromium`, `npm test` y `npm run test:additiona
 - [Recorridos, especificación y roadmap de producción](docs/comunicaciones-v06.md)
 - [Borrador de aviso de privacidad](docs/aviso-privacidad-DEMO.md)
 - [Plantillas de correo y compatibilidad](docs/plantillas-correo-v06.md)
-- [Pruebas](docs/pruebas-v06.md)
+- [Arquitectura y releases v0.7](docs/pipelines-releases-v07.md)
+- [Registro de decisiones](docs/decisiones.md)
+- [Pruebas v0.7](docs/pruebas-v07.md)
 - [Medios y licencias](assets/LICENCIAS.md)
 
 La fotografía de café es una referencia licenciada, rotulada como ajena a Shalom; sustituir por foto de la iglesia autorizada antes de producción. Logo aportado por el usuario. No hay fotografías de menores. El clip local es tipografía de seis segundos, sin sonido ni autoplay.

@@ -1,13 +1,15 @@
 {
   "name": "shalom-prototipo-publico",
-  "version": "0.6.0",
+  "version": "0.7.0",
   "private": true,
-  "description": "Prototipo estático sin backend ni datos reales",
+  "description": "Prototipo estÃ¡tico sin backend ni datos reales",
   "scripts": {
     "test": "node tests/flows.cjs",
     "serve": "node tests/server.cjs",
     "test:additional": "node tests/additional.cjs",
-    "test:audit": "node tests/audit-baseline.cjs"
+    "test:audit": "node tests/audit-baseline.cjs",
+    "test:processing": "node tests/processing.cjs",
+    "test:logos": "node tests/logos.cjs"
   },
   "devDependencies": {
     "axe-core": "4.11.0",
