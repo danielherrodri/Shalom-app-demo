@@ -2,9 +2,13 @@
 
 Inter, Noche, Crema y cobre. **Solo ejemplos ficticios. Sin backend, autenticación, correos, cobros o consentimientos reales.** El sistema real Shalom Kids no se modifica.
 
+## Áreas de Shalom
+
+La navegación principal conecta cinco espacios: **Inicio**, **Shalom Kids**, **Cafetería**, **Avisos** y **Tu opinión**. Las pestañas internas se reservan a las tareas de cada módulo. Estas páginas son demostraciones, no los sistemas productivos. El tema Noche/Crema se conserva al navegar por todas las áreas en un mismo navegador y dominio. Documentación: [Arquitectura de información](docs/arquitectura-areas-v01.md).
+
 ## Explorar
 
-- [Mockups actualizados: Kids, cocina, equipo y aportaciones](https://danielherrodri.github.io/Shalom-app-demo/design/kids-paneles.html#inicio)
+- [Shalom Kids · Vistas de docentes, coordinación y otros equipos](https://danielherrodri.github.io/Shalom-app-demo/design/kids-paneles.html#inicio)
 
 - [App principal](https://danielherrodri.github.io/Shalom-app-demo/)
 - [Avisos y comunicaciones](https://danielherrodri.github.io/Shalom-app-demo/comunicaciones.html#avisos)
