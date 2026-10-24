@@ -42,6 +42,7 @@ Pruebas: `npx playwright install chromium`, `npm test`, `npm run test:processing
 - [Plantillas de correo y compatibilidad](docs/plantillas-correo-v06.md)
 - [Arquitectura y releases v0.7](docs/pipelines-releases-v07.md)
 - [Registro de decisiones](docs/decisiones.md)
+- [Protección y cifrado de datos del usuario](docs/cifrado-datos-v07.md)
 - [Pruebas v0.7](docs/pruebas-v07.md)
 - [Medios y licencias](assets/LICENCIAS.md)
 
