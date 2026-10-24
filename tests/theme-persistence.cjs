@@ -52,7 +52,7 @@ assert.equal(main.meta.attrs.content, '#1a1a1a');
 assert.equal(main.button.attrs['aria-label'], 'Cambiar a tema claro');
 main.api.set('cream');
 assert.equal(storage.get(KEY), 'cream');
-for (const name of ['cafe', 'kids', 'comms']) {
+for (const name of ['cafe', 'kids', 'comms', 'feedback']) {
   const page = boot(name, storage);
   assert.equal(page.api.get(), 'cream', name + ' remembers light selection');
   assert.equal(page.html.dataset.shalomTheme, 'cream');
@@ -80,6 +80,7 @@ const required = [
   ['cafeteria.html', 'assets/shalom-theme.js'],
   ['comunicaciones.html', 'assets/shalom-theme.js'],
   ['design/kids-paneles.html', '../assets/shalom-theme.js'],
+  ['feedback.html', 'assets/shalom-theme.js'],
 ];
 for (const [file, script] of required) {
   const page = read(file);
@@ -88,6 +89,7 @@ for (const [file, script] of required) {
 }
 assert.match(read('cafeteria.html'), /data-shalom-theme-toggle/);
 assert.match(read('design/kids-paneles.html'), /data-shalom-theme-toggle/);
+assert.match(read('feedback.html'), /data-shalom-theme-toggle/);
 assert.ok(read('design/kids-paneles.js').includes('a[href^="#"]'), 'Kids external Inicio link is not intercepted');
 assert.match(read('index.html'), /state\.theme=window\.ShalomTheme\.get\(\)/);
 assert.match(read('assets/comunicaciones.js'), /window\.ShalomTheme\.toggle\(\)/);

@@ -2,9 +2,13 @@
 
 Inter, Noche, Crema y cobre. **Solo ejemplos ficticios. Sin backend, autenticación, correos, cobros o consentimientos reales.** El sistema real Shalom Kids no se modifica.
 
+## Áreas de Shalom
+
+La navegación principal conecta cinco espacios: **Inicio**, **Shalom Kids**, **Cafetería**, **Avisos** y **Tu opinión**. Las pestañas internas se reservan a las tareas de cada módulo. Estas páginas son demostraciones, no los sistemas productivos. El tema Noche/Crema se conserva al navegar por todas las áreas en un mismo navegador y dominio. Documentación: [Arquitectura de información](docs/arquitectura-areas-v01.md).
+
 ## Explorar
 
-- [Mockups actualizados: Kids, cocina, equipo y aportaciones](https://danielherrodri.github.io/Shalom-app-demo/design/kids-paneles.html#inicio)
+- [Shalom Kids · Vistas de docentes, coordinación y otros equipos](https://danielherrodri.github.io/Shalom-app-demo/design/kids-paneles.html#inicio)
 
 - [App principal](https://danielherrodri.github.io/Shalom-app-demo/)
 - [Avisos y comunicaciones](https://danielherrodri.github.io/Shalom-app-demo/comunicaciones.html#avisos)
@@ -14,9 +18,9 @@ Inter, Noche, Crema y cobre. **Solo ejemplos ficticios. Sin backend, autenticaci
 - [Ocho plantillas de correo](https://danielherrodri.github.io/Shalom-app-demo/comunicaciones.html#correos)
 - [Cafetería v0.5](https://danielherrodri.github.io/Shalom-app-demo/cafeteria.html)
 
-## Mejoras UX/UI en revisión
+## Estructura y mejoras UX/UI
 
-La primera fase de armonización visual y base React compartida se encuentra en una rama de revisión. Documentación: [primera fase UX/UI](docs/ux-implementacion-v01.md). No supone integración con Shalom Kids operativo.
+La primera fase de armonización visual ya está integrada en la rama principal, y esta iteración reúne los accesos bajo cinco áreas con nombres claros, tema persistente y una página de opiniones coherente con el resto. Véanse [primera fase UX/UI](docs/ux-implementacion-v01.md) y [arquitectura de áreas](docs/arquitectura-areas-v01.md). La base React/Django continúa separada de estos prototipos públicos y **no reemplaza el Shalom Kids operativo**.
 
 ## Qué cambia en v0.7
 

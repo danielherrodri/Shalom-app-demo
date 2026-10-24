@@ -1,4 +1,4 @@
-/* Demostración compartida: sin almacenamiento ni llamadas de red. */
+/* Las opiniones son efimeras y no se envian. Solo el tema visual se conserva por separado. */
 (() => {
   "use strict";
   const services = {
@@ -16,24 +16,7 @@
   const app = document.getElementById("feedback-app");
   const esc = value => String(value ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
   const options = (values, selected) => values.map(([v,t]) => `<option value="${esc(v)}" ${v===selected?"selected":""}>${esc(t)}</option>`).join("");
-  if (!app) {
-    const script = document.currentScript;
-    const url = new URL("../feedback.html", script.src);
-    const link = document.createElement("a");
-    link.textContent = "Compartir mi experiencia";
-    link.style.cssText = "position:fixed;bottom:18px;right:18px;z-index:30;background:#49372a;color:white;padding:11px 16px;border-radius:24px;font:600 14px system-ui;box-shadow:0 2px 10px #0003;text-decoration:none";
-    link.addEventListener("click", () => {
-      let screen = "other";
-      if (location.pathname.includes("cafeteria")) screen = "cafe";
-      else if (location.pathname.includes("kids")) screen = ({inicio:"welcome",cocina:"cafe",buzon:"other",eventos:"events",pagos:"giving",acompanamiento:"pastoral",reuniones:"advice"})[location.hash.slice(1)] || "kids";
-      else { try { if (typeof state !== "undefined") screen = ({home:"welcome",family:"kids",profile:"other",volunteer:"other",admin:"other",projects:"other"})[state.screen] || state.screen; } catch (_) { /* Otro módulo. */ } }
-      url.searchParams.set("service", services[screen] ? screen : "other");
-      link.href = url.href;
-    });
-    link.href = url.href;
-    document.body.append(link);
-    return;
-  }
+  if (!app) return;
   const categories = ["Agradecimiento","Sugerencia","Problema","Solicitud de seguimiento"];
   const statuses = ["Recibido","En revisión","En atención","Resuelto","Cerrado"];
   let records = [], profile = "person", scope = "cafe", filter = "all", message = "";
