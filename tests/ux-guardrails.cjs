@@ -58,4 +58,4 @@ assert.match(visual,/quick-action\[data-detail="incident"\]/, 'incidents have di
 console.log('PASS: SPARK main priorities, Kids reflow, accessible typography and family summary');
 
 assert.match(main,/aria-label="Accesos frecuentes de tu perfil"/,'mobile navigation is contextual, not a second global menu');
-assert.match(main,/state\\.session&&state\\.role===/, 'technical processing control stays with demo administration');
+assert.match(main,/state\.session&&state\.role===/, 'technical processing control stays with demo administration');
