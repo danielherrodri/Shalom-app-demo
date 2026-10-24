@@ -86,10 +86,12 @@ assert.equal(host.children[0].attributes['data-mobile-open'],'true','open naviga
 assert.equal(host.children.length,1,'rerenders do not duplicate navigation');
 document.body.dataset.shalomSpace='main';
 const home=element('main');
-window.ShalomNavigation.mount(home);
+window.ShalomNavigation.mount(home,{noticesInLocalNav:true});
 const mainLinks=home.children[0].children[1].children[0].children;
 assert.equal(mainLinks.length,3,'main omits destinations already in bottom navigation');
 assert.equal(mainLinks.map(x=>x.textContent).join('|'),'Shalom Kids|Cafetería|Tu opinión');
+window.ShalomNavigation.mount(home,{noticesInLocalNav:false});
+assert.equal(home.children[0].children[1].children[0].children.length,4,'Avisos is available when no local shortcut exists');
 document.body.dataset.shalomSpace='feedback';
 const opinion=element('header');
 window.ShalomNavigation.mount(opinion);
