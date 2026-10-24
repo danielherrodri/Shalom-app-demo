@@ -1,0 +1,11 @@
+@import 'tailwindcss';
+@font-face {font-family: Inter; src: url('../../assets/Inter-latin.woff2') format('woff2'); font-display: swap;}
+@theme {--font-sans: Inter, Arial, sans-serif; --color-shalom-bg: #faf7f2; --color-shalom-ink: #2d2d2d; --color-shalom-accent: #82552f;}
+html {font-family: var(--font-sans); background: var(--color-shalom-bg); color: var(--color-shalom-ink);}
+body {margin: 0; font-size: 1.125rem; line-height: 1.5;}
+button,input,select {font: inherit; min-height: 48px; border-radius: 10px; border: 1px solid #756b60; padding: .6rem .9rem; max-width: 100%;}
+button {background: #82552f; color: white; cursor: pointer; font-weight: 600;}
+button:disabled {cursor: wait; opacity: .75;}
+input,select {background: white; color: #2d2d2d; width: 100%;}
+:focus-visible {outline: 3px solid #82552f; outline-offset: 4px;}
+@media (prefers-reduced-motion: reduce) {* {scroll-behavior: auto !important;}}
