@@ -18,9 +18,9 @@ La navegación principal conecta cinco espacios: **Inicio**, **Shalom Kids**, **
 - [Ocho plantillas de correo](https://danielherrodri.github.io/Shalom-app-demo/comunicaciones.html#correos)
 - [Cafetería v0.5](https://danielherrodri.github.io/Shalom-app-demo/cafeteria.html)
 
-## Mejoras UX/UI en revisión
+## Estructura y mejoras UX/UI
 
-La primera fase de armonización visual y base React compartida se encuentra en una rama de revisión. Documentación: [primera fase UX/UI](docs/ux-implementacion-v01.md). No supone integración con Shalom Kids operativo.
+La primera fase de armonización visual ya está integrada en la rama principal, y esta iteración reúne los accesos bajo cinco áreas con nombres claros, tema persistente y una página de opiniones coherente con el resto. Véanse [primera fase UX/UI](docs/ux-implementacion-v01.md) y [arquitectura de áreas](docs/arquitectura-areas-v01.md). La base React/Django continúa separada de estos prototipos públicos y **no reemplaza el Shalom Kids operativo**.
 
 ## Qué cambia en v0.7
 
