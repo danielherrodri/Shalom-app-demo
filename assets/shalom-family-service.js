@@ -38,6 +38,12 @@ document.addEventListener('submit', e => {
   const data=new FormData(e.target), event=state.events.find(x=>x.id===data.get('event'));if(!event)return;
   const result=window.ShalomFamily.plan(event,state.family.members,data.getAll('participant'));
   if(result.error){document.getElementById('family-event-error').textContent=result.error;return;}
-  event.registered=result.registered;modal=null;render();notify('Selección familiar actualizada en la demo. No se enviaron inscripciones.');
+  event.registered=result.registered;
+  const selected=state.family.members.filter(m=>result.registered.includes(m.id));
+  // Se confirma la selección final, no solo que el formulario fue enviado.
+  const summary=selected.length
+    ? `<p><strong>${selected.length} ${selected.length===1?'integrante inscrito':'integrantes inscritos'}</strong> en esta demostración.</p><ul class="family-confirmation-list">${selected.map(m=>`<li>${X(m.name)}</li>`).join('')}</ul>`
+    : '<p><strong>No hay integrantes inscritos</strong> de tu familia en este evento de prueba.</p>';
+  openModal('Resumen de inscripción familiar',`<div class="family-confirmation" role="status"><p class="eyebrow">SELECCIÓN GUARDADA · SOLO DEMO</p><h3>${X(event.title)}</h3>${summary}<p class="muted">Puedes corregir los participantes. Esto no envía inscripciones reales ni realiza cobros.</p><div class="modal-actions"><button type="button" class="btn secondary" data-family-event="${X(event.id)}">Corregir selección</button><button type="button" class="btn" data-action="modal-close">Listo</button></div></div>`);
 });
 if(location.hash==='#agenda') goto('agenda');

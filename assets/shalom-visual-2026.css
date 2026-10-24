@@ -12,6 +12,7 @@
   --sh-violet:#5f3c90;--sh-violet-soft:#f1e9ff;
   --sh-green:#3b651c;--sh-green-soft:#edf6df;
   --sh-coral:#973d38;--sh-coral-soft:#fdece8;
+  --sh-attention:#8f360c;--sh-attention-soft:#fff0e7;
 }
 /* Iglesia: colores en iconos de categoría. El CTA principal permanece cobre. */
 body[data-shalom-space="main"] .tile[data-shalom-category]{
@@ -53,7 +54,7 @@ body[data-shalom-space="main"] .kids-context [data-kids-status="verified"]{
   --sh-status:var(--sh-green);--sh-status-soft:var(--sh-green-soft);
 }
 body[data-shalom-space="main"] .kids-context [data-kids-status="pending"]{
-  --sh-status:var(--sh-coral);--sh-status-soft:var(--sh-coral-soft);
+  --sh-status:var(--sh-attention);--sh-status-soft:var(--sh-attention-soft);
 }
 body[data-shalom-space="main"] .kids-context [data-kids-status] .tag{
   color:var(--sh-status);border-color:var(--sh-status);background:#fff;
@@ -96,7 +97,7 @@ body[data-shalom-space="kids"] :is(.quick-action[data-home-view],.quick-action[d
 body[data-shalom-space="kids"] :is(.quick-action[data-home-view="reservas"],.quick-action[data-switch="reservas"]){
   --sh-module:var(--sh-turquoise);--sh-module-soft:var(--sh-turquoise-soft);
 }
-body[data-shalom-space="kids"] :is(.quick-action[data-home-view="equipo"],.quick-action[data-detail="events"],.quick-action[data-detail="incident"]){
+body[data-shalom-space="kids"] :is(.quick-action[data-home-view="equipo"],.quick-action[data-detail="events"]){
   --sh-module:var(--sh-violet);--sh-module-soft:var(--sh-violet-soft);
 }
 body[data-shalom-space="kids"] :is(.quick-action[data-home-view="acompanamiento"],.quick-action[data-detail="notice"]){
@@ -120,4 +121,9 @@ body[data-shalom-space="feedback"] .notice{border-left:3px solid var(--sh-plum)}
 }
 @media(prefers-reduced-motion:reduce){
   body[data-shalom-space] :is(.tile,.quick-action){transition:none}
+}
+
+/* Incidencias y pendientes: atención fuego. Coral permanece para comunidad/acompañamiento. */
+body[data-shalom-space="kids"] .quick-action[data-detail="incident"]{
+  --sh-module:var(--sh-attention);--sh-module-soft:var(--sh-attention-soft);
 }
