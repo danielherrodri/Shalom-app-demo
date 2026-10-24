@@ -54,3 +54,4 @@ jobs:
       - run: node tests/ux-guardrails.cjs
       - run: node tests/theme-persistence.cjs
       - run: node tests/site-navigation.cjs
+      - run: node tests/family-registration.cjs
