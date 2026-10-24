@@ -84,7 +84,7 @@ function showView(name, moveFocus = false) {
   nav.querySelectorAll('a').forEach(link => { if(link.hash === `#${name}`) link.setAttribute('aria-current','page'); else link.removeAttribute('aria-current'); });
   if(moveFocus){const heading = document.querySelector(`#${name} h1`); heading.tabIndex=-1; heading.focus({preventScroll:true}); window.scrollTo({top:0,behavior:'instant'});}
 }
-nav.querySelectorAll('a:not([href="#alcance"])').forEach(link => link.addEventListener('click', event => {event.preventDefault(); showView(link.hash.slice(1),true);}));
+nav.querySelectorAll('a[href^="#"]:not([href="#alcance"])').forEach(link => link.addEventListener('click', event => {event.preventDefault(); showView(link.hash.slice(1),true);}));
 document.querySelectorAll('[data-switch]').forEach(button => button.addEventListener('click',() => showView(button.dataset.switch,true)));
 showView(document.getElementById(location.hash.slice(1))?.classList.contains('panel') ? location.hash.slice(1) : 'maestro');
 window.addEventListener('hashchange', () => {

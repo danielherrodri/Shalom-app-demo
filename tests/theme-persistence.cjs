@@ -88,6 +88,7 @@ for (const [file, script] of required) {
 }
 assert.match(read('cafeteria.html'), /data-shalom-theme-toggle/);
 assert.match(read('design/kids-paneles.html'), /data-shalom-theme-toggle/);
+assert.match(read('design/kids-paneles.js'), /a\\[href\\\\\^=/, 'Kids internal navigation must not intercept the Inicio Shalom external link');
 assert.match(read('index.html'), /state\.theme=window\.ShalomTheme\.get\(\)/);
 assert.match(read('assets/comunicaciones.js'), /window\.ShalomTheme\.toggle\(\)/);
 console.log('Tema compartido: migración, guardado, 4 módulos, sincronización y modo privado correctos.');
