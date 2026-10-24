@@ -1,11 +1,83 @@
 @import 'tailwindcss';
-@font-face {font-family: Inter; src: url('../../assets/Inter-latin.woff2') format('woff2'); font-display: swap;}
-@theme {--font-sans: Inter, Arial, sans-serif; --color-shalom-bg: #faf7f2; --color-shalom-ink: #2d2d2d; --color-shalom-accent: #82552f;}
-html {font-family: var(--font-sans); background: var(--color-shalom-bg); color: var(--color-shalom-ink);}
-body {margin: 0; font-size: 1.125rem; line-height: 1.5;}
-button,input,select {font: inherit; min-height: 48px; border-radius: 10px; border: 1px solid #756b60; padding: .6rem .9rem; max-width: 100%;}
-button {background: #82552f; color: white; cursor: pointer; font-weight: 600;}
-button:disabled {cursor: wait; opacity: .75;}
-input,select {background: white; color: #2d2d2d; width: 100%;}
-:focus-visible {outline: 3px solid #82552f; outline-offset: 4px;}
-@media (prefers-reduced-motion: reduce) {* {scroll-behavior: auto !important;}}
+@font-face { font-family: Inter; src: url('../../assets/Inter-latin.woff2') format('woff2'); font-display: swap; }
+@theme {
+  --font-sans: Inter, Arial, sans-serif;
+  --color-shalom-bg: #faf7f2;
+  --color-shalom-ink: #2d2d2d;
+  --color-shalom-accent: #82552f;
+}
+:root {
+  font-family: Inter, Arial, sans-serif;
+  color: #2d2d2d;
+  background: #faf7f2;
+  font-synthesis: none;
+  --noche: #1a1a1a;
+  --crema: #faf7f2;
+  --cobre: #c8956c;
+  --cobre-texto: #82552f;
+}
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body { margin: 0; font-size: 1.125rem; line-height: 1.5; }
+button, input, select { font: inherit; min-height: 48px; border-radius: 10px; border: 1px solid #756b60; padding: .6rem .9rem; max-width: 100%; }
+button { background: #82552f; color: white; cursor: pointer; font-weight: 600; }
+button:disabled { cursor: not-allowed; opacity: .7; }
+input, select { background: white; color: #2d2d2d; width: 100%; }
+:focus-visible { outline: 3px solid #82552f; outline-offset: 4px; }
+.shalom-shell { min-height: 100vh; display: grid; grid-template-columns: 256px minmax(0, 1fr); }
+.shalom-sidebar { background: var(--noche); color: #f0f0f0; padding: 28px 17px; display: flex; flex-direction: column; gap: 18px; }
+.shalom-brand { padding: 13px 8px 28px; border-bottom: 1px solid #45413e; display: grid; gap: 8px; }
+.shalom-brand img { display: block; width: 180px; max-width: 100%; height: auto; }
+.shalom-brand span { font-size: .8125rem; letter-spacing: .08em; color: #dfc4ae; }
+.shalom-nav-heading { color: #c4c4c4; font-size: .8125rem; letter-spacing: .08em; margin: 0; }
+.shalom-sidebar nav { display: grid; gap: 5px; }
+.shalom-nav-link { width: 100%; display: block; text-align: left; border: 1px solid transparent; border-radius: 12px; color: #f0f0f0; background: transparent; font-size: 1rem; }
+.shalom-nav-link[aria-current="page"] { background: #372b21; border-color: #765338; color: #f2d1b5; }
+.shalom-nav-link:hover:not(:disabled) { background: #312720; }
+.shalom-sidebar-note { margin-top: auto; padding-top: 16px; border-top: 1px solid #45413e; color: #c4c4c4; font-size: .875rem; }
+.shalom-workspace { min-width: 0; }
+.shalom-topbar { min-height: 76px; padding: 12px clamp(18px, 3vw, 40px); display: flex; justify-content: space-between; gap: 20px; align-items: center; border-bottom: 1px solid #d3c8b9; }
+.shalom-header-brand { display: none; }
+.shalom-topbar-title { font-weight: 650; font-size: 1rem; }
+.shalom-topbar-title span { margin: 0 8px; color: #756b60; }
+.shalom-session { display: flex; gap: 14px; align-items: center; }
+.shalom-session-name { font-size: .9375rem; overflow-wrap: anywhere; }
+.shalom-logout { font-size: .9375rem; }
+.shalom-demo-pill { border: 1px solid #a38770; border-radius: 99px; padding: 6px 12px; font-size: .875rem; }
+.shalom-content { margin: 0 auto; max-width: 1160px; padding: 28px clamp(18px, 3.5vw, 48px) 80px; }
+.shalom-content > h1, .shalom-content h1 { font-size: clamp(1.75rem, 3.5vw, 2.25rem); line-height: 1.2; letter-spacing: -.02em; }
+.shalom-content > p { max-width: 65ch; }
+.shalom-field { display: grid; gap: 8px; min-width: 0; }
+.shalom-field label { font-size: 1rem; font-weight: 650; }
+.shalom-field-hint { font-size: .9375rem; color: #5f5349; }
+.shalom-empty { border: 1px dashed #998c7c; border-radius: 14px; padding: 20px; color: #4f4a44; background: #fff; }
+.shalom-dashboard { max-width: 670px; }
+.shalom-dashboard-card { border: 1px solid #d4c7b8; border-radius: 20px; background: #fff; padding: clamp(20px, 3vw, 32px); display: grid; gap: 12px; }
+.shalom-dashboard-card h2 { font-size: 1.5rem; font-weight: 700; }
+.shalom-dashboard-card button { justify-self: start; }
+.shalom-mobile-nav { display: none; }
+.shalom-skip { position: fixed; z-index: 50; top: 8px; left: 8px; transform: translateY(-180%); background: white; padding: 12px; color: var(--cobre-texto); border-radius: 8px; }
+.shalom-skip:focus { transform: translateY(0); }
+@media (max-width: 860px) {
+  .shalom-shell { display: block; }
+  .shalom-sidebar { display: none; }
+  .shalom-topbar { background: var(--noche); color: white; padding: 14px 18px; min-height: 72px; }
+  .shalom-header-brand { display: grid; gap: 4px; }
+  .shalom-header-brand img { width: 105px; max-height: 42px; object-fit: contain; object-position: left; }
+  .shalom-header-brand span { font-size: .625rem; letter-spacing: .08em; }
+  .shalom-topbar-title { display: none; }
+  .shalom-session-name { display: none; }
+  .shalom-logout { background: var(--cobre); color: var(--noche); border: 0; }
+  .shalom-demo-pill { color: #faf7f2; }
+  .shalom-content { padding: 24px 18px 118px; }
+  .shalom-mobile-nav { display: flex; position: fixed; z-index: 20; bottom: 0; left: 0; right: 0; padding: 8px 12px max(8px, env(safe-area-inset-bottom)); gap: 8px; background: #faf7f2; border-top: 1px solid #d3c8b9; }
+  .shalom-mobile-link { flex: 1; min-width: 0; min-height: 56px; background: transparent; color: #4f4a44; border: 1px solid transparent; font-size: 1rem; line-height: 1.25; }
+  .shalom-mobile-link[aria-current="page"] { background: #f0e3d6; color: #5e3821; border-color: #9b785c; }
+}
+@media (max-width: 400px) {
+  .shalom-session { gap: 4px; }
+  .shalom-logout { padding: 8px 10px; font-size: .875rem; }
+}
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
+}
