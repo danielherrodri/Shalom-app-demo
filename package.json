@@ -11,7 +11,8 @@
     "test:processing": "node tests/processing.cjs",
     "test:logos": "node tests/logos.cjs",
     "test:ux": "node tests/ux-guardrails.cjs",
-    "test:theme": "node tests/theme-persistence.cjs"
+    "test:theme": "node tests/theme-persistence.cjs",
+    "test:structure": "node tests/site-navigation.cjs"
   },
   "devDependencies": {
     "axe-core": "4.11.0",

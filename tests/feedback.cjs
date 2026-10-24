@@ -14,7 +14,7 @@ const { chromium } = require('playwright');
     });
     await page.goto('http://localhost/index.html');
     await page.evaluate(() => goto('events'));
-    await page.getByRole('link', {name: 'Compartir mi experiencia'}).click();
+    await page.getByRole('link', {name: 'Tu opinión'}).click();
     assert.equal(await page.locator('#service').inputValue(), 'events');
     await page.goto('http://localhost/feedback.html?service=kids');
     assert.equal(await page.locator('#service').inputValue(), 'kids');
@@ -71,7 +71,7 @@ const { chromium } = require('playwright');
     assert.match(await page.locator('.metrics').innerText(), /100%/);
     for (const [file, service] of [['cafeteria.html','cafe'], ['design/kids-paneles.html','kids'], ['comunicaciones.html','other']]) {
       await page.goto('http://localhost/' + file);
-      await page.getByRole('link', {name: 'Compartir mi experiencia'}).click();
+      await page.getByRole('link', {name: 'Tu opinión'}).click();
       assert.equal(await page.locator('#service').inputValue(), service);
     }
     await page.setViewportSize({width: 1366, height: 900});

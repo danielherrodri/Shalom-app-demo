@@ -53,3 +53,4 @@ jobs:
       - run: npm run build --prefix frontend
       - run: node tests/ux-guardrails.cjs
       - run: node tests/theme-persistence.cjs
+      - run: node tests/site-navigation.cjs

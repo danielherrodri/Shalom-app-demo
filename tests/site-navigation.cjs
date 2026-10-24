@@ -31,9 +31,9 @@ function element(tag) {
   return {
     tag, children:[], attributes:{}, className:'', textContent:'', href:'',
     setAttribute(k,v){this.attributes[k]=v;},
-    append(...items){this.children.push(...items);},
-    prepend(item){this.children.unshift(item);},
-    remove(){this.removed=true;},
+    append(...items){for(const item of items){item.parent=this;this.children.push(item);}},
+    prepend(item){item.parent=this;this.children.unshift(item);},
+    remove(){ if(this.parent) this.parent.children=this.parent.children.filter(item=>item!==this); },
     querySelector(sel) {
       if (sel === '.shalom-area-nav') return this.children.find(n=>n.className === 'shalom-area-nav') || null;
       if (sel === '.topbar') return this.children.find(n=>n.className === 'topbar') || null;
