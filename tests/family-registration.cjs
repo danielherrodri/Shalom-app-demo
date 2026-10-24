@@ -1,0 +1,12 @@
+const assert = require('node:assert/strict');
+const {plan}=require('../assets/shalom-family-model.js');
+const members=[{id:'a',verified:true},{id:'b',verified:true},{id:'c',verified:false}];
+const event={registered:['outsider','a'],capacity:3};
+assert.deepEqual(plan(event,members,['a','b','b']).registered,['outsider','a','b']);
+assert.deepEqual(plan(event,members,[]).registered,['outsider']);
+assert.deepEqual(plan(event,members,['b']).registered,['outsider','b']);
+assert.ok(plan(event,members,['c']).error);
+assert.ok(plan(event,members,['unknown']).error);
+assert.ok(plan({...event,capacity:2},members,['a','b']).error);
+assert.deepEqual(event.registered,['outsider','a'],'failure does not change existing reservations');
+console.log('PASS family: capacity, duplicates, unverified relationships, cancellation and atomic update');

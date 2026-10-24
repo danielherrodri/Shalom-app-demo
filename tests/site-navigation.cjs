@@ -61,6 +61,8 @@ assert.deepEqual(list.map(x=>x.textContent).join('|'),'Inicio|Shalom Kids|Cafete
 assert.equal(list[2].attributes['aria-current'],'page');
 assert.equal(nav.children[0].className,'shalom-area-top');
 assert.equal(nav.children[0].children[1].className,'shalom-area-actions');
+assert.equal(nav.children[2].className,'shalom-text-toggle','preserve enlarged text switch from PR #11');
+assert.equal(nav.children[2].attributes['data-large-text'],'');
 const navCss = read('assets/shalom-navigation.css');
 assert.match(navCss,/display:grid;grid-template-columns:repeat\(2,minmax\(0,1fr\)\)/);
 assert.doesNotMatch(navCss,/overflow-x:auto/,'areas must not use a horizontal carousel on phones');

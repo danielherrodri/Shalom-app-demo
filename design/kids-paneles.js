@@ -112,3 +112,5 @@ function updateBooking(){document.getElementById('reservation-count').textConten
 child.addEventListener('change',() => {updateBooking(); status.textContent=reservations.has(child.value)?'Este niño ya tiene una reserva de prueba para esta sesión.':'Demostración local. No se envían ni guardan reservas reales.';});
 document.getElementById('booking-form').addEventListener('submit',event => {event.preventDefault(); if(!child.value)return; if(reservations.has(child.value)){status.textContent='Este niño ya tiene una reserva de prueba. No se duplicó el lugar.';return;} reservations.add(child.value); updateBooking(); status.textContent='Reserva de prueba añadida al conteo local. La asistencia se registraría al llegar. No se envió al servidor.';});
 cancel.addEventListener('click',() => {reservations.delete(child.value); updateBooking(); status.textContent='Reserva de prueba cancelada. Se ajustó el conteo local.';});
+
+const teacherAgendaLink=document.createElement('a');teacherAgendaLink.className='button';teacherAgendaLink.href='../index.html#agenda';teacherAgendaLink.textContent='Mi agenda docente y asistencia';maestro.prepend(teacherAgendaLink);
