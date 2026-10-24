@@ -16,6 +16,8 @@
     if (!container) return;
     // La sección exterior no compite con las pestañas internas del módulo.
     const existing = container.querySelector('.shalom-area-nav');
+    // Mantiene la apertura si la misma vista vuelve a renderizarse.
+    const wasExpanded = existing?.getAttribute?.('data-mobile-open') === 'true';
     if (existing) existing.remove();
     const area = document.body.dataset.shalomSpace || 'main';
     const nav = document.createElement('nav');
@@ -28,8 +30,24 @@
     top.className = 'shalom-area-top';
     const actions = document.createElement('div');
     actions.className = 'shalom-area-actions';
+    const toggle = document.createElement('button');
+    toggle.type = 'button';
+    toggle.className = 'shalom-areas-toggle';
+    toggle.setAttribute('aria-controls', 'shalom-area-panel');
+    const setExpanded = value => {
+      nav.setAttribute('data-mobile-open', String(value));
+      toggle.setAttribute('aria-expanded', String(value));
+      toggle.setAttribute('aria-label', value ? 'Ocultar áreas de Shalom' : 'Mostrar áreas de Shalom');
+      toggle.textContent = value ? 'Ocultar' : 'Ver áreas';
+    };
+    setExpanded(wasExpanded);
+    toggle.addEventListener('click', () => setExpanded(nav.getAttribute('data-mobile-open') !== 'true'));
+    actions.append(toggle);
     top.append(heading, actions);
     nav.append(top);
+    const panel = document.createElement('div');
+    panel.className = 'shalom-area-panel';
+    panel.setAttribute('id', 'shalom-area-panel');
     const links = document.createElement('div');
     links.className = 'shalom-area-links';
     for (const section of sections) {
@@ -46,13 +64,14 @@
       }
       links.append(link);
     }
-    nav.append(links);
+    panel.append(links);
     const textButton = document.createElement('button');
     textButton.type = 'button';
     textButton.className = 'shalom-text-toggle';
     textButton.setAttribute('data-large-text', '');
     textButton.textContent = 'Ampliar texto';
-    nav.append(textButton);
+    panel.append(textButton);
+    nav.append(panel);
     if (options.after) {
       const anchor = container.querySelector(options.after);
       if (anchor) {

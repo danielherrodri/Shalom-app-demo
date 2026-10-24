@@ -31,6 +31,7 @@ function element(tag) {
   return {
     tag, children:[], attributes:{}, className:'', textContent:'', href:'',
     setAttribute(k,v){this.attributes[k]=v;},
+    getAttribute(k){return this.attributes[k]??null;},
     addEventListener(k,fn){this.events||={};this.events[k]=fn;},
     append(...items){for(const item of items){item.parent=this;this.children.push(item);}},
     prepend(item){item.parent=this;this.children.unshift(item);},
@@ -55,14 +56,22 @@ window.ShalomNavigation.mount(host,{service:'cafe'});
 assert.equal(host.children.length,1);
 const nav=host.children[0];
 assert.equal(nav.attributes['aria-label'],'Áreas de Shalom');
-const list=nav.children[1].children;
+const list=nav.children[1].children[0].children;
 assert.equal(list.length,5);
 assert.deepEqual(list.map(x=>x.textContent).join('|'),'Inicio|Shalom Kids|Cafetería|Avisos|Tu opinión');
 assert.equal(list[2].attributes['aria-current'],'page');
 assert.equal(nav.children[0].className,'shalom-area-top');
 assert.equal(nav.children[0].children[1].className,'shalom-area-actions');
-assert.equal(nav.children[2].className,'shalom-text-toggle','preserve enlarged text switch from PR #11');
-assert.equal(nav.children[2].attributes['data-large-text'],'');
+assert.equal(nav.children[1].className,'shalom-area-panel');
+assert.equal(nav.children[1].children[1].className,'shalom-text-toggle','preserve enlarged text switch from PR #11');
+assert.equal(nav.children[1].children[1].attributes['data-large-text'],'');
+const toggle=nav.children[0].children[1].children[0];
+assert.equal(toggle.className,'shalom-areas-toggle');
+assert.equal(toggle.attributes['aria-expanded'],'false');
+assert.equal(nav.attributes['data-mobile-open'],'false');
+toggle.events.click();
+assert.equal(toggle.attributes['aria-expanded'],'true');
+assert.equal(nav.attributes['data-mobile-open'],'true');
 const navCss = read('assets/shalom-navigation.css');
 assert.match(navCss,/display:grid;grid-template-columns:repeat\(2,minmax\(0,1fr\)\)/);
 assert.doesNotMatch(navCss,/overflow-x:auto/,'areas must not use a horizontal carousel on phones');
@@ -75,11 +84,19 @@ list[2].events.click({preventDefault(){prevented=true;}});
 assert.ok(prevented,'active section does not reload the current form');
 assert.ok(list[4].href.endsWith('/Shalom-app-demo/feedback.html?service=cafe'));
 window.ShalomNavigation.mount(host,{service:'kids'});
-assert.equal(host.children[0].children[1].children[4].href.includes('service=kids'),true);
+assert.equal(host.children[0].children[1].children[0].children[4].href.includes('service=kids'),true);
+assert.equal(host.children[0].attributes['data-mobile-open'],'true','open navigation state survives a render');
 assert.equal(host.children.length,1,'rerenders do not duplicate navigation');
 document.body.dataset.shalomSpace='feedback';
 const opinion=element('header');
 window.ShalomNavigation.mount(opinion);
-assert.equal(opinion.children[0].children[1].children[4].attributes['aria-current'],'page');
-assert.equal(opinion.children[0].children[1].children[0].href,'https://danielherrodri.github.io/Shalom-app-demo/index.html');
+assert.equal(opinion.children[0].children[1].children[0].children[4].attributes['aria-current'],'page');
+assert.equal(opinion.children[0].children[1].children[0].children[0].href,'https://danielherrodri.github.io/Shalom-app-demo/index.html');
 console.log('PASS: cinco areas, rutas, contextos de opinion, tema y navegacion no duplicada');
+
+const accessible=read('assets/shalom-accessibility.css');
+assert.match(accessible,/\.kids-context\s*>\s*\.grid\s*\{[\s\S]*?grid-template-columns:minmax\(0,1fr\)/);
+assert.doesNotMatch(accessible,/\.mobile-bottom\s*\{flex-wrap:wrap;position:static\}/);
+assert.match(accessible,/body\[data-shalom-space="main"\]\s+\.mobile-bottom\s*\{[\s\S]*?position:fixed/);
+assert.match(navCss,/\.shalom-area-panel\s*\{\s*display:none;/);
+assert.match(navCss,/\[data-mobile-open="true"\]\s+\.shalom-area-panel/);
