@@ -37,4 +37,7 @@ assert.match(shell, /profileName \?/, 'do not expose Kids navigation before auth
 assert.match(attendance, /visiblePeople/);
 assert.match(attendance, /g\.results\.length === 1/, 'single group should be automatically selected');
 assert.match(attendance, /aria-live="polite"/);
-console.log('UX guardrails: 4 spaces, simplified navigation, contextual Kids and accessible status passed.');
+const accessibility = read('assets/shalom-accessibility.css');
+assert.match(accessibility, /\.kids-context\s*>\s*\.grid\s*\{[\s\S]*?grid-template-columns:minmax\(0,1fr\)/, 'Kids cards need full width on phones');
+assert.match(accessibility, /data-shalom-large-text="true"[\s\S]*?\.mobile-bottom\s*\{[\s\S]*?position:fixed/, 'large text must preserve mobile bottom navigation');
+console.log('UX guardrails: responsive Kids cards, persistent mobile nav, areas and accessibility passed.');
