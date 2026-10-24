@@ -5,7 +5,7 @@
 
 ## Decisiones implementadas
 
-1. **Accesos de tu perfil (Inicio):** el menú local inferior y la barra lateral conservan tareas del perfil; los enlaces entre sitios ahora aparecen como «Más áreas». En Inicio se omiten «Inicio» y «Avisos» de ese menú secundario porque ambos ya están disponibles en la navegación local. En otros módulos se omite el enlace al área activa.
+1. **Accesos de tu perfil (Inicio):** el menú local inferior y la barra lateral conservan tareas del perfil; los enlaces entre sitios ahora aparecen como «Más áreas». En Inicio se omiten «Inicio» y «Avisos» de ese menú secundario cuando están disponibles en la navegación local; «Avisos» se conserva en «Más áreas» si el perfil móvil no tiene ese acceso. En otros módulos se omite el enlace al área activa.
 2. **Inicio contextual:** primera acción destacada y dos accesos frecuentes según cuatro contextos de prueba: sin sesión, congregante, voluntariado, administración. El resto de funcionalidades permanece en «Explora otras funciones» y navegación local.
 3. **Lectura y tactilidad:** cuerpo de 16 px en textos de contenido, notas de al menos 14 px en las tarjetas y controles de 44/48 px. «Ampliar texto» es visible sin abrir «Más áreas» y sigue siendo persistente.
 4. **Kids móvil:** navegación interna con rejilla adaptable, sin desplazamiento lateral a 320–390 px; vistas y acciones existentes intactas.
