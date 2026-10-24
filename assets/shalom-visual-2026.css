@@ -1,0 +1,123 @@
+/* Evolución visual Shalom 2026. Los colores complementarios son PROPUESTOS;
+   cobre de Iglesia y fuego/oro Kids conservan prioridad institucional. */
+:root{
+  --sh-forest:#24483e;--sh-forest-soft:#e4f0e7;
+  --sh-sky:#244f65;--sh-sky-soft:#e8f3f7;
+  --sh-plum:#6e3d62;--sh-plum-soft:#f5e9f1;
+  --sh-olive:#5a5b28;--sh-olive-soft:#f2f0da;
+  --sh-fire:#b84810;--sh-fire-ink:#8f360c;--sh-fire-soft:#fff0e7;
+  --sh-gold-ink:#5b430f;--sh-gold-soft:#fbf4e1;
+  --sh-turquoise:#14635a;--sh-turquoise-soft:#d9f5ee;
+  --sh-blue:#2e4f88;--sh-blue-soft:#e8f0ff;
+  --sh-violet:#5f3c90;--sh-violet-soft:#f1e9ff;
+  --sh-green:#3b651c;--sh-green-soft:#edf6df;
+  --sh-coral:#973d38;--sh-coral-soft:#fdece8;
+}
+/* Iglesia: colores en iconos de categoría. El CTA principal permanece cobre. */
+body[data-shalom-space="main"] .tile[data-shalom-category]{
+  --sh-module:#244f65;--sh-module-soft:#e8f3f7;
+}
+body[data-shalom-space="main"] :is(.tile[data-shalom-category="family"],.tile[data-shalom-category="people"],.tile[data-shalom-category="parking"]){
+  --sh-module:var(--sh-forest);--sh-module-soft:var(--sh-forest-soft);
+}
+body[data-shalom-space="main"] :is(.tile[data-shalom-category="events"],.tile[data-shalom-category="giving"],.tile[data-shalom-category="profile"]){
+  --sh-module:var(--sh-plum);--sh-module-soft:var(--sh-plum-soft);
+}
+body[data-shalom-space="main"] :is(.tile[data-shalom-category="volunteer"],.tile[data-shalom-category="agenda"],.tile[data-shalom-category="cafe"]){
+  --sh-module:var(--sh-olive);--sh-module-soft:var(--sh-olive-soft);
+}
+body[data-shalom-space="main"] .tile[data-shalom-category="kids"]{
+  --sh-module:var(--sh-fire-ink);--sh-module-soft:var(--sh-fire-soft);
+}
+body[data-shalom-space="main"] .tile[data-shalom-category] .icon-disc{
+  background:var(--sh-module-soft);color:var(--sh-module);
+}
+body[data-shalom-space="main"] .tile[data-shalom-category]:focus-visible{
+  outline:3px solid var(--sh-module);outline-offset:3px;
+}
+body.theme-cream[data-shalom-space="main"] .tile[data-shalom-category]{background:#fff;border-color:var(--border)}
+body.theme-night[data-shalom-space="main"] .tile[data-shalom-category]{background:var(--surface);border-color:var(--border)}
+/* Kids dentro de la App: fuego oficial para acciones, otros colores informativos. */
+body[data-shalom-space="main"] .kids-context{
+  border:1px solid #eddccf;background:#fff;color:#2d2d2d;
+}
+body[data-shalom-space="main"] .kids-context :is(.eyebrow,.section-title){color:var(--sh-fire-ink)}
+body[data-shalom-space="main"] .kids-context .icon-disc{
+  background:var(--sh-blue-soft);color:var(--sh-blue);
+}
+body[data-shalom-space="main"] .kids-context [data-kids-status]{
+  --sh-status:var(--sh-blue);--sh-status-soft:var(--sh-blue-soft);
+  background:var(--sh-status-soft);border-color:var(--sh-status-soft);color:#2d2d2d;
+}
+body[data-shalom-space="main"] .kids-context [data-kids-status="verified"]{
+  --sh-status:var(--sh-green);--sh-status-soft:var(--sh-green-soft);
+}
+body[data-shalom-space="main"] .kids-context [data-kids-status="pending"]{
+  --sh-status:var(--sh-coral);--sh-status-soft:var(--sh-coral-soft);
+}
+body[data-shalom-space="main"] .kids-context [data-kids-status] .tag{
+  color:var(--sh-status);border-color:var(--sh-status);background:#fff;
+}
+body[data-shalom-space="main"] .kids-context [data-kids-status] .item-main h3{color:var(--sh-status)}
+body[data-shalom-space="main"] .kids-context [data-kids-module="attendance"]{
+  border:1px solid #a0d9cc;border-left:4px solid var(--sh-turquoise);
+  background:#f5fcfa;
+}
+body[data-shalom-space="main"] .kids-context [data-kids-module="attendance"] > h2{color:var(--sh-turquoise)}
+body[data-shalom-space="main"] .kids-context .btn:not(.secondary){
+  background:var(--sh-fire);border-color:var(--sh-fire);color:#fff;
+}
+body[data-shalom-space="main"] .kids-context .btn.secondary{color:var(--sh-fire-ink)}
+/* Kids, vistas independientes. No se modifican logotipos originales. */
+body[data-shalom-space="kids"] :is(.primary,.button.primary){
+  background:var(--sh-fire);border-color:var(--sh-fire);color:#fff;
+}
+body[data-shalom-space="kids"] :is(.primary,.button.primary):hover{
+  background:var(--sh-fire-ink);border-color:var(--sh-fire-ink);color:#fff;
+}
+body[data-shalom-space="kids"] header nav a[aria-current="page"]{
+  background:var(--sh-fire);border-color:var(--sh-fire);color:#fff;
+}
+body[data-shalom-space="kids"] .quick-action[data-home-view],
+body[data-shalom-space="kids"] .quick-action[data-detail],
+body[data-shalom-space="kids"] .quick-action[data-switch]{
+  --sh-module:var(--sh-blue);--sh-module-soft:var(--sh-blue-soft);
+  background:var(--sh-module-soft);border:1px solid var(--sh-module-soft);color:var(--sh-module);
+}
+body[data-shalom-space="kids"] :is(.quick-action[data-home-view],.quick-action[data-detail],.quick-action[data-switch]) > :is(strong,span:not(.icon-box)){
+  color:var(--sh-module);
+}
+body[data-shalom-space="kids"] :is(.quick-action[data-home-view],.quick-action[data-detail],.quick-action[data-switch]) .icon-box{
+  background:#fff;color:var(--sh-module);border:1px solid currentColor;
+}
+body[data-shalom-space="kids"] :is(.quick-action[data-home-view],.quick-action[data-detail],.quick-action[data-switch]):focus-visible{
+  outline:3px solid var(--sh-module);outline-offset:3px;
+}
+body[data-shalom-space="kids"] :is(.quick-action[data-home-view="reservas"],.quick-action[data-switch="reservas"]){
+  --sh-module:var(--sh-turquoise);--sh-module-soft:var(--sh-turquoise-soft);
+}
+body[data-shalom-space="kids"] :is(.quick-action[data-home-view="equipo"],.quick-action[data-detail="events"],.quick-action[data-detail="incident"]){
+  --sh-module:var(--sh-violet);--sh-module-soft:var(--sh-violet-soft);
+}
+body[data-shalom-space="kids"] :is(.quick-action[data-home-view="acompanamiento"],.quick-action[data-detail="notice"]){
+  --sh-module:var(--sh-coral);--sh-module-soft:var(--sh-coral-soft);
+}
+body[data-shalom-space="kids"] :is(.quick-action[data-home-view="cocina"],.quick-action[data-detail="books"]){
+  --sh-module:var(--sh-blue);--sh-module-soft:var(--sh-blue-soft);
+}
+body[data-shalom-space="kids"] .module-demo{border-left-color:var(--sh-fire)}
+/* Acentos de información para áreas adicionales, no nuevos CTAs primarios. */
+body[data-shalom-space="cafe"] .stat:first-child{border-left:4px solid var(--sh-olive)}
+body[data-shalom-space="cafe"] .stat:nth-child(2){border-left:4px solid var(--sh-sky)}
+body[data-shalom-space="cafe"] .stat:nth-child(3){border-left:4px solid var(--sh-forest)}
+body.theme-cream[data-shalom-space="comms"] :is(.notice,.demo-note){border-left:3px solid var(--sh-sky)}
+body.night[data-shalom-space="comms"] :is(.notice,.demo-note){border-left:3px solid #81b0c7}
+body[data-shalom-space="feedback"] .shalom-feedback-eyebrow{color:var(--sh-plum)}
+body.theme-night[data-shalom-space="feedback"] .shalom-feedback-eyebrow{color:#e4b9d8}
+body[data-shalom-space="feedback"] .notice{border-left:3px solid var(--sh-plum)}
+@media(max-width:600px){
+  body[data-shalom-space="main"] .kids-context [data-kids-status]{padding:16px}
+}
+@media(prefers-reduced-motion:reduce){
+  body[data-shalom-space] :is(.tile,.quick-action){transition:none}
+}
