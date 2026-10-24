@@ -6,6 +6,10 @@ Inter, Noche, Crema y cobre. **Solo ejemplos ficticios. Sin backend, autenticaci
 
 La navegación principal conecta cinco espacios: **Inicio**, **Shalom Kids**, **Cafetería**, **Avisos** y **Tu opinión**. Las pestañas internas se reservan a las tareas de cada módulo. Estas páginas son demostraciones, no los sistemas productivos. El tema Noche/Crema se conserva al navegar por todas las áreas en un mismo navegador y dominio. Documentación: [Arquitectura de información](docs/arquitectura-areas-v01.md).
 
+## Evolución visual institucional 2026 (propuesta)
+
+La identidad oficial permanece: Inter, logotipos originales blanco/negro, Noche/Crema y cobre en Iglesia; fuego/oro en Kids. La nueva hoja compartida `assets/shalom-visual-2026.css` usa colores complementarios **propuestos, no aprobados institucionalmente**, para distinguir funciones sin sacrificar contraste. Alcance, tokens, accesibilidad y asignación semántica: [Identidad visual 2026](docs/identidad-visual-propuesta-2026.md). No modifica el Shalom Kids operativo.
+
 ## Explorar
 
 - [Shalom Kids · Vistas de docentes, coordinación y otros equipos](https://danielherrodri.github.io/Shalom-app-demo/design/kids-paneles.html#inicio)
