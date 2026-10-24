@@ -1,6 +1,5 @@
 /* Tema compartido para los prototipos que originalmente eran solo Noche.
    Inicio y Comunicaciones conservan sus temas existentes. */
-:root { color-scheme: dark; }
 html[data-shalom-theme="cream"] { color-scheme: light; }
 [data-shalom-theme="cream"] body[data-shalom-space="cafe"],
 body.theme-cream[data-shalom-space="cafe"] {
@@ -81,7 +80,7 @@ body.theme-cream[data-shalom-space="kids"] :is(.primary,.button.primary) {
 body.theme-cream[data-shalom-space="kids"] :is(select,.module-view input:not([type="checkbox"]),.module-view textarea,dialog) {
   background:#fff;color:#2d2d2d;border-color:#b9a99a;
 }
-body.theme-cream[data-shalom-space="kids"] :is(.hero-art::after) { background:#f2ece3; }
+body.theme-cream[data-shalom-space="kids"] .hero-art::after { background:#f2ece3; }
 body.theme-cream[data-shalom-space="kids"] :is(.care-request-card .button[aria-pressed="true"],.action:hover,.button:hover) {
   background:#edddce;color:#633b22;
 }
