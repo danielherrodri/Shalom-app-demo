@@ -42,11 +42,18 @@
       links.append(link);
     }
     nav.append(links);
+    const textButton = document.createElement('button');
+    textButton.type = 'button';
+    textButton.className = 'shalom-text-toggle';
+    textButton.setAttribute('data-large-text', '');
+    textButton.textContent = 'Ampliar texto';
+    nav.append(textButton);
     if (options.after) {
       const anchor = container.querySelector(options.after);
-      if (anchor) { anchor.insertAdjacentElement('afterend', nav); return; }
+      if (anchor) { anchor.insertAdjacentElement('afterend', nav); window.ShalomAccessibility?.apply(); return; }
     }
     container.prepend(nav);
+    window.ShalomAccessibility?.apply();
   }
   window.ShalomNavigation = Object.freeze({ mount });
 })();

@@ -68,3 +68,11 @@ Documentación anterior de cafetería: [diseño v0.4](docs/cafeteria-diseno-mvp-
 ## Tu opinión en Shalom
 
 [Formulario y seguimiento de opiniones](https://danielherrodri.github.io/Shalom-app-demo/feedback.html): experiencia común por servicio, incluido Kids. Prototipo en memoria; no recibe opiniones reales y se reinicia al recargar. [Alcance y pendientes de producción](docs/feedback-v01.md).
+
+## Ideas integradas del primer prototipo
+
+- **Ampliar texto** en las cinco áreas. Conserva la preferencia local al recargar y navegar, independientemente del tema.
+- **Eventos → Inscripción familiar**: seleccionar integrantes verificados, editar o cancelar la selección y respetar cupos sin duplicados. Solo registra perfiles ficticios en este navegador.
+- **Voluntario / Administración → Mi agenda docente**: próximos servicios ilustrativos, preparación de clase y acceso a asistencia con grupo preseleccionado. Los avisos de ausencia y su retiro son simulaciones en memoria, sin notificar a coordinación ni asignar suplentes.
+
+La agenda también se abre desde la vista de maestro en Shalom Kids. Los materiales de clase y la asistencia operativa siguen sin integración con los sistemas reales. Prueba de cupos, duplicados y cancelaciones: `npm run test:family`.
