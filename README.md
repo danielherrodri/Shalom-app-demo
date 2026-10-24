@@ -14,6 +14,10 @@ Inter, Noche, Crema y cobre. **Solo ejemplos ficticios. Sin backend, autenticaci
 - [Ocho plantillas de correo](https://danielherrodri.github.io/Shalom-app-demo/comunicaciones.html#correos)
 - [Cafetería v0.5](https://danielherrodri.github.io/Shalom-app-demo/cafeteria.html)
 
+## Mejoras UX/UI en revisión
+
+La primera fase de armonización visual y base React compartida se encuentra en una rama de revisión. Documentación: [primera fase UX/UI](docs/ux-implementacion-v01.md). No supone integración con Shalom Kids operativo.
+
 ## Qué cambia en v0.7
 
 Avisos de texto/imagen/video con categorías, vigencias, fijación, audiencias y ministerios de ejemplo; borradores, edición, programación por reloj simulado y archivo reversible. Búsqueda, filtros y paginación conservados. Las exportaciones de información ahora son solicitudes en cola de todos los resultados filtrados, con entrega por correo simulada, sin descargar ni crear archivos de datos. Galería de correos Shalom/Kids, HTML y texto plano editables, con búsqueda y filtro; las descargas HTML/TXT siguen disponibles como material de diseño.

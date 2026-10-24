@@ -9,7 +9,8 @@
     "test:additional": "node tests/additional.cjs",
     "test:audit": "node tests/audit-baseline.cjs",
     "test:processing": "node tests/processing.cjs",
-    "test:logos": "node tests/logos.cjs"
+    "test:logos": "node tests/logos.cjs",
+    "test:ux": "node tests/ux-guardrails.cjs"
   },
   "devDependencies": {
     "axe-core": "4.11.0",
