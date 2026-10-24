@@ -76,3 +76,26 @@ body.night[data-shalom-space="comms"] .shalom-area-links a[aria-current="page"] 
   body[data-shalom-space] .shalom-areas-toggle::before {content:'☰';font-size:21px;line-height:1;}
   body[data-shalom-space] .shalom-area-nav[data-mobile-open="true"] .shalom-areas-toggle::before {content:'×';font-size:27px;}
 }
+
+/* SPARK: controles siempre visibles y rutas externas separadas de las tareas. */
+body[data-shalom-space] .shalom-area-actions .shalom-text-toggle {
+  margin:0;min-height:44px;white-space:nowrap;padding:8px 12px;
+  border:1px solid #ae8c6e;background:#fff;color:#654025;font-size:.875rem;
+}
+body.theme-night[data-shalom-space] .shalom-area-actions .shalom-text-toggle,
+body.night[data-shalom-space="comms"] .shalom-area-actions .shalom-text-toggle {
+  background:#372a20;color:#f0d5bd;border-color:#8b674d;
+}
+@media(max-width:560px){
+  body[data-shalom-space] .shalom-area-caption{font-size:.875rem}
+  body[data-shalom-space] .shalom-area-actions{gap:6px}
+  body[data-shalom-space] .shalom-area-actions .shalom-text-toggle{padding:8px;letter-spacing:-.02em}
+}
+@media(max-width:360px){
+  body[data-shalom-space] .shalom-area-caption{display:none}
+  body[data-shalom-space] .shalom-areas-toggle{
+    font-size:.875rem!important;width:auto;min-width:80px;padding:8px!important;
+  }
+  body[data-shalom-space] .shalom-areas-toggle::before,
+  body[data-shalom-space] .shalom-area-nav[data-mobile-open="true"] .shalom-areas-toggle::before {content:none}
+}

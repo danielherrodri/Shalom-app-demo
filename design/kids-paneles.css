@@ -29,3 +29,25 @@ a{color:#d9ad86}header{border-right:1px solid var(--line)}header>strong{display:
 
 .care-directory{margin:22px 0}.care-directory .card h3{margin-top:18px;font-size:19px}.care-directory .button{margin-top:12px;width:100%}.care-directory .button[aria-pressed=true]{border-color:#c8956c;background:#2a221c}.care-request-card{margin:16px 0}.care-request-card h3{font-size:20px;margin-top:18px}.care-request-card .button{margin:12px 12px 0 0}.care-request-card a.button{max-width:100%;overflow-wrap:anywhere;text-align:center}#care-filter{max-width:360px}#acompanamiento .checkline{align-items:flex-start}#acompanamiento .checkline input{margin-top:4px}@media(max-width:650px){.care-request-card .button{width:100%;margin-right:0}.care-directory .card{padding:22px}}
 
+
+/* SPARK: las vistas locales de Kids no se desplazan lateralmente en móvil. */
+@media(max-width:920px){
+  body[data-shalom-space="kids"] header nav {
+    display:grid;grid-template-columns:repeat(3,minmax(0,1fr));
+    gap:8px;overflow:visible;scroll-snap-type:none;padding:0;align-items:stretch;
+  }
+  body[data-shalom-space="kids"] header nav a,
+  body[data-shalom-space="kids"] header nav a:not([href="#alcance"]),
+  body[data-shalom-space="kids"] header nav button {
+    flex:initial;min-width:0;min-height:48px;white-space:normal;overflow-wrap:break-word;
+    padding:10px;font-size:.875rem;line-height:1.35;text-align:center;justify-content:center;
+  }
+}
+@media(max-width:650px){
+  body[data-shalom-space="kids"] header nav{grid-template-columns:repeat(2,minmax(0,1fr));}
+}
+@media(max-width:360px){
+  body[data-shalom-space="kids"] header nav{gap:6px}
+  body[data-shalom-space="kids"] header nav a,
+  body[data-shalom-space="kids"] header nav a:not([href="#alcance"]){font-size:.875rem;gap:6px}
+}

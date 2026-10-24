@@ -22,10 +22,10 @@
     const area = document.body.dataset.shalomSpace || 'main';
     const nav = document.createElement('nav');
     nav.className = 'shalom-area-nav';
-    nav.setAttribute('aria-label', 'Áreas de Shalom');
+    nav.setAttribute('aria-label', 'Más áreas de Shalom');
     const heading = document.createElement('span');
     heading.className = 'shalom-area-caption';
-    heading.textContent = 'Áreas de Shalom';
+    heading.textContent = 'Más áreas de Shalom';
     const top = document.createElement('div');
     top.className = 'shalom-area-top';
     const actions = document.createElement('div');
@@ -38,11 +38,16 @@
       nav.setAttribute('data-mobile-open', String(value));
       toggle.setAttribute('aria-expanded', String(value));
       toggle.setAttribute('aria-label', value ? 'Ocultar áreas de Shalom' : 'Mostrar áreas de Shalom');
-      toggle.textContent = value ? 'Ocultar' : 'Ver áreas';
+      toggle.textContent = value ? 'Cerrar áreas' : 'Más áreas';
     };
     setExpanded(wasExpanded);
     toggle.addEventListener('click', () => setExpanded(nav.getAttribute('data-mobile-open') !== 'true'));
-    actions.append(toggle);
+    const textButton = document.createElement('button');
+    textButton.type = 'button';
+    textButton.className = 'shalom-text-toggle shalom-text-quick';
+    textButton.setAttribute('data-large-text', '');
+    textButton.textContent = 'Ampliar texto';
+    actions.append(textButton, toggle);
     top.append(heading, actions);
     nav.append(top);
     const panel = document.createElement('div');
@@ -50,7 +55,10 @@
     panel.setAttribute('id', 'shalom-area-panel');
     const links = document.createElement('div');
     links.className = 'shalom-area-links';
-    for (const section of sections) {
+    // La navegación inferior de Inicio ya contiene Inicio y Avisos.
+    // Los enlaces compartidos solo llevan a otras áreas, nunca al módulo actual.
+    const otherAreas = sections.filter(section => section.id !== area && !(area === 'main' && section.id === 'comms' && options.noticesInLocalNav === true));
+    for (const section of otherAreas) {
       const link = document.createElement('a');
       const url = new URL(section.path, root);
       if (section.id === 'feedback' && feedbackServices.has(options.service))
@@ -65,12 +73,6 @@
       links.append(link);
     }
     panel.append(links);
-    const textButton = document.createElement('button');
-    textButton.type = 'button';
-    textButton.className = 'shalom-text-toggle';
-    textButton.setAttribute('data-large-text', '');
-    textButton.textContent = 'Ampliar texto';
-    panel.append(textButton);
     nav.append(panel);
     if (options.after) {
       const anchor = container.querySelector(options.after);
