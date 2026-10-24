@@ -1,5 +1,9 @@
 # Registro de decisiones
 
+## 2026-10-23 · Arquitectura y seguridad de la aplicación futura
+
+Estado: propuesta, sin backend ni controles productivos implementados. Modelo fijo de tablas/campos adaptado a Shalom; sin campos arbitrarios creados por usuarios. React/TypeScript/Tailwind/shadcn para web y Django REST Framework/PostgreSQL como API compartida con futuro móvil. Diseñar índices por consultas y en conjunto con cifrado. Incorporar identidad, sesiones, MFA, autorización por registro, CSRF, prevención de inyecciones, protección contra automatización y validaciones de secretos/datos en Git y CI. No es garantizable distinguir una llamada de interfaz de otra equivalente desde consola con las mismas credenciales; aplicar controles en servidor a ambas. Ver [ADR-001](arquitectura-seguridad-v08.md), con alternativas, criterios verificables y pendientes.
+
 ## 2026-10-23 · v0.7 · Exportación asíncrona
 
 Estado: aceptado para prototipo; arquitectura productiva provisional.

@@ -1,0 +1,9 @@
+repos:
+  - repo: local
+    hooks:
+      - id: shalom-secrets
+        name: Secretos y archivos restringidos
+        entry: python scripts/security_gate.py --staged
+        language: system
+        pass_filenames: false
+        always_run: true
