@@ -1,0 +1,46 @@
+/* Identidad de navegación consistente entre Inicio, Kids, Cafetería, Avisos y Tu opinión. */
+body[data-shalom-space] .shalom-area-nav {
+  color:#514a43; background:#f4ede5; border:1px solid #d4c6b7; border-radius:16px;
+  padding:12px 14px; margin:16px 0 22px; min-width:0;
+}
+body[data-shalom-space] .shalom-area-caption {
+  display:block; font:700 .875rem/1.4 Inter,system-ui,sans-serif; color:#514a43;
+  letter-spacing:.01em; margin:0 0 8px;
+}
+body[data-shalom-space] .shalom-area-links {
+  display:flex; flex-wrap:wrap; gap:6px 10px;
+}
+body[data-shalom-space] .shalom-area-links a {
+  display:inline-flex; align-items:center; justify-content:center; text-decoration:none;
+  min-height:44px; padding:8px 12px; border:1px solid transparent; border-radius:10px;
+  font:600 .9375rem/1.25 Inter,system-ui,sans-serif; color:#654025;
+}
+body[data-shalom-space] .shalom-area-links a:hover,
+body[data-shalom-space] .shalom-area-links a:focus-visible { background:#eadacd; border-color:#c2a383; }
+body[data-shalom-space] .shalom-area-links a[aria-current="page"] {
+  background:#fff; border-color:#ae8c6e; color:#5c351e;
+}
+body[data-shalom-space] .shalom-area-links a:focus-visible { outline:3px solid #82552f; outline-offset:2px; }
+body.theme-night[data-shalom-space] .shalom-area-nav,
+body.night[data-shalom-space="comms"] .shalom-area-nav {
+  background:#262321; border-color:#4a4a4a; color:#f0f0f0;
+}
+body.theme-night[data-shalom-space] .shalom-area-caption,
+body.night[data-shalom-space="comms"] .shalom-area-caption { color:#d6c6b8; }
+body.theme-night[data-shalom-space] .shalom-area-links a,
+body.night[data-shalom-space="comms"] .shalom-area-links a { color:#e8c6a8; }
+body.theme-night[data-shalom-space] .shalom-area-links a:hover,
+body.theme-night[data-shalom-space] .shalom-area-links a:focus-visible,
+body.night[data-shalom-space="comms"] .shalom-area-links a:hover,
+body.night[data-shalom-space="comms"] .shalom-area-links a:focus-visible {
+  background:#3d3026; border-color:#8b6a4e;
+}
+body.theme-night[data-shalom-space] .shalom-area-links a[aria-current="page"],
+body.night[data-shalom-space="comms"] .shalom-area-links a[aria-current="page"] {
+  background:#372a20; color:#f0d5bd; border-color:#8b674d;
+}
+@media(max-width:560px) {
+  body[data-shalom-space] .shalom-area-nav { margin:10px 0 18px; padding:12px; }
+  body[data-shalom-space] .shalom-area-links { flex-wrap:nowrap; overflow-x:auto; padding:3px 0 6px; }
+  body[data-shalom-space] .shalom-area-links a { flex:0 0 auto; white-space:nowrap; }
+}
