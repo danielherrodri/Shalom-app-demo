@@ -56,3 +56,6 @@ const visual=read('assets/shalom-visual-2026.css');
 assert.match(visual,/--sh-status:var\(--sh-attention\)/, 'pending is not coral community');
 assert.match(visual,/quick-action\[data-detail="incident"\]/, 'incidents have distinct attention semantics');
 console.log('PASS: SPARK main priorities, Kids reflow, accessible typography and family summary');
+
+assert.match(main,/aria-label="Accesos frecuentes de tu perfil"/,'mobile navigation is contextual, not a second global menu');
+assert.match(main,/state\\.session&&state\\.role===/, 'technical processing control stays with demo administration');
