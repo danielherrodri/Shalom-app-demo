@@ -45,3 +45,7 @@ Los nuevos formularios distinguen error con texto y borde, no únicamente color.
 La guía pide fotos reales de la iglesia. No se aportaron fotos de la comunidad autorizadas. Se incluye una foto de café con licencia como **referencia claramente rotulada**, no como evidencia de un evento o de instalaciones de Shalom. No hay fotos de menores; para producción faltan autorización y control de finalidad, vigencia, audiencia y distribución de imágenes.
 
 Quedan pendientes la prueba con personas mayores/familias/coordinación, zoom real de navegador y tecnologías de asistencia (NVDA/VoiceOver), Safari/iOS, tamaños de texto del sistema y clientes reales de correo. El reflujo se prueba por viewport; una matriz de navegadores no se sustituye con un escaneo automático. No hay certificación WCAG ni cumplimiento legal o seguridad productiva implícitos.
+
+### Ajuste de logo al cambiar de tema
+
+La cabecera común mantenía un bloque Noche con logo blanco en ambos temas. Aunque conservaba contraste, no acompañaba el tema Crema y podía percibirse como una variante incorrecta. El acceso y los perfiles ahora muestran el logo negro sobre fondo Crema y el blanco sobre Noche; Comunicaciones sigue la misma regla. Las piezas con cabecera local oscura, como los correos, mantienen el blanco sobre ese fondo.

@@ -926,3 +926,29 @@ dialog:has(.email-frame) {
     height: 420px;
   }
 }
+
+/* Variantes originales por fondo en la navegación. */
+.brand {
+  background: transparent;
+}
+.brand .logo-white {
+  display: none;
+}
+.brand .logo-black {
+  display: block;
+}
+.brand span {
+  color: #82552f;
+}
+.night .brand {
+  background: #1a1a1a;
+}
+.night .brand .logo-white {
+  display: block;
+}
+.night .brand .logo-black {
+  display: none;
+}
+.night .brand span {
+  color: #c8956c;
+}

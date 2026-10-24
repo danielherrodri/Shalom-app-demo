@@ -42,3 +42,7 @@ Los scripts inician sus propios servidores locales temporales en 4174–4176 y l
 ## Pendiente de revisión humana/productiva
 
 NVDA/VoiceOver, Safari/iOS/Android, zoom real al 200 % y tamaños de texto del sistema, usuarios de coordinación/familias y pruebas de entrega Gmail/Outlook/Apple Mail. Las pruebas de esquema oscuro en navegador no validan modo oscuro forzado de clientes de correo. No hay auditoría de backend porque no existe backend, ni verificación de identidad, seguridad real o integración de Kids.
+
+## Corrección posterior de logotipos por tema
+
+La revisión solicitada por el usuario detectó que la cabecera Noche con logo blanco se repetía también en Crema. Se cambió a las variantes originales negra/Crema y blanca/Noche en acceso, perfiles y navegación de Comunicaciones. No se recolorea ningún PNG. Se añadieron 16 revisiones de acceso/perfiles × tema × tamaño (390/1366), con cero problemas axe detectados, y 4 verificaciones de variante en Comunicaciones. Ejecutar `node tests/logos.cjs`. Estas comprobaciones se suman a la matriz anterior; las plantillas de email mantienen logo blanco porque su propia cabecera sigue siendo Noche.
