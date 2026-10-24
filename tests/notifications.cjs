@@ -1,0 +1,53 @@
+const fs = require('node:fs');
+const path = require('node:path');
+const assert = require('node:assert/strict');
+const { chromium } = require('playwright');
+(async () => {
+  const browser = await chromium.launch({ channel: 'msedge', headless: true });
+  try {
+    const page = await browser.newPage({ viewport: { width: 390, height: 844 } });
+    const errors = [];
+    page.on('pageerror', e => errors.push(e.message));
+    await page.route('**/*', route => {
+      const file = path.join(__dirname, '..', new URL(route.request().url()).pathname);
+      return fs.existsSync(file) && fs.statSync(file).isFile() ? route.fulfill({ path: file }) : route.abort();
+    });
+    await page.goto('http://localhost/cafeteria.html');
+    await page.locator('[data-tab="seguimiento"]:visible').click();
+    await page.locator('[data-action="cancel-order"]').click();
+    await page.locator('#cancellationReason').fill('Producto agotado');
+    await page.locator('#cancelOrderForm').evaluate(f => f.requestSubmit());
+    await page.locator('[data-n-open]').click();
+    const text = () => page.locator('#notification-dialog').innerText();
+    assert.match(await text(), /Se canceló tu pedido/);
+    assert.doesNotMatch(await text(), /Producto agotado/);
+    await page.locator('[data-n-all]').click();
+    assert.match(await page.locator('#notification-dialog [role="status"]').innerText(), /0 sin leer/);
+    await page.locator('#notification-role').selectOption('caja');
+    assert.match(await text(), /Producto agotado/);
+    assert.match(await page.locator('#notification-dialog [role="status"]').innerText(), /1 sin leer/);
+    await page.locator('#notification-role').selectOption('cocina');
+    assert.match(await text(), /Detén su preparación/);
+    assert.doesNotMatch(await text(), /Producto agotado/);
+    await page.locator('[data-n-demo]').click();
+    assert.equal(await page.locator('.n-item').count(), 2);
+    await page.locator('[data-n-topic]').check();
+    assert.equal(await page.locator('.n-item').count(), 3);
+    await page.locator('[data-n-topic]').uncheck();
+    assert.equal(await page.locator('.n-item').count(), 2);
+    await page.keyboard.press('Escape');
+    assert.equal(await page.locator('#notification-dialog').evaluate(d => d.open), false);
+    await page.goto('http://localhost/index.html');
+    assert.equal(await page.locator('#notification-entry').isVisible(), false);
+    await page.evaluate(() => { state.session = { role: 'persona', kind: 'demo' }; state.role = 'persona'; render(); });
+    await page.locator('[data-n-open]').click();
+    await page.locator('[data-n-demo]').click();
+    assert.match(await page.locator('#notification-title').innerText(), /Congregante/);
+    await page.keyboard.press('Escape');
+    await page.evaluate(() => { state.role = 'admin'; state.session.role = 'admin'; render(); });
+    await page.locator('[data-n-open]').click();
+    assert.equal(await page.locator('.n-item').count(), 0);
+    assert.deepEqual(errors, []);
+    console.log('PASS: destinatarios, lectura por perfil, preferencias y vista móvil');
+  } finally { await browser.close(); }
+})().catch(error => { console.error(error); process.exitCode = 1; });
