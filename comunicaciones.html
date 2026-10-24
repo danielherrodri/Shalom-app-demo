@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="es-MX">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <meta name="theme-color" content="#faf7f2" />
+    <meta name="robots" content="noindex,nofollow" />
+    <title>Comunicaciones · Shalom · Demo v0.6</title>
+    <link rel="stylesheet" href="assets/comunicaciones.css" />
+    <script defer src="assets/email-catalog.js"></script>
+    <script defer src="assets/comunicaciones.js"></script>
+  </head>
+  <body>
+    <a class="skip" href="#main">Saltar al contenido</a>
+    <aside class="sidebar">
+      <a class="brand" href="index.html" aria-label="Shalom · Inicio"
+        ><img src="assets/shalom-logo.png" alt="Shalom" /><span
+          >UNA CASA PARA TODOS</span
+        ></a
+      >
+      <div>
+        <p class="overline">TU ESPACIO</p>
+        <nav aria-label="Principal">
+          <a href="index.html">← Inicio de Shalom</a
+          ><a href="#avisos" data-route="avisos">Avisos <span>01</span></a
+          ><a href="#preferencias" data-route="preferencias"
+            >Preferencias <span>02</span></a
+          ><a href="#privacidad" data-route="privacidad"
+            >Privacidad <span>03</span></a
+          ><a href="#correos" data-route="correos"
+            >Plantillas de correo <span>04</span></a
+          >
+        </nav>
+      </div>
+      <div class="sidebar-end">
+        <p class="overline">ESPACIO DE PRUEBA</p>
+        <a href="#admin" data-route="admin">Administrar demo ↗</a>
+        <p class="small">
+          Acceso libre para explorar. Los roles no son permisos reales.
+        </p>
+        <button data-action="theme" class="secondary">Cambiar tema</button>
+      </div>
+    </aside>
+    <div class="shell">
+      <header class="topbar">
+        <a class="mobile-brand" href="index.html" aria-label="Shalom · Inicio"
+          ><img
+            class="logo-white"
+            src="assets/shalom-logo.png"
+            alt="Shalom" /><img
+            class="logo-black"
+            src="assets/shalom-logo-negro.png"
+            alt="Shalom" /></a
+        ><span class="breadcrumb">SHALOM / COMUNICACIONES</span
+        ><span class="badge">DEMO v0.6</span
+        ><button data-action="theme" class="secondary mobile-theme">
+          Cambiar tema
+        </button>
+      </header>
+      <div class="demo-note">
+        <strong>Un espacio para explorar.</strong> No envía correos ni guarda
+        consentimientos reales. Los cambios de este módulo se pierden al
+        recargar. Usa solo ejemplos ficticios.
+      </div>
+      <main id="main" tabindex="-1"></main>
+      <footer>
+        <span>Iglesia Cristiana Shalom · Prototipo público</span>
+        <div>
+          <a href="#avisos">Avisos</a><a href="#preferencias">Preferencias</a
+          ><a href="#privacidad">Privacidad</a
+          ><a href="#correos">Plantillas de correo</a
+          ><a href="docs/comunicaciones-v06.md">Diseño y roadmap</a>
+        </div>
+      </footer>
+    </div>
+    <nav class="mobile-nav" aria-label="Comunicaciones">
+      <a href="#avisos" data-route="avisos">Avisos</a
+      ><a href="#preferencias" data-route="preferencias">Preferencias</a
+      ><a href="#privacidad" data-route="privacidad">Privacidad</a
+      ><a href="#admin" data-route="admin">Admin demo</a>
+    </nav>
+    <dialog id="dialog" aria-labelledby="dialog-title">
+      <div id="dialog-content"></div>
+      <button class="secondary" data-action="close">Cerrar</button>
+    </dialog>
+    <div id="status" role="status" aria-live="polite"></div>
+  </body>
+</html>

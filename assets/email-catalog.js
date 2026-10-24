@@ -1,0 +1,58 @@
+window.ShalomEmailCatalog = [
+  {
+    id: "bienvenida-kids",
+    theme: "Kids",
+    type: "Servicio",
+    subject: "Bienvenido al equipo de Shalom Kids",
+    title: "Qué gusto tenerte en el equipo.",
+  },
+  {
+    id: "recordatorio-kids",
+    theme: "Kids",
+    type: "Servicio",
+    subject: "Tu próxima actividad en Shalom Kids",
+    title: "Nos preparamos para acompañar.",
+  },
+  {
+    id: "aviso-general",
+    theme: "Shalom",
+    type: "Optativo",
+    subject: "Cerca de lo que está pasando en Shalom",
+    title: "Hay un espacio para ti.",
+  },
+  {
+    id: "invitacion-evento",
+    theme: "Shalom",
+    type: "Optativo",
+    subject: "Nos encontramos en comunidad",
+    title: "Nos dará gusto verte.",
+  },
+  {
+    id: "recibo-cafeteria",
+    theme: "Shalom",
+    type: "Transaccional",
+    subject: "El resumen de tu pedido en Cafetería Shalom",
+    title: "Gracias por compartir la mesa.",
+  },
+  {
+    id: "cambio-preferencias",
+    theme: "Shalom",
+    type: "Transaccional",
+    subject: "Revisa tus preferencias de comunicación",
+    title: "Tus elecciones, con claridad.",
+  },
+  {
+    id: "solicitud-privacidad",
+    theme: "Shalom",
+    type: "Transaccional",
+    subject: "Seguimiento de tu solicitud de privacidad",
+    title: "Cada solicitud merece claridad.",
+  },
+  {
+    id: "imagen-menores",
+    theme: "Kids",
+    type: "Transaccional",
+    subject: "Revisa las finalidades de imagen de tu familia",
+    title: "Una decisión para cada finalidad.",
+  },
+];

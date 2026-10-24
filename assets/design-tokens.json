@@ -1,0 +1,51 @@
+{
+  "version": "0.6-demo",
+  "source": "Guía de estilos Shalom · octubre 2026",
+  "font": {
+    "family": "Inter",
+    "fallback": "Arial, sans-serif",
+    "body": 16,
+    "small": 14,
+    "h1": 48,
+    "h1Weight": 800,
+    "cardTitle": 20,
+    "cardWeight": 700
+  },
+  "themes": {
+    "night": {
+      "background": "#1a1a1a",
+      "surface": "#222222",
+      "surfaceAlt": "#2e2e2e",
+      "ink": "#f0f0f0",
+      "secondary": "#c4c4c4",
+      "accentFill": "#c8956c",
+      "accentText": "#d9ad86",
+      "onAccent": "#1a1a1a"
+    },
+    "cream": {
+      "background": "#faf7f2",
+      "surface": "#f2ece3",
+      "border": "#e6ddd0",
+      "ink": "#2d2d2d",
+      "secondary": "#4f4a44",
+      "accentFill": "#c8956c",
+      "accentText": "#82552f",
+      "onAccent": "#1a1a1a"
+    },
+    "kids": {
+      "background": "#ffffff",
+      "fire": "#b84810",
+      "heading": "#8f360c",
+      "fireSoft": "#fff0e7",
+      "gold": "#785a15",
+      "goldHeading": "#5b430f",
+      "goldSoft": "#fbf4e1"
+    }
+  },
+  "space": [8, 12, 16, 24, 32, 40, 48, 56, 64, 128],
+  "radii": { "card": 28, "row": 24, "web": 16, "pill": 999 },
+  "motion": { "entryMs": 220, "reducedMotion": "none" },
+  "semantics": {
+    "note": "Operational states are not additional brand colors; never rely on color alone."
+  }
+}

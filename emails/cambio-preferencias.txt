@@ -1,0 +1,20 @@
+Revisa tus preferencias de comunicación
+
+DEMOSTRACIÓN · SIN ENVÍO
+
+Este ejemplo resume un cambio que la persona habría solicitado. No confirma una modificación real de tus preferencias.
+
+Tu selección
+Avisos generales: [estado]
+Kids: [estado]
+Eventos: [estado]
+Ministerios: [estado]
+Frecuencia: [frecuencia]
+
+Puedes cambiar de opinión
+Revisa o revoca cada tema desde preferencias. Las decisiones sobre imágenes de menores se tramitan por separado.
+
+En producción, una confirmación de cambio no debe volver a suscribir a nadie ni incluir contenido promocional. La baja puede realizarse sin iniciar sesión mediante un enlace seguro de un clic.
+
+Ejemplo de confirmación transaccional de una acción solicitada. No habilita comunicaciones optativas.
+Preferencias y privacidad: [enlaces de producción]

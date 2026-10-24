@@ -1,0 +1,20 @@
+El resumen de tu pedido en Cafetería Shalom
+
+DEMOSTRACIÓN · SIN ENVÍO
+
+Este es un ejemplo de cómo podrías recibir el resumen de un pedido que tú solicitaste. No representa un cobro real.
+
+Pedido [folio]
+[fecha y hora] · [medio de pago confirmado por el proveedor]
+
+Detalle de tu pedido
+[cantidad] × [artículo y modificaciones] · [importe]
+Total: [importe total y moneda]
+
+Seguimiento
+El enlace de consulta deberá ser individual, con vigencia y permisos definidos en producción.
+
+Recibo ilustrativo. No constituye CFDI, comprobante de pago ni confirmación del proveedor. No contiene promociones ni exige aceptar marketing.
+
+Ejemplo transaccional, ligado a un pedido solicitado. Solo se enviaría tras verificar el evento de pago o la política operativa definida.
+Preferencias y privacidad: [enlaces de producción]

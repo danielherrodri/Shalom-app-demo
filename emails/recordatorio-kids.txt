@@ -1,0 +1,16 @@
+Tu próxima actividad en Shalom Kids
+
+DEMOSTRACIÓN · SIN ENVÍO
+
+Hola, [nombre]. Aquí encontrarás los datos de tu siguiente actividad cuando la agenda real esté habilitada.
+
+Tu participación
+[fecha] · [hora] · [grupo] · [lección]
+
+Antes de llegar
+Revisa el material y confirma con [coordinación] cualquier cambio. Este ejemplo no verifica turnos ni registra confirmaciones.
+
+No se enviarán recordatorios desde esta demo. En producción, un recordatorio operativo se vincularía a una asignación válida; las invitaciones se gestionarían aparte.
+
+Ejemplo operativo de una asignación de servicio. Sin promoción ni alta automática a novedades de Kids.
+Preferencias y privacidad: [enlaces de producción]

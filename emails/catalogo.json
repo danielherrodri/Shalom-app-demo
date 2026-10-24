@@ -1,0 +1,189 @@
+[
+  {
+    "id": "bienvenida-kids",
+    "theme": "Kids",
+    "type": "Servicio",
+    "subject": "Bienvenido al equipo de Shalom Kids",
+    "eyebrow": "BIENVENIDA · SHALOM KIDS",
+    "title": "Qué gusto tenerte en el equipo.",
+    "intro": "Hola, [nombre]. Gracias por acompañar a los niños. Este es un ejemplo de bienvenida para conocer las herramientas del ministerio infantil.",
+    "blocks": [
+      [
+        "1 · Prepara tu domingo",
+        "Consulta tu agenda, el grupo y la lección de la actividad de ejemplo."
+      ],
+      [
+        "2 · Acompaña con cuidado",
+        "La asistencia y los gafetes requieren acceso autorizado. Este prototipo no se conecta con los registros actuales."
+      ],
+      [
+        "3 · Mantente cerca",
+        "Si necesitas ayuda, comunícate con [contacto de coordinación]. No compartas códigos ni fotografías de menores."
+      ]
+    ],
+    "note": "Tesoros del Rey (4–6) · Primarios (7–12). Los nombres, accesos y destinatarios se definirán en producción.",
+    "cta": "Explorar Kids en la demo",
+    "href": "../index.html",
+    "reason": "Ejemplo de mensaje de incorporación solicitado por la coordinación. En producción se validaría el alta y su finalidad antes de enviarlo."
+  },
+  {
+    "id": "recordatorio-kids",
+    "theme": "Kids",
+    "type": "Servicio",
+    "subject": "Tu próxima actividad en Shalom Kids",
+    "eyebrow": "TU AGENDA · SHALOM KIDS",
+    "title": "Nos preparamos para acompañar.",
+    "intro": "Hola, [nombre]. Aquí encontrarás los datos de tu siguiente actividad cuando la agenda real esté habilitada.",
+    "blocks": [
+      ["Tu participación", "[fecha] · [hora] · [grupo] · [lección]"],
+      [
+        "Antes de llegar",
+        "Revisa el material y confirma con [coordinación] cualquier cambio. Este ejemplo no verifica turnos ni registra confirmaciones."
+      ]
+    ],
+    "note": "No se enviarán recordatorios desde esta demo. En producción, un recordatorio operativo se vincularía a una asignación válida; las invitaciones se gestionarían aparte.",
+    "cta": "Consultar la demostración",
+    "href": "../index.html",
+    "reason": "Ejemplo operativo de una asignación de servicio. Sin promoción ni alta automática a novedades de Kids."
+  },
+  {
+    "id": "aviso-general",
+    "theme": "Shalom",
+    "type": "Optativo",
+    "subject": "Cerca de lo que está pasando en Shalom",
+    "eyebrow": "VIDA EN COMUNIDAD",
+    "title": "Hay un espacio para ti.",
+    "intro": "Te compartimos las novedades de la comunidad. Elige los temas que te interesan y consúltalos a tu ritmo.",
+    "blocks": [
+      ["[Título del aviso]", "[Mensaje breve] · [fecha de vigencia]"],
+      [
+        "Lo que viene",
+        "Consulta los detalles en el centro de comunicaciones. Este es un ejemplo visual, sin convocatoria ni envío real."
+      ]
+    ],
+    "note": "Consultar la app no te suscribe a estos correos. En producción, este mensaje solo se enviaría con una elección optativa vigente para avisos generales.",
+    "cta": "Consultar avisos de ejemplo",
+    "href": "../comunicaciones.html#avisos",
+    "reason": "Ejemplo de correo optativo de avisos generales. No acredita una suscripción real."
+  },
+  {
+    "id": "invitacion-evento",
+    "theme": "Shalom",
+    "type": "Optativo",
+    "subject": "Nos encontramos en comunidad",
+    "eyebrow": "ENCUENTROS Y ACTIVIDADES",
+    "title": "Nos dará gusto verte.",
+    "intro": "Te invitamos a conocer [nombre del encuentro]. Aquí puedes revisar la información antes de decidir si quieres participar.",
+    "blocks": [
+      ["Los detalles", "[fecha] · [hora] · [lugar]"],
+      [
+        "Para participar",
+        "[Información de inscripción, cupo y condiciones]. Este ejemplo no reserva lugares ni cobra cooperaciones."
+      ]
+    ],
+    "note": "La invitación es optativa. Darte de baja de eventos no afecta los avisos esenciales de una inscripción que tú hayas solicitado.",
+    "cta": "Ver eventos de demostración",
+    "href": "../index.html",
+    "reason": "Ejemplo de invitación promocional; requiere una preferencia vigente para eventos en producción."
+  },
+  {
+    "id": "recibo-cafeteria",
+    "theme": "Shalom",
+    "type": "Transaccional",
+    "subject": "El resumen de tu pedido en Cafetería Shalom",
+    "eyebrow": "CAFETERÍA SHALOM · RECIBO DEMO",
+    "title": "Gracias por compartir la mesa.",
+    "intro": "Este es un ejemplo de cómo podrías recibir el resumen de un pedido que tú solicitaste. No representa un cobro real.",
+    "blocks": [
+      [
+        "Pedido [folio]",
+        "[fecha y hora] · [medio de pago confirmado por el proveedor]"
+      ],
+      [
+        "Detalle de tu pedido",
+        "[cantidad] × [artículo y modificaciones] · [importe]\nTotal: [importe total y moneda]"
+      ],
+      [
+        "Seguimiento",
+        "El enlace de consulta deberá ser individual, con vigencia y permisos definidos en producción."
+      ]
+    ],
+    "note": "Recibo ilustrativo. No constituye CFDI, comprobante de pago ni confirmación del proveedor. No contiene promociones ni exige aceptar marketing.",
+    "cta": "Explorar seguimiento y recibos",
+    "href": "../cafeteria.html",
+    "reason": "Ejemplo transaccional, ligado a un pedido solicitado. Solo se enviaría tras verificar el evento de pago o la política operativa definida."
+  },
+  {
+    "id": "cambio-preferencias",
+    "theme": "Shalom",
+    "type": "Transaccional",
+    "subject": "Revisa tus preferencias de comunicación",
+    "eyebrow": "TU CUENTA · COMUNICACIONES",
+    "title": "Tus elecciones, con claridad.",
+    "intro": "Este ejemplo resume un cambio que la persona habría solicitado. No confirma una modificación real de tus preferencias.",
+    "blocks": [
+      [
+        "Tu selección",
+        "Avisos generales: [estado]\nKids: [estado]\nEventos: [estado]\nMinisterios: [estado]\nFrecuencia: [frecuencia]"
+      ],
+      [
+        "Puedes cambiar de opinión",
+        "Revisa o revoca cada tema desde preferencias. Las decisiones sobre imágenes de menores se tramitan por separado."
+      ]
+    ],
+    "note": "En producción, una confirmación de cambio no debe volver a suscribir a nadie ni incluir contenido promocional. La baja puede realizarse sin iniciar sesión mediante un enlace seguro de un clic.",
+    "cta": "Probar preferencias",
+    "href": "../comunicaciones.html#preferencias",
+    "reason": "Ejemplo de confirmación transaccional de una acción solicitada. No habilita comunicaciones optativas."
+  },
+  {
+    "id": "solicitud-privacidad",
+    "theme": "Shalom",
+    "type": "Transaccional",
+    "subject": "Seguimiento de tu solicitud de privacidad",
+    "eyebrow": "PRIVACIDAD · SOLICITUD DE EJEMPLO",
+    "title": "Cada solicitud merece claridad.",
+    "intro": "Esta plantilla muestra un posible acuse para [tipo de solicitud]. Aquí no hemos recibido, exportado ni eliminado datos reales.",
+    "blocks": [
+      [
+        "Referencia de seguimiento",
+        "[folio] · [fecha de recepción verificada] · [estado]"
+      ],
+      [
+        "Siguiente paso",
+        "[Procedimiento de verificación y revisión]. Los plazos y el alcance se informarán conforme al proceso validado para producción."
+      ]
+    ],
+    "note": "El acuse confirma recepción en un sistema real, cuando exista; no confirma que la eliminación o exportación haya concluido. No promete borrar obligaciones de conservación ni copias ajenas.",
+    "cta": "Ver solicitudes simuladas",
+    "href": "../comunicaciones.html#privacidad",
+    "reason": "Ejemplo transaccional asociado a una solicitud de la persona. Requiere verificación y un canal de seguimiento de producción."
+  },
+  {
+    "id": "imagen-menores",
+    "theme": "Kids",
+    "type": "Transaccional",
+    "subject": "Revisa las finalidades de imagen de tu familia",
+    "eyebrow": "FAMILIAS · SHALOM KIDS",
+    "title": "Una decisión para cada finalidad.",
+    "intro": "Esta plantilla ilustra cómo informar sobre una decisión de imagen de un menor, después de verificar a su representante. No constituye autorización ni comprobante real.",
+    "blocks": [
+      [
+        "Uso interno",
+        "[Estado de la finalidad de identificación] · [actividad] · [vigencia]"
+      ],
+      [
+        "Difusión pública",
+        "[Estado de la finalidad de publicación] · [canales] · [vigencia]"
+      ],
+      [
+        "Si necesitas revocar",
+        "[Canal de contacto y procedimiento]. Autorizar identificación no autoriza difusión pública ni suscribe a correos."
+      ]
+    ],
+    "note": "En producción se minimizarían los datos incluidos en el correo: sin fotografía del menor ni vínculos públicos a sus registros. La retirada se revisaría según el alcance y los canales aplicables.",
+    "cta": "Explorar autorizaciones ficticias",
+    "href": "../comunicaciones.html#privacidad",
+    "reason": "Ejemplo de confirmación transaccional de una decisión validada del representante. No sustituye la evidencia de autorización."
+  }
+]

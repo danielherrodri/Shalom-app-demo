@@ -1,0 +1,19 @@
+Revisa las finalidades de imagen de tu familia
+
+DEMOSTRACIÓN · SIN ENVÍO
+
+Esta plantilla ilustra cómo informar sobre una decisión de imagen de un menor, después de verificar a su representante. No constituye autorización ni comprobante real.
+
+Uso interno
+[Estado de la finalidad de identificación] · [actividad] · [vigencia]
+
+Difusión pública
+[Estado de la finalidad de publicación] · [canales] · [vigencia]
+
+Si necesitas revocar
+[Canal de contacto y procedimiento]. Autorizar identificación no autoriza difusión pública ni suscribe a correos.
+
+En producción se minimizarían los datos incluidos en el correo: sin fotografía del menor ni vínculos públicos a sus registros. La retirada se revisaría según el alcance y los canales aplicables.
+
+Ejemplo de confirmación transaccional de una decisión validada del representante. No sustituye la evidencia de autorización.
+Preferencias y privacidad: [enlaces de producción]

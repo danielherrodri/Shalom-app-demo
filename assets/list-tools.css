@@ -1,0 +1,45 @@
+.list-tools {
+  margin: 18px 0 24px;
+}
+.list-toolbar {
+  display: grid;
+  grid-template-columns: minmax(160px, 1fr) minmax(120px, 0.7fr) 100px auto;
+  gap: 12px;
+  align-items: end;
+}
+.list-toolbar label {
+  display: grid;
+  gap: 8px;
+  font-size: 13px;
+  color: var(--text2);
+}
+.list-toolbar .btn {
+  min-height: 47px;
+}
+.list-pagination {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+  padding: 14px 0;
+  color: var(--text2);
+  font-size: 13px;
+}
+[hidden] {
+  display: none !important;
+}
+@media (max-width: 1100px) {
+  .list-toolbar {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+@media (max-width: 540px) {
+  .list-toolbar {
+    grid-template-columns: 1fr;
+  }
+  .list-pagination {
+    align-items: start;
+    flex-direction: column;
+  }
+}

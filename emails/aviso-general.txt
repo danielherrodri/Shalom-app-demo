@@ -1,0 +1,16 @@
+Cerca de lo que está pasando en Shalom
+
+DEMOSTRACIÓN · SIN ENVÍO
+
+Te compartimos las novedades de la comunidad. Elige los temas que te interesan y consúltalos a tu ritmo.
+
+[Título del aviso]
+[Mensaje breve] · [fecha de vigencia]
+
+Lo que viene
+Consulta los detalles en el centro de comunicaciones. Este es un ejemplo visual, sin convocatoria ni envío real.
+
+Consultar la app no te suscribe a estos correos. En producción, este mensaje solo se enviaría con una elección optativa vigente para avisos generales.
+
+Ejemplo de correo optativo de avisos generales. No acredita una suscripción real.
+Preferencias y privacidad: [enlaces de producción]
