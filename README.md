@@ -56,3 +56,7 @@ La fotografía de café es una referencia licenciada, rotulada como ajena a Shal
 Base verificada: `main` e9aa3e4 (README v0.5), sin etiqueta Git v0.5. Esta entrega no convierte la app en servicio operativo. El roadmap cubre backend, roles y segmentación en servidor, almacenamiento seguro, evidencia de decisiones, colas de email, separación transaccional/marketing, baja real de un clic y revisión profesional de privacidad.
 
 Documentación anterior de cafetería: [diseño v0.4](docs/cafeteria-diseno-mvp-v04.md), [requisitos](docs/cafeteria-requisitos-arquitectura.md), [movimiento v0.5](docs/microinteracciones-v05.md).
+
+## Tu opinión en Shalom
+
+[Formulario y seguimiento de opiniones](https://danielherrodri.github.io/Shalom-app-demo/feedback.html): experiencia común por servicio, incluido Kids. Prototipo en memoria; no recibe opiniones reales y se reinicia al recargar. [Alcance y pendientes de producción](docs/feedback-v01.md).
