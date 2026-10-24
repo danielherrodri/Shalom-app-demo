@@ -1,31 +1,29 @@
-# Shalom · Prototipo interactivo v0.3
+# Shalom App · Prototipo v0.4
 
-Interfaz integral de Iglesia Cristiana Shalom. **Demo pública**, sin datos reales, pagos, autenticación segura ni integración con Shalom Kids.
+Prototipo interactivo de la plataforma **Iglesia Cristiana Shalom**. Este repositorio es **público** y contiene solamente ejemplos, sin bases de datos productivas.
 
-## Abrir en navegador
+## Abrir en Safari
 
-https://danielherrodri.github.io/Shalom-app-demo/
+- **Aplicación completa:** https://danielherrodri.github.io/Shalom-app-demo/
+- **Cafetería Shalom (nuevo):** https://danielherrodri.github.io/Shalom-app-demo/cafeteria.html
 
-Si GitHub Pages todavía muestra una página vacía, revisar **Settings → Pages → Deploy from a branch → main → /(root)** y esperar a que termine la publicación.
+Si GitHub Pages no actualiza enseguida, revisa *Settings → Pages* y recarga en Safari.
 
-## Cambios de la versión 0.3
+## Cafetería v0.4
 
-- **Inicio de sesión de demostración** con roles ficticios: congregante, voluntario y administrador. No se solicitan contraseñas reales. Se puede continuar como visitante.
-- Las vistas personales llevan a iniciar una sesión **simulada**. No es un sistema de autorización seguro.
-- **Anuncios en el inicio:** formato visual 16:9 para imágenes y videos, con texto breve, llamados a la acción y adaptación móvil.
-- **Publicación de anuncios de prueba** desde administración: texto, URL HTTPS de imagen, YouTube o MP4. Los datos quedan almacenados exclusivamente en el navegador en el que se crearon.
-- Los videos se reproducen solamente cuando el visitante hace clic, sin reproducirse automáticamente.
-- Se conservan los módulos de estacionamiento, familia, Shalom Kids, eventos, aportaciones, cafetería, proyectos y comunicaciones de prueba.
-- Tema institucional Noche/Crema, tipografía Inter y colores exactos de la Guía de estilos octubre 2026.
+Tres pantallas interactivas: **Caja rápida → Preparación (Bebidas/Alimentos) → Seguimiento y recibo**. Desde la app principal entra a «Cafetería» y pulsa «Abrir cafetería interactiva». Productos, modificaciones, precios y órdenes son ficticios. La pantalla del cliente muestra artículos específicos y el detalle del total; la preparación funciona por estaciones, sin doble captura.
 
-## Límites importantes
+**La demo no envía correos, no se integra con Mercado Pago, no cobra, no autentica usuarios y no sincroniza información entre distintos dispositivos.** Los datos simulados se guardan en el mismo navegador con localStorage, y las pestañas abiertas de ese navegador se pueden actualizar entre sí. No introducir datos reales.
 
-Este prototipo se sirve como un archivo HTML estático (GitHub Pages). **GitHub Pages no puede autenticar usuarios ni alojar una base de datos de producción por sí solo.** No se comparten los anuncios agregados con otros dispositivos o visitantes. No publicar fotografías privadas, videos de menores sin autorización, CURP, cuentas bancarias, nombres reales o contraseñas.
+### Documentación
 
-Para un sistema productivo se necesitarán autenticación real con backend y sesiones seguras, autorizaciones por rol en servidor, gestión de archivos multimedia, almacenamiento, revisiones editoriales, consentimiento para imágenes de menores y sincronización con las demás funciones.
+- [Propuesta funcional y arquitectura MVP v0.4](./docs/cafeteria-diseno-mvp-v04.md)
+- [Levantamiento y requisitos iniciales](./docs/cafeteria-requisitos-arquitectura.md)
 
-El sistema existente de Google Sheets / Apps Script de Shalom Kids no fue modificado.
+## Resto de Shalom App
 
-## Repositorio
+Se conservan los módulos simulados de congregación, voluntariado y administración: inicio con anuncios multimedia, acceso de demostración, estacionamiento, familias, Kids, eventos, donativos y proyectos. El sistema real Shalom Kids (Google Sheets/Apps Script) no fue modificado.
 
-El punto de entrada es `index.html`, que incluye el código necesario para recorrer el prototipo.
+Identidad: Inter, temas Noche/Crema, acento cobre. Los contenidos y montos de esta demo no deben utilizarse para decisiones reales.
+
+Para producción hacen falta backend central, base de datos PostgreSQL, permisos, integración y comprobación de cobros, servicio de email, seguridad y respaldo.
