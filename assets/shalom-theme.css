@@ -113,3 +113,10 @@ body[data-shalom-space] .shalom-theme-control:focus-visible { outline:3px solid 
 @media(prefers-reduced-motion:reduce) {
   body[data-shalom-space] .shalom-theme-control { transition:none; }
 }
+
+@media(max-width:600px) {
+  body[data-shalom-space="cafe"] .topbar { flex-wrap:wrap; }
+  body[data-shalom-space="cafe"] .top-actions {
+    flex:1 1 100%;display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;
+  }
+}
