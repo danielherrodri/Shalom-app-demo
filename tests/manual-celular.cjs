@@ -129,4 +129,11 @@ check("horas en formato 9:00 AM", () => {
   assert(/const h12=/.test(read("design/shalom-acompanamiento.js")) && !/time\+'–'\+time/.test(read("design/shalom-acompanamiento.js")));
 });
 
+check("rol de clases de Kids: mismo cálculo que el sistema (permutas simples e intercambios)", () => {
+  assert(/<script src="shalom-rol\.js" defer><\/script>/.test(read("design/kids-paneles.html")), "kids-paneles carga shalom-rol.js");
+  const rol = read("design/shalom-rol.js");
+  assert(/function quienDa\(/.test(rol) && /p\.devuelve && clave\(p\.grupo, p\.devuelve, p\.servicioDevuelve, p\.cubre\)/.test(rol), "aplica el turno devuelto de un intercambio");
+  assert(!/localStorage|fetch\(/.test(rol), "datos ficticios en memoria: no guarda ni envía nada");
+});
+
 console.log(`PASS manual celular 2026: ${ok} grupos de reglas`);
