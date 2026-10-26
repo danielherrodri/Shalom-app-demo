@@ -106,6 +106,7 @@ check("un nombre por concepto, en español", () => {
   const roleNav = html.match(/const roleNav=\(\)=>\{if\(!state\.session\)return ([^;]+);/)[1];
   assert(!/'login'/.test(roleNav), "el menú lateral no repite iniciar sesión");
   assert(!/Tema: /.test(read("assets/shalom-theme.js")), "el tema se llama Noche o Crema");
+  assert(!/addDemoView\('incidencias', 'Acompañamiento'/.test(read("design/shalom-vistas.js")), "«Acompañamiento» es solo el espiritual; la vista interna se llama Seguimiento");
 });
 
 check("filtros avanzados detrás de «Filtros»; administración oculta a las familias", () => {

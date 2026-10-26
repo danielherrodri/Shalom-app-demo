@@ -1,5 +1,6 @@
 "use strict";
 const icons = {
+  menu:'<path d="M4 7h16M4 12h16M4 17h16"/>',
   sun:'<circle cx="12" cy="12" r="4"/><path d="M12 2v2m0 16v2M2 12h2m16 0h2M5 5l1.5 1.5m11 11L19 19M5 19l1.5-1.5m11-11L19 5"/>',
   calendar:'<rect x="3" y="5" width="18" height="16" rx="3"/><path d="M7 3v4m10-4v4M3 11h18m-13 4h2m4 0h2"/>',
   grid:'<rect x="3" y="3" width="7" height="7" rx="2"/><rect x="14" y="3" width="7" height="7" rx="2"/><rect x="3" y="14" width="7" height="7" rx="2"/><rect x="14" y="14" width="7" height="7" rx="2"/>',
@@ -23,6 +24,17 @@ maestro.querySelector('h1 + p').textContent = 'Todo listo para acompañar a tu g
 maestro.querySelector('.notice').insertAdjacentHTML('beforebegin', `<div class="hero"><div><span class="hero-label">${icon('sprout')} TU GRUPO DE HOY</span><h2>Semillas</h2><p>Aprendemos, compartimos y crecemos juntos.</p><small>Sesión ficticia · Domingo · 10:00–12:00</small></div><div class="hero-art" aria-hidden="true">${icon('sprout')}</div></div>`);
 document.querySelector('main').insertAdjacentHTML('afterbegin', '<div class="topline"><span>Shalom / Kids</span><span class="demo-pill">● Boceto interactivo · datos ficticios</span></div>');
 const nav = document.querySelector('header nav');
+// Celular (pág. 14 del manual): las vistas quedan detrás de un botón «Menú», en una sola columna.
+nav.id = 'kids-vistas';
+const menuToggle = document.createElement('button');
+menuToggle.type = 'button'; menuToggle.className = 'kids-menu-toggle';
+menuToggle.setAttribute('aria-controls', nav.id); menuToggle.setAttribute('aria-expanded', 'false');
+menuToggle.innerHTML = `${icon('menu')} <span>Menú</span>`;
+nav.before(menuToggle);
+const setMenu = open => { menuToggle.setAttribute('aria-expanded', String(open)); nav.classList.toggle('abierto', open); };
+menuToggle.addEventListener('click', () => setMenu(menuToggle.getAttribute('aria-expanded') !== 'true'));
+nav.addEventListener('click', event => { if (event.target.closest('a')) setMenu(false); });
+document.addEventListener('keydown', event => { if (event.key === 'Escape' && nav.classList.contains('abierto')) { setMenu(false); menuToggle.focus(); } });
 nav.querySelector('[href="#maestro"]').innerHTML = `${icon('sun')} Mi clase`;
 nav.querySelector('[href="#coordinacion"]').innerHTML = `${icon('grid')} Coordinación`;
 nav.querySelector('[href="#coordinacion"]').insertAdjacentHTML('beforebegin', `<a href="#reservas">${icon('calendar')} Reservar lugar</a>`);
@@ -82,6 +94,8 @@ function showView(name, moveFocus = false) {
   if (moveFocus) history.replaceState(null, '', `#${name}`);
   document.querySelectorAll('.panel').forEach(panel => { panel.hidden = panel.id !== name; });
   nav.querySelectorAll('a').forEach(link => { if(link.hash === `#${name}`) link.setAttribute('aria-current','page'); else link.removeAttribute('aria-current'); });
+  const current = nav.querySelector('[aria-current=page]');
+  menuToggle.querySelector('span').textContent = current ? `Menú · ${current.textContent.trim()}` : 'Menú';
   if(moveFocus){const heading = document.querySelector(`#${name} h1`); heading.tabIndex=-1; heading.focus({preventScroll:true}); window.scrollTo({top:0,behavior:'instant'});}
 }
 nav.querySelectorAll('a[href^="#"]:not([href="#alcance"])').forEach(link => link.addEventListener('click', event => {event.preventDefault(); showView(link.hash.slice(1),true);}));
