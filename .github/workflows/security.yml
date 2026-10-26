@@ -56,3 +56,4 @@ jobs:
       - run: node tests/site-navigation.cjs
       - run: node tests/family-registration.cjs
       - run: node tests/visual-identity.cjs
+      - run: node tests/manual-celular.cjs

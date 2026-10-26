@@ -196,6 +196,14 @@ const check = (name, label, value = false) =>
   `<label class="check"><input type="checkbox" name="${name}" ${value ? "checked" : ""}><span>${label}</span></label>`;
 const heading = (over, title, lead) =>
   `<header class="page-heading"><div><p class="overline">${over}</p><h1>${title}</h1><p class="lead">${lead}</p></div></header>`;
+function rolDemo() {
+  try {
+    const s = JSON.parse(localStorage.getItem("shalom-demo-v03") || "{}");
+    return s && s.session ? s.role : null;
+  } catch (e) {
+    return null;
+  }
+}
 function say(message) {
   $("#status").textContent = message;
   clearTimeout(notificationTimer);
@@ -320,7 +328,7 @@ function renderNotices() {
       "Cerca de lo que importa.",
       "Avisos y próximos encuentros. Un lugar para enterarte, participar y acompañarnos.",
     ) +
-    `<div class="split"><section aria-label="Listado de avisos"><div class="toolbar"><div class="field"><label for="search">Buscar un aviso</label><input type="search" id="search" value="${esc(search)}" placeholder="Escribe una palabra" maxlength="90"></div>${select("category", "Categoría", ["Todos", ...categories], category)}</div><div class="row list-actions">${select("page-size", "Avisos por página", ["2", "5", "10"], String(pageSize))}${btn("csv", "Solicitar CSV por correo", "avisos")}</div><div id="results">${results()}</div></section><aside aria-label="Tu experiencia"><section class="panel quiet-panel"><p class="overline">A TU RITMO</p><h2>Tú eliges cómo recibirnos.</h2><p class="small">Consultar avisos públicos no te suscribe a correos. Elige solo los temas que te interesan.</p><a href="#preferencias" class="button secondary">Elegir preferencias →</a></section><section class="panel"><p class="overline">EXPLORAR LA DEMO</p><h2>Una vista para cada persona</h2>${select("audience", "Experiencia simulada", audiences, audience)}${select("ministry", "Ministerio de prueba", ministries, ministry)}<p class="small">El listado público solo muestra contenido público. Las otras vistas son ejemplos abiertos: no existe control de acceso real.</p><p class="small">Fecha de prueba: <strong>${date(clock)}</strong></p><a href="#admin">Administrar y probar programación</a></section></aside></div><details class="state-controls"><summary>Probar carga, vacío y error</summary><div class="row">${["normal", "carga", "vacío", "error"].map((s) => btn("state", s[0].toUpperCase() + s.slice(1), s)).join("")}</div></details>`
+    `<div class="split"><section aria-label="Listado de avisos"><div class="toolbar"><div class="field"><label for="search">Buscar un aviso</label><input type="search" id="search" value="${esc(search)}" placeholder="Escribe una palabra" maxlength="90"></div>${select("category", "Categoría", ["Todos", ...categories], category)}</div><div class="row list-actions"><details class="filtros"${pageSize !== 2 ? " open" : ""}><summary class="button secondary">Filtros</summary>${select("page-size", "Avisos por página", ["2", "5", "10"], String(pageSize))}</details>${btn("csv", "Solicitar CSV por correo", "avisos")}</div><div id="results">${results()}</div></section><aside aria-label="Tu experiencia"><section class="panel quiet-panel"><p class="overline">A TU RITMO</p><h2>Tú eliges cómo recibirnos.</h2><p class="small">Consultar avisos públicos no te suscribe a correos. Elige solo los temas que te interesan.</p><a href="#preferencias" class="button secondary">Elegir preferencias →</a></section><section class="panel"><p class="overline">EXPLORAR LA DEMO</p><h2>Una vista para cada persona</h2>${select("audience", "Experiencia simulada", audiences, audience)}${select("ministry", "Ministerio de prueba", ministries, ministry)}<p class="small">El listado público solo muestra contenido público. Las otras vistas son ejemplos abiertos: no existe control de acceso real.</p><p class="small">Fecha de prueba: <strong>${date(clock)}</strong></p><a href="#admin">Administrar y probar programación</a></section></aside></div><details class="state-controls"><summary>Probar carga, vacío y error</summary><div class="row">${["normal", "carga", "vacío", "error"].map((s) => btn("state", s[0].toUpperCase() + s.slice(1), s)).join("")}</div></details>`
   );
 }
 function renderPreferences() {
@@ -470,6 +478,12 @@ function render(focus = false) {
   document.querySelectorAll("[data-route]").forEach((a) => {
     if (a.dataset.route === r) a.setAttribute("aria-current", "page");
     else a.removeAttribute("aria-current");
+  });
+  // Las herramientas de administración no se muestran a las familias (manual 2026, pág. 14):
+  // solo con la sesión de prueba de administración, o cuando ya se está en esa ruta.
+  const esAdmin = rolDemo() === "admin" || r === "admin" || r === "procesamiento";
+  document.querySelectorAll('.sidebar-end [data-route="admin"], .sidebar-end [data-route="procesamiento"]').forEach((a) => {
+    a.hidden = !esAdmin;
   });
   document.title =
     {

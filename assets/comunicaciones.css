@@ -8,30 +8,30 @@
   font-family: Inter, Arial, sans-serif;
   color-scheme: light;
   --bg: #faf7f2;
-  --surface: #fff;
-  --soft: #f0ebe4;
-  --ink: #1a1a1a;
-  --muted: #625c55;
-  --border: #d8d0c6;
-  --control: #81766a;
+  --surface: #f2ece3;
+  --soft: #f5ebe1;
+  --ink: #2d2d2d;
+  --muted: #4f4a44;
+  --border: #e6ddd0;
+  --control: #cfc4b4;
   --copper: #c8956c;
-  --accent-text: #79502e;
-  --success: #315e48;
-  --danger: #9b3830;
-  --focus: #79502e;
+  --accent-text: #82552f;
+  --success: #24483e;
+  --danger: #5e3d24;
+  --focus: #c8956c;
 }
 body.night {
   color-scheme: dark;
   --bg: #1a1a1a;
-  --surface: #242424;
-  --soft: #2c2926;
-  --ink: #faf7f2;
-  --muted: #c2bbb2;
-  --border: #514a43;
-  --control: #a99c8e;
+  --surface: #222222;
+  --soft: #2a221c;
+  --ink: #f0f0f0;
+  --muted: #c4c4c4;
+  --border: #2e2e2e;
+  --control: #4a4a4a;
   --accent-text: #d9ad86;
   --success: #a3d1b7;
-  --danger: #ffb4aa;
+  --danger: #f0d5bd;
   --focus: #c8956c;
 }
 * {
@@ -76,7 +76,7 @@ button,
   padding: 10px 19px;
   background: var(--copper);
   color: #1a1a1a;
-  font-weight: 650;
+  font-weight: 700;
   text-decoration: none;
   font-size: 14px;
 }
@@ -95,8 +95,8 @@ button:hover,
   filter: brightness(0.95);
 }
 :focus-visible {
-  outline: 3px solid var(--focus);
-  outline-offset: 4px;
+  outline:2px solid var(--focus);
+  outline-offset:2px;
 }
 .skip {
   position: fixed;
@@ -135,12 +135,12 @@ button:hover,
 .brand span {
   display: block;
   color: #c8956c;
-  font-size: 9px;
+  font-size: 12px;
   letter-spacing: 2px;
   margin-top: 12px;
 }
 .overline {
-  font-size: 11px;
+  font-size: 12px;
   letter-spacing: 1.8px;
   font-weight: 700;
   color: var(--accent-text);
@@ -156,10 +156,10 @@ button:hover,
   justify-content: space-between;
   gap: 8px;
   padding: 11px 12px;
-  border-radius: 12px;
+  border-radius: 16px;
   text-decoration: none;
   min-height: 46px;
-  font-weight: 550;
+  font-weight: 600;
   font-size: 14px;
 }
 .sidebar a[aria-current="page"] {
@@ -167,7 +167,7 @@ button:hover,
   color: var(--accent-text);
 }
 .sidebar nav span {
-  font-size: 11px;
+  font-size: 12px;
   color: var(--muted);
 }
 .sidebar-end {
@@ -192,13 +192,13 @@ button:hover,
   gap: 12px;
 }
 .breadcrumb {
-  font-size: 11px;
+  font-size: 12px;
   letter-spacing: 1.5px;
   color: var(--muted);
 }
 .badge {
-  font-size: 10px;
-  font-weight: 750;
+  font-size: 12px;
+  font-weight: 700;
   letter-spacing: 1px;
   border: 1px solid var(--border);
   padding: 5px 10px;
@@ -227,7 +227,7 @@ h1 {
   font-size: clamp(34px, 4.2vw, 58px);
   line-height: 1.08;
   letter-spacing: -2px;
-  font-weight: 650;
+  font-weight: 700;
   margin: 0 0 18px;
 }
 h2 {
@@ -274,7 +274,7 @@ p {
 .card {
   background: var(--surface);
   border: 1px solid var(--border);
-  border-radius: 20px;
+  border-radius: 24px;
   overflow: hidden;
 }
 .panel {
@@ -285,8 +285,8 @@ p {
   background: var(--soft);
 }
 .meta {
-  font-size: 11px;
-  font-weight: 650;
+  font-size: 12px;
+  font-weight: 700;
   letter-spacing: 0.6px;
   color: var(--accent-text);
   display: flex;
@@ -297,7 +297,7 @@ p {
 }
 .meta time {
   color: var(--muted);
-  font-weight: 450;
+  font-weight: 400;
   letter-spacing: 0;
 }
 .cards {
@@ -328,7 +328,7 @@ p {
   display: block;
 }
 .photo-caption {
-  font-size: 10px;
+  font-size: 12px;
   color: var(--muted);
   margin: 8px 25px;
 }
@@ -368,7 +368,7 @@ textarea {
   width: 100%;
   min-height: 46px;
   border: 1px solid var(--control);
-  border-radius: 10px;
+  border-radius: 16px;
   background: var(--bg);
   color: var(--ink);
   padding: 10px 12px;
@@ -401,7 +401,7 @@ legend {
   min-height: 48px;
   padding: 12px 0;
   font-size: 14px;
-  font-weight: 450;
+  font-weight: 400;
 }
 .check input {
   width: 21px;
@@ -427,7 +427,7 @@ legend {
 }
 .notice {
   padding: 15px;
-  border-radius: 12px;
+  border-radius: 16px;
   background: var(--soft);
   font-size: 13px;
   color: var(--muted);
@@ -446,7 +446,7 @@ legend {
   padding: 45px 25px;
   text-align: center;
   border: 1px dashed var(--control);
-  border-radius: 20px;
+  border-radius: 24px;
   grid-column: 1/-1;
 }
 .admin-item {
@@ -533,7 +533,7 @@ dialog {
   background: var(--bg);
   color: var(--ink);
   border: 1px solid var(--control);
-  border-radius: 22px;
+  border-radius: 24px;
   padding: 28px;
   width: min(620px, calc(100% - 28px));
   max-height: 85vh;
@@ -559,7 +559,7 @@ dialog video {
   background: var(--ink);
   color: var(--bg);
   padding: 14px 20px;
-  border-radius: 12px;
+  border-radius: 16px;
   max-width: calc(100% - 30px);
   font-size: 13px;
 }
@@ -652,15 +652,15 @@ main > .panel {
   .mobile-nav a {
     min-height: 48px;
     padding: 12px 3px;
-    font-size: 11px;
+    font-size: 12px;
     text-align: center;
     text-decoration: none;
-    border-radius: 10px;
+    border-radius: 16px;
   }
   .mobile-nav a[aria-current="page"] {
     color: var(--accent-text);
     background: var(--soft);
-    font-weight: 650;
+    font-weight: 700;
   }
   footer {
     padding-bottom: 100px;
@@ -705,7 +705,7 @@ main > .panel {
     padding-inline: 16px;
   }
   .badge {
-    font-size: 9px;
+    font-size: 12px;
   }
   .mobile-brand {
     font-size: 16px;
@@ -744,7 +744,7 @@ main > .panel {
   --muted: #4f4a44;
   --border: #e6ddd0;
   --accent-text: #82552f;
-  --focus: #82552f;
+  --focus: #c8956c;
 }
 body.night {
   --bg: #1a1a1a;
@@ -771,7 +771,7 @@ h3 {
 }
 .panel,
 .card {
-  border-radius: 28px;
+  border-radius: 24px;
 }
 .panel,
 .card-body {
@@ -803,7 +803,7 @@ h3 {
   padding: 24px 16px;
 }
 .brand span {
-  font-size: 9px;
+  font-size: 12px;
 }
 .error,
 .success {
@@ -913,7 +913,7 @@ button:disabled {
   background: #faf7f2;
 }
 .email-frame:focus-visible {
-  outline: 3px solid var(--focus);
+  outline:2px solid var(--focus);
 }
 dialog:has(.email-frame) {
   width: min(760px, calc(100% - 28px));
@@ -952,3 +952,10 @@ dialog:has(.email-frame) {
 .night .brand span {
   color: #c8956c;
 }
+
+/* Filtros avanzados detrás de un botón «Filtros» (manual 2026, pág. 14). */
+details.filtros { display: inline-block; }
+details.filtros > summary { list-style: none; cursor: pointer; display: inline-flex; align-items: center; min-height: 44px; }
+details.filtros > summary::-webkit-details-marker { display: none; }
+details.filtros[open] > summary::after { content: " ✓"; }
+details.filtros[open] { display: block; width: 100%; }

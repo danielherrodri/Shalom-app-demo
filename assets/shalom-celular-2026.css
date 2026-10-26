@@ -1,0 +1,119 @@
+/* Shalom · reglas para celular y componentes del Manual de identidad visual 2026 (págs. 12–14).
+   Se carga al final en las cinco áreas. No cambia lógica, datos ni permisos.
+   Hasta 599 px: escala celular, una columna, márgenes de 16 px. Desde 600 px: escala web y dos columnas. */
+
+:root {
+  --sh-radius-card: 24px;
+  --sh-radius-field: 16px;
+  --sh-radius-pill: 999px;
+  --sh-focus: #c8956c;
+}
+
+/* — Tipografía: Inter 400/600/700/800 con respaldo Arial — */
+body { font-family: Inter, Arial, sans-serif; }
+
+/* — Botones: píldora, área táctil de 44 px y 8 px entre controles — */
+.btn, .button, .tiny-btn, .mini-role, .chip, .icon-btn, .text-btn, .pill-select,
+[data-shalom-space="feedback"] button, [data-shalom-space="feedback"] .action {
+  border-radius: var(--sh-radius-pill);
+  min-height: 44px;
+}
+.btn.sm, .tiny-btn, .mini-role, .icon-btn, .modal-close, .chip { min-height: 44px; min-width: 44px; }
+.btnrow, .feature-action, .top-actions, .actions, .button-row { gap: 8px; }
+
+/* — Campos y avisos: radio 16; tarjetas: radio 24 — */
+input:not([type=checkbox]):not([type=radio]):not([type=range]), select, textarea { border-radius: var(--sh-radius-field); min-height: 48px; }
+textarea { min-height: 96px; }
+
+/* — Foco: contorno de 2 px en cobre-500, separado 2 px del control — */
+:where(a, button, input, select, textarea, summary, [tabindex]):focus-visible {
+  outline: 2px solid var(--sh-focus) !important;
+  outline-offset: 2px !important;
+}
+
+/* — Sin sombras, tampoco en barras fijas: se separan con un borde de 1 px — */
+.modal, .dialog, #dialog, #toast, .toast, .mobile-top, .mobile-bottom, .sticky-bar { box-shadow: none !important; }
+.modal, #toast, .toast { border: 1px solid var(--borderstrong, var(--border2, #4a4a4a)); }
+
+/* — Deshabilitado: texto ink-muted (sin transparencia) y una frase que explica por qué — */
+button:disabled, .btn:disabled, .btn[aria-disabled="true"], input:disabled, select:disabled, textarea:disabled {
+  opacity: 1 !important;
+  cursor: not-allowed;
+  color: var(--text3, var(--muted, #9a9a9a)) !important;
+  background: transparent !important;
+  border-color: var(--border, #2e2e2e) !important;
+  filter: none !important;
+}
+.motivo-deshabilitado { display: block; margin-top: 8px; font-size: 14px; color: var(--text3, var(--muted, #9a9a9a)); }
+
+/* — Error: mensaje en texto bajo el campo, con ícono. El rojo «live» queda reservado para «En línea» — */
+.campo-error {
+  display: flex; align-items: flex-start; gap: 6px;
+  margin: 6px 0 0; font-size: 14px; font-weight: 600; line-height: 1.4;
+  color: var(--copperlight, var(--accent-text, #82552f));
+}
+.campo-error::before {
+  content: ""; flex: none; width: 16px; height: 16px; margin-top: 2px; background: currentColor;
+  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round'%3E%3Ccircle cx='12' cy='12' r='10'/%3E%3Cpath d='M12 8v4M12 16h.01'/%3E%3C/svg%3E") center / contain no-repeat;
+          mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round'%3E%3Ccircle cx='12' cy='12' r='10'/%3E%3Cpath d='M12 8v4M12 16h.01'/%3E%3C/svg%3E") center / contain no-repeat;
+}
+[aria-invalid="true"] { border-color: currentColor !important; border-width: 2px !important; }
+
+/* — Filtros avanzados detrás de un botón «Filtros» — */
+.filtros-toggle { display: inline-flex; align-items: center; gap: 8px; }
+.filtros-toggle[aria-expanded="true"]::after { content: "✓"; }
+.filtros-panel[hidden] { display: none !important; }
+
+/* — Barra inferior: ícono y texto; destino activo en cobre y con texto — */
+.mobile-bottom button, .mobile-bottom a { min-height: 52px; min-width: 0; }
+.mobile-bottom button span, .mobile-bottom a span {
+  font-size: 12px; font-weight: 600; line-height: 1.15; text-align: center;
+  white-space: normal; overflow-wrap: normal; hyphens: manual; max-width: 100%;
+}
+.mobile-bottom button.active, .mobile-bottom [aria-current="page"] { font-weight: 700; }
+.mobile-bottom button.active span, .mobile-bottom [aria-current="page"] span { font-weight: 700; text-decoration: underline; text-underline-offset: 3px; text-decoration-thickness: 2px; }
+
+/* ================= Escala web y dos columnas desde 600 px ================= */
+@media (min-width: 600px) {
+  .h1, main h1, body > header h1, header h1 { font-size: 48px !important; font-weight: 800 !important; line-height: 1.08; }
+  .section-title, main h2, .feature h2 { font-size: 40px; font-weight: 700; }
+  main h3, .tile h3 { font-size: 20px !important; font-weight: 700 !important; }
+  .panel h2, .panel h3, .card h2, .card h3, .modal h2, .modal h3, dialog h2, dialog h3 { font-size: 20px; }
+}
+@media (min-width: 600px) and (max-width: 860px) {
+  .grid.cols3, .grid.cols4, .grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+/* ================= Celular: hasta 599 px ================= */
+@media (max-width: 599px) {
+  body { font-size: 16px; }
+
+  /* Escala tipográfica · celular */
+  .h1, main h1, header h1, .hero h1, .page-title { font-size: 32px !important; font-weight: 800 !important; line-height: 1.12 !important; letter-spacing: -0.02em; }
+  .section-title, main h2, .feature h2, .hero h2, .section-head h2 { font-size: 24px !important; font-weight: 700 !important; line-height: 1.2 !important; }
+  main h3, .tile h3, .card h3, .panel h3 { font-size: 18px !important; font-weight: 700 !important; line-height: 1.25 !important; }
+  .label, .eyebrow, .kicker { font-size: 13px; font-weight: 600; }
+  main p, main li, .tile p, .panel p { font-size: max(14px, 1em); }
+  small, .muted, .tiny, .meta, figcaption { font-size: max(12px, 0.875em); }
+
+  /* Una sola columna */
+  .grid, .grid.cols3, .grid.cols4, .grid.two, .form-grid, .proposal-grid, .product-grid, .cards, .stats-grid,
+  .announcement-grid, .login-layout, .section-grid { grid-template-columns: minmax(0, 1fr) !important; }
+
+  /* Margen lateral 16, 16 entre tarjetas y 16 de relleno */
+  .app-content, main.page, main.wrap, .page-wrap { padding-left: 16px !important; padding-right: 16px !important; }
+  .grid, .cards, .product-grid, .announcement-grid, .stack, .list { gap: 16px !important; }
+  .panel, .tile, .feature, .item-card, .card, .announcement-card, .mini-stat, .product, .teacher-card, .login-panel, .login-hero { padding: 16px !important; border-radius: var(--sh-radius-card) !important; }
+  .tile { min-height: 0 !important; }
+
+  /* Títulos completos: nunca palabra por palabra */
+  h1, h2, h3, .h1, .section-title { overflow-wrap: normal; word-break: normal; hyphens: manual; }
+
+  /* Barras superiores: los controles bajan de línea en vez de salirse de la pantalla */
+  .topbar, .top-actions, .topline, .heading { flex-wrap: wrap; }
+  .top-actions { gap: 8px; }
+
+  /* La acción principal se ve sin desplazarse */
+  .feature-action { display: grid; gap: 8px; }
+  .feature-action .btn { width: 100%; }
+}

@@ -49,14 +49,14 @@ main.api.set('night');
 assert.equal(storage.get(KEY), 'night', 'persists chosen theme to a dedicated key');
 assert.ok(main.classes.has('theme-night'));
 assert.equal(main.meta.attrs.content, '#1a1a1a');
-assert.equal(main.button.attrs['aria-label'], 'Cambiar a tema claro');
+assert.equal(main.button.attrs['aria-label'], 'Cambiar a tema Crema');
 main.api.set('cream');
 assert.equal(storage.get(KEY), 'cream');
 for (const name of ['cafe', 'kids', 'comms', 'feedback']) {
   const page = boot(name, storage);
   assert.equal(page.api.get(), 'cream', name + ' remembers light selection');
   assert.equal(page.html.dataset.shalomTheme, 'cream');
-  assert.equal(page.button.textContent, 'Tema: Claro');
+  assert.equal(page.button.textContent, 'Tema Noche');
   if (name === 'comms') assert.equal(page.classes.has('night'), false);
   else assert.ok(page.classes.has('theme-cream'));
 }

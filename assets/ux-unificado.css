@@ -10,9 +10,9 @@ body[data-shalom-space] { font-size: var(--shalom-text-body); }
 body[data-shalom-space] :is(button, input, select, textarea, a) { touch-action: manipulation; }
 body[data-shalom-space] :is(input, select, textarea) { font-size: 1rem; }
 body[data-shalom-space] :is(button, a, input, select, textarea):focus-visible {
-  outline-width: 3px;
+  outline-width:2px;
   outline-style: solid;
-  outline-offset: 3px;
+  outline-offset:2px;
 }
 body[data-shalom-space="main"] .nav-link { font-size: 1rem; min-height: var(--shalom-touch-target); }
 body[data-shalom-space="main"] :is(.lead, .announcement-body p, .tile p) { font-size: var(--shalom-text-support); }
@@ -71,8 +71,8 @@ body[data-shalom-space="kids"] header nav a { font-size: var(--shalom-text-nav);
 body[data-shalom-space="comms"] #dialog .dialog-dismiss {
   position:absolute;top:12px;right:12px;display:inline-flex;align-items:center;justify-content:center;
   min-width:44px;width:44px;min-height:44px;height:44px;padding:0;
-  background:transparent;color:inherit;border:1px solid var(--border);border-radius:10px;
-  font:400 28px/1 Inter,system-ui,sans-serif;cursor:pointer;
+  background:transparent;color:inherit;border:1px solid var(--border);border-radius:16px;
+  font:400 28px/1 Inter,Arial,sans-serif;cursor:pointer;
 }
 body[data-shalom-space="comms"] #dialog-content>h2:first-child {padding-right:54px;}
 

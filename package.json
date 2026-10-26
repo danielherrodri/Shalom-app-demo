@@ -14,7 +14,8 @@
     "test:theme": "node tests/theme-persistence.cjs",
     "test:structure": "node tests/site-navigation.cjs",
     "test:family": "node tests/family-registration.cjs",
-    "test:visual": "node tests/visual-identity.cjs"
+    "test:visual": "node tests/visual-identity.cjs",
+    "test:manual": "node tests/manual-celular.cjs"
   },
   "devDependencies": {
     "axe-core": "4.11.0",

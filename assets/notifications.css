@@ -4,34 +4,34 @@
 #notification-entry .n-entry-button {
   position:relative;display:inline-flex;align-items:center;justify-content:center;
   width:46px;height:46px;min-width:46px;min-height:46px;padding:8px;
-  border:1px solid #a68568;border-radius:12px;background:#fff;color:#654025;
+  border:1px solid #82552f;border-radius:16px;background:#fff;color:#5e3d24;
   font:inherit;cursor:pointer;
 }
 #notification-entry .n-entry-button svg {width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
 #notification-entry .n-count {position:absolute;top:-5px;right:-5px;min-width:19px;height:19px;
   display:flex;justify-content:center;align-items:center;padding:0 4px;border-radius:999px;
-  background:#7b431f;color:#fff;border:2px solid #f4ede5;font:700 11px/1 Inter,system-ui,sans-serif}
-body.theme-night #notification-entry .n-entry-button {background:#372a20;color:#f0d5bd;border-color:#8b674d}
-body.theme-night #notification-entry .n-count {background:#e0ae80;color:#251910;border-color:#262321}
+  background:#5e3d24;color:#fff;border:2px solid #f5ebe1;font:700 12px/1 Inter,Arial,sans-serif}
+body.theme-night #notification-entry .n-entry-button {background:#2a221c;color:#f0d5bd;border-color:#82552f}
+body.theme-night #notification-entry .n-count {background:#d9ad86;color:#1a1a1a;border-color:#222222}
 #notification-dialog {box-sizing:border-box;width:min(640px,calc(100% - 24px));
   max-height:min(85vh,calc(100dvh - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px) - 32px));
-  overflow:auto;border:1px solid #80654f;border-radius:18px;background:#222;color:#f0f0f0;
+  overflow:auto;border:1px solid #82552f;border-radius:24px;background:#222;color:#f0f0f0;
   padding:20px;font:14px/1.6 Inter,Arial,sans-serif}
 #notification-dialog::backdrop {background:#0009}
 #notification-dialog p {margin:10px 0}
 #notification-dialog h3 {margin:20px 0 8px}
 #notification-dialog .n-head,#notification-dialog .n-tools {display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
 #notification-dialog .n-head h2 {margin:0;min-width:0;font-size:1.25rem;line-height:1.3}
-#notification-dialog button,#notification-dialog select {font:inherit;min-height:44px;border:1px solid #80654f;border-radius:10px;padding:9px 13px;background:#30271f;color:#f0f0f0;cursor:pointer}
+#notification-dialog button,#notification-dialog select {font:inherit;min-height:44px;border:1px solid #82552f;border-radius:16px;padding:9px 13px;background:#2a221c;color:#f0f0f0;cursor:pointer}
 #notification-dialog .n-close {display:inline-flex;align-items:center;justify-content:center;min-width:44px;width:44px;height:44px;padding:0;margin-left:auto;font-size:28px;line-height:1}
 #notification-dialog .n-option {display:flex;align-items:center;gap:10px;min-height:44px}
 #notification-dialog input {width:20px;height:20px}
-#notification-dialog .n-item {border:1px solid #80654f;border-radius:12px;padding:15px;margin-top:12px}
+#notification-dialog .n-item {border:1px solid #82552f;border-radius:16px;padding:15px;margin-top:12px}
 #notification-dialog .n-read {border-color:#555;color:#c4c4c4}
 #notification-dialog button:disabled {opacity:.5;cursor:default}
-#notification-dialog :focus-visible,#notification-entry :focus-visible {outline:3px solid #eac3a3;outline-offset:3px}
-body.theme-cream #notification-dialog {background:#fff;color:#2d2d2d;border-color:#bba997;color-scheme:light}
-body.theme-cream #notification-dialog :is(button,select) {background:#f4ede5;color:#473120;border-color:#ae8c6e}
-body.theme-cream #notification-dialog .n-item {border-color:#bba997}
-body.theme-cream #notification-dialog .n-read {color:#5e564e;border-color:#d5c9bb}
+#notification-dialog :focus-visible,#notification-entry :focus-visible {outline:2px solid #ecd6c3;outline-offset:2px}
+body.theme-cream #notification-dialog {background:#fff;color:#2d2d2d;border-color:#cfc4b4;color-scheme:light}
+body.theme-cream #notification-dialog :is(button,select) {background:#f5ebe1;color:#4a3526;border-color:#c8956c}
+body.theme-cream #notification-dialog .n-item {border-color:#cfc4b4}
+body.theme-cream #notification-dialog .n-read {color:#6b655d;border-color:#cfc4b4}
 @media(max-width:560px){#notification-dialog {padding:16px;border-radius:16px}}
