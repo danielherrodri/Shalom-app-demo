@@ -2,7 +2,7 @@
 
 **Estado:** implementación de diseño propuesta para el prototipo público. No sustituye la guía oficial ni constituye aprobación institucional de las paletas complementarias.
 
-**Fuente de diseño:** `Manual_Identidad_Visual_Shalom_y_Shalom_Kids_2026.pdf` (octubre de 2026, 19 páginas). Para trabajar con producción, solicitar aprobación y conservar una versión maestra de la guía.
+**Fuente de diseño:** `Manual_Identidad_Visual_Shalom_2026.pdf` (octubre de 2026, 20 páginas; la página 14 «Reglas para celular» es nueva). Para trabajar con producción, solicitar aprobación y conservar una versión maestra de la guía.
 
 ## Identidad oficial conservada
 
@@ -32,12 +32,32 @@ Se asignan por significado, nunca como única señal de estado:
 
 La hoja `assets/shalom-visual-2026.css` se carga después de los estilos actuales y **no modifica la lógica** de reservas, inscripciones, roles o asistencia. En App demo, los mosaicos tienen `data-shalom-category`, y las tarjetas de prueba de Kids tienen `data-kids-status` y `data-kids-module`. Se preservan los textos de estado visibles: «Verificado» y «Pendiente».
 
-Las cinco páginas comparten tokens. Kids usa fuego como color primario; las acciones rápidas de su prototipo se diferencian de manera semántica, manteniendo el diseño Noche/Crema de toda la demo. No se realizan cambios al proyecto operativo `shalom-kids-clasp` ni se introducen datos personales.
+Las cinco páginas comparten tokens. Kids usa fuego como color primario; las acciones rápidas de su prototipo se diferencian de manera semántica, manteniendo el diseño Noche/Crema de toda la demo. El proyecto operativo `shalom-kids-clasp` aplica las mismas reglas en su propia rama; esta demo no introduce datos personales.
+
+## Reglas para celular y componentes (págs. 12–14)
+
+`assets/shalom-celular-2026.css` se carga al final en las cinco áreas y `tests/manual-celular.cjs` lo vigila.
+
+| Regla | Aplicación en la demo |
+| --- | --- |
+| Escala celular (hasta 599 px) | H1 32/800, H2 24/700, H3 18/700, etiqueta 13/600, cuerpo 16/400, notas 14/400; nada por debajo de 12 px |
+| Escala web (desde 600 px) | H1 48/800, H2 40/700, H3 20/700 |
+| Diseño | Una columna hasta 599 px, dos desde 600 px; margen lateral, separación y relleno de 16 px |
+| Radios | 24 en tarjetas, 16 en campos y avisos, píldora en botones; ningún otro valor (los círculos de íconos usan 50 %) |
+| Sombras | Ninguna, tampoco en barras fijas, modal ni aviso flotante: se separan con un borde de 1 px |
+| Navegación | Barra inferior de máximo 5 destinos con ícono y texto; activo en cobre, subrayado y con `aria-current`. «Iniciar sesión» solo en el encabezado |
+| Nombres | Uno por concepto en barra, menú y título: Estacionamiento, Shalom Kids, Iniciar sesión, Cerrar sesión, Administración, Voluntariado, Mi agenda, Cafetería, Tema Noche/Crema |
+| Interacción | Áreas táctiles de 44 px y 8 px entre controles; foco de 2 px en cobre-500 separado 2 px |
+| Filtros | Opciones avanzadas detrás de «Filtros»; Procesamiento y Administrar ocultos sin sesión de administración |
+| Estados | Deshabilitado en ink-muted sin transparencia; error en texto bajo el campo con ícono; el rojo «live» queda reservado para «En línea»; vacíos que dicen qué pasa |
+| Horas | 9:00 AM y 1:00 PM |
+
+`assets/design-tokens.json` recoge los tokens completos de Noche, Crema y Kids, las dos escalas y los radios.
 
 ## Reglas de validación
 
 - Contraste objetivo de texto normal de al menos 4.5:1, probado con los pares texto/superficie.
 - Botones y enlaces con foco visible y nombres/etiquetas: el color no comunica por sí solo.
-- Revisar teléfonos de 320, 390 y 430 px y pantallas grandes, con texto normal y ampliado.
+- Revisar cada pantalla en un teléfono de 360 px con el texto ampliado y en los temas Noche y Crema (prueba final de la pág. 14), además de 320, 390 y 430 px y pantallas grandes.
 - Mantener «Áreas de Shalom» compacto en móviles y navegación inferior estable.
 - Al aprobar institucionalmente la paleta ampliada, actualizar la guía oficial antes de presentarla como norma.

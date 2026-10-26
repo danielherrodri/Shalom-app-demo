@@ -36,8 +36,8 @@
 }
 .process-panel :focus-visible,
 #processing-dialog > button:focus-visible {
-  outline: 3px solid var(--accent-text, var(--coppertext, #82552f));
-  outline-offset: 3px;
+  outline:2px solid var(--accent-text, var(--coppertext, #82552f));
+  outline-offset:2px;
 }
 .process-check {
   display: flex;
@@ -82,7 +82,7 @@
 }
 .process-empty {
   border: 1px dashed var(--control, var(--borderstrong, #82552f));
-  border-radius: 20px;
+  border-radius: 24px;
   padding: 24px;
 }
 #processing-dialog {

@@ -28,8 +28,9 @@
     const meta = document.querySelector('meta[name="theme-color"]');
     if (meta) meta.setAttribute('content', color);
     document.querySelectorAll('[data-shalom-theme-toggle], body[data-shalom-space="comms"] [data-action="theme"]').forEach(button => {
-      const next = current === 'night' ? 'claro' : 'oscuro';
-      button.textContent = 'Tema: ' + (current === 'night' ? 'Oscuro' : 'Claro');
+      // Mismos nombres que el manual y que Inicio: el botón dice a qué tema cambia (Noche o Crema).
+      const next = current === 'night' ? 'Crema' : 'Noche';
+      button.textContent = 'Tema ' + next;
       button.setAttribute('aria-label', 'Cambiar a tema ' + next);
       button.setAttribute('title', 'Cambiar a tema ' + next);
     });

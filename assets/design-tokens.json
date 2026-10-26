@@ -1,51 +1,69 @@
 {
-  "version": "0.6-demo",
-  "source": "Guía de estilos Shalom · octubre 2026",
+  "version": "0.8-demo",
+  "source": "Manual de identidad visual Shalom + Kids · octubre 2026 (20 páginas)",
   "font": {
     "family": "Inter",
     "fallback": "Arial, sans-serif",
-    "body": 16,
-    "small": 14,
-    "h1": 48,
-    "h1Weight": 800,
-    "cardTitle": 20,
-    "cardWeight": 700
+    "weights": [400, 600, 700, 800],
+    "web": { "display": [72, 700], "h1": [48, 800], "h2": [40, 700], "h3": [20, 700], "label": [13, 600], "body": [16, 400], "notes": [14, 400] },
+    "mobile": { "h1": [32, 800], "h2": [24, 700], "h3": [18, 700], "label": [13, 600], "body": [16, 400], "notes": [14, 400], "minimum": 12 }
   },
+  "breakpoints": { "mobileMax": 599, "twoColumnsFrom": 600 },
   "themes": {
     "night": {
-      "background": "#1a1a1a",
-      "surface": "#222222",
-      "surfaceAlt": "#2e2e2e",
+      "surface": "#1a1a1a",
+      "surfaceAlt": "#222222",
+      "border": "#2e2e2e",
+      "borderStrong": "#4a4a4a",
       "ink": "#f0f0f0",
-      "secondary": "#c4c4c4",
-      "accentFill": "#c8956c",
-      "accentText": "#d9ad86",
-      "onAccent": "#1a1a1a"
+      "inkSecondary": "#c4c4c4",
+      "inkMuted": "#9a9a9a",
+      "cobre900": "#f0d5bd",
+      "cobre700": "#d9ad86",
+      "cobre500": "#c8956c",
+      "cobre200": "#4a3526",
+      "cobre50": "#2a221c",
+      "onCobre": "#1a1a1a",
+      "live": "#f87171"
     },
     "cream": {
-      "background": "#faf7f2",
-      "surface": "#f2ece3",
+      "surface": "#faf7f2",
+      "surfaceAlt": "#f2ece3",
       "border": "#e6ddd0",
+      "borderStrong": "#cfc4b4",
       "ink": "#2d2d2d",
-      "secondary": "#4f4a44",
-      "accentFill": "#c8956c",
-      "accentText": "#82552f",
-      "onAccent": "#1a1a1a"
+      "inkSecondary": "#4f4a44",
+      "inkMuted": "#6b655d",
+      "cobre900": "#5e3d24",
+      "cobre700": "#82552f",
+      "cobre500": "#c8956c",
+      "cobre200": "#ecd6c3",
+      "cobre50": "#f5ebe1",
+      "onCobre": "#1a1a1a",
+      "live": "#b91c1c"
     },
     "kids": {
-      "background": "#ffffff",
-      "fire": "#b84810",
-      "heading": "#8f360c",
-      "fireSoft": "#fff0e7",
-      "gold": "#785a15",
-      "goldHeading": "#5b430f",
-      "goldSoft": "#fbf4e1"
+      "surface": "#ffffff",
+      "fuego900": "#8f360c",
+      "fuego700": "#b84810",
+      "fuego600": "#d45f18",
+      "fuego500": "#ea7124",
+      "fuego200": "#ffd8c2",
+      "fuego50": "#fff0e7",
+      "oro900": "#5b430f",
+      "oro700": "#785a15",
+      "oro400": "#e2c46e",
+      "oro200": "#f1deaa",
+      "oro50": "#fbf4e1"
     }
   },
   "space": [8, 12, 16, 24, 32, 40, 48, 56, 64, 128],
-  "radii": { "card": 28, "row": 24, "web": 16, "pill": 999 },
+  "mobileSpace": { "sideMargin": 16, "betweenCards": 16, "cardPadding": 16 },
+  "radii": { "card": 24, "field": 16, "notice": 16, "pill": 999 },
+  "touch": { "minTarget": 44, "gap": 8 },
+  "focus": { "width": 2, "offset": 2, "color": "#c8956c" },
   "motion": { "entryMs": 220, "reducedMotion": "none" },
   "semantics": {
-    "note": "Operational states are not additional brand colors; never rely on color alone."
+    "note": "Operational states are not additional brand colors; never rely on color alone. The red «live» token is reserved for «En línea»."
   }
 }

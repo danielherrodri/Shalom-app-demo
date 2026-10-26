@@ -26,7 +26,7 @@
     const ui = document.createElement("section");
     ui.className = "list-tools";
     ui.setAttribute("aria-label", "Herramientas de " + title);
-    ui.innerHTML = `<div class="list-toolbar"><label>Buscar en ${title}<input type="search" maxlength="100" placeholder="Escribe para buscar" data-list="search"></label><label>Filtrar por estado<select data-list="filter"><option>Todos</option></select></label><label>Por página<select data-list="size"><option>5</option><option>10</option><option>25</option></select></label><button type="button" class="btn secondary" data-list="csv">Solicitar CSV por correo</button></div><div class="list-pagination"><span role="status" data-list="status"></span><div class="btnrow"><button type="button" class="btn secondary sm" data-list="prev">Anterior</button><button type="button" class="btn secondary sm" data-list="next">Siguiente</button></div></div><p class="empty" data-list="empty" hidden>Sin resultados. Cambia la búsqueda o el filtro.</p>`;
+    ui.innerHTML = `<div class="list-toolbar"><label>Buscar en ${title}<input type="search" maxlength="100" placeholder="Escribe para buscar" data-list="search"></label><button type="button" class="btn secondary filtros-toggle" data-list="toggle" aria-expanded="false" aria-controls="${id}-filtros">Filtros</button><button type="button" class="btn secondary" data-list="csv">Solicitar CSV por correo</button></div><div class="list-toolbar filtros-panel" id="${id}-filtros" data-list="panel" hidden><label>Filtrar por estado<select data-list="filter"><option>Todos</option></select></label><label>Por página<select data-list="size"><option>5</option><option>10</option><option>25</option></select></label></div><div class="list-pagination"><span role="status" data-list="status"></span><div class="btnrow"><button type="button" class="btn secondary sm" data-list="prev">Anterior</button><button type="button" class="btn secondary sm" data-list="next">Siguiente</button></div></div><p class="empty" data-list="empty" hidden>Sin resultados. Cambia la búsqueda o el filtro.</p>`;
     for (const tag of tags) {
       const o = document.createElement("option");
       o.textContent = tag;
@@ -42,6 +42,12 @@
     }
     container.before(ui);
     const find = (k) => ui.querySelector("[data-list=" + k + "]");
+    // Filtros avanzados detrás de un botón «Filtros» (manual 2026, pág. 14).
+    find("toggle").addEventListener("click", () => {
+      const abrir = find("panel").hidden;
+      find("panel").hidden = !abrir;
+      find("toggle").setAttribute("aria-expanded", String(abrir));
+    });
     const filtered = () =>
       entries.filter(
         (e) =>

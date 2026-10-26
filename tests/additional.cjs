@@ -216,6 +216,7 @@ let b;
       .textContent()
       .then((x) => x.includes("Página 2")),
   );
+  await p.locator("[data-list=toggle]").click();
   await p.locator("[data-list=filter]").selectOption("Pendiente");
   ok(
     "Filtro vuelve a página 1",

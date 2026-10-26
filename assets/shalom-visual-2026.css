@@ -34,7 +34,7 @@ body[data-shalom-space="main"] .tile[data-shalom-category] .icon-disc{
   background:var(--sh-module-soft);color:var(--sh-module);
 }
 body[data-shalom-space="main"] .tile[data-shalom-category]:focus-visible{
-  outline:3px solid var(--sh-module);outline-offset:3px;
+  outline:2px solid var(--sh-module);outline-offset:2px;
 }
 body.theme-cream[data-shalom-space="main"] .tile[data-shalom-category]{background:#fff;border-color:var(--border)}
 body.theme-night[data-shalom-space="main"] .tile[data-shalom-category]{background:var(--surface);border-color:var(--border)}
@@ -92,7 +92,7 @@ body[data-shalom-space="kids"] :is(.quick-action[data-home-view],.quick-action[d
   background:#fff;color:var(--sh-module);border:1px solid currentColor;
 }
 body[data-shalom-space="kids"] :is(.quick-action[data-home-view],.quick-action[data-detail],.quick-action[data-switch]):focus-visible{
-  outline:3px solid var(--sh-module);outline-offset:3px;
+  outline:2px solid var(--sh-module);outline-offset:2px;
 }
 body[data-shalom-space="kids"] :is(.quick-action[data-home-view="reservas"],.quick-action[data-switch="reservas"]){
   --sh-module:var(--sh-turquoise);--sh-module-soft:var(--sh-turquoise-soft);
