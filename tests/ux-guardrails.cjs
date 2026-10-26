@@ -45,6 +45,10 @@ console.log('UX guardrails: responsive Kids cards, persistent mobile nav, areas 
 const kidsCss=read('design/kids-paneles.css');
 assert.match(kidsCss,/header nav\s*\{[\s\S]*?grid-template-columns:repeat\(2,minmax\(0,1fr\)\)/, 'Kids uses grid without horizontal nav scrolling');
 assert.match(kidsCss,/scroll-snap-type:none/, 'Kids does not use a swipe-only menu');
+assert.match(kidsCss,/@media\(max-width:599px\)\{[\s\S]*?header nav\{display:none;grid-template-columns:minmax\(0,1fr\)[\s\S]*?header nav\.abierto\{display:grid\}/, 'Kids views live behind «Menú» in one column on phones');
+const kidsJs=read('design/kids-paneles.js');
+assert.match(kidsJs,/menuToggle\.setAttribute\('aria-controls', nav\.id\); menuToggle\.setAttribute\('aria-expanded', 'false'\)/, 'Kids menu button exposes its state');
+assert.match(kidsJs,/Menú · \$\{current\.textContent\.trim\(\)\}/, 'Kids menu button names the current view');
 const main=read('index.html');
 assert.match(main,/const priorities=isAdmin/, 'home has contextual priorities');
 assert.match(main,/home-priorities/, 'home exposes secondary tasks deliberately');
