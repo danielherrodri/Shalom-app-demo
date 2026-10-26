@@ -66,10 +66,14 @@
     const g = $('rol-grupo').value, si = SERVICIOS.findIndex(([s]) => s === $('rol-servicio').value);
     const ds = calendario[g][DOMINGOS.indexOf(actual())].turnos[si].filter(Boolean);
     $('rol-cede').innerHTML = ds.length ? ds.map(d => `<option>${esc(d)}</option>`).join('') : '<option value="">Nadie tiene ese turno</option>';
+    suplente();
     $('rol-registrar').disabled = !ds.length;
     $('rol-estado').textContent = ds.length ? '' : 'Ese turno no tiene docentes en el calendario: elige otro grupo, servicio o domingo.';
   }
   $('rol-fecha').addEventListener('change', pinta);
+  /** Propone como suplente a alguien distinto de quien cede. */
+  function suplente() { if ($('rol-cubre').value === $('rol-cede').value) $('rol-cubre').value = DOCENTES.find(d => d !== $('rol-cede').value); }
+  $('rol-cede').addEventListener('change', suplente);
   ['rol-grupo', 'rol-servicio'].forEach(id => $(id).addEventListener('change', cedentes));
   $('rol-intercambio').addEventListener('change', e => { $('rol-devuelve').hidden = !e.target.checked; });
   $('rol-form').addEventListener('submit', event => {

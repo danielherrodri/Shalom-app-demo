@@ -117,3 +117,12 @@ button:disabled, .btn:disabled, .btn[aria-disabled="true"], input:disabled, sele
   .feature-action { display: grid; gap: 8px; }
   .feature-action .btn { width: 100%; }
 }
+
+/* — Enlaces sueltos (fuera de un párrafo): también con área táctil de 44 px — */
+.row > a, .list-actions > a, .panel > a:not(.btn):not(.button), .preview > a,
+.shalom-feedback-heading > a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+}
+.mobile-brand { min-height: 44px; } /* sin tocar display: en escritorio sigue oculto */
