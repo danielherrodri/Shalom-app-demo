@@ -62,3 +62,11 @@ a{color:#d9ad86}header{border-right:1px solid var(--line)}header>strong{display:
   body[data-shalom-space="kids"] header nav a:not([href="#alcance"]),
   body[data-shalom-space="kids"] header nav button{justify-content:flex-start;text-align:left;font-size:1rem}
 }
+
+/* Rol de clases: rol del domingo con permutas y resumen de asistencia (mismo cálculo que Shalom Kids). */
+.rol-grupo h3{font-size:18px;margin:0 0 4px}.rol-grupo>.muted{font-size:14px;margin:0}
+.rol-turno{border-top:1px solid var(--line);padding-top:12px;margin-top:12px}.rol-turno strong{display:block;font-size:14px}
+.rol-turno ul{list-style:none;margin:6px 0 0;padding:0;display:grid;gap:6px}.rol-turno li{font-size:16px;display:flex;gap:8px;flex-wrap:wrap;align-items:center}.rol-turno p{font-size:14px;margin:6px 0 0}
+.rol-resumen{width:100%;border-collapse:collapse;font-size:14px}.rol-resumen th,.rol-resumen td{text-align:left;padding:10px 8px 10px 0;border-top:1px solid var(--line);vertical-align:top}
+.rol-resumen th{border-top:0;font-weight:600;color:var(--muted)}.rol-resumen strong{font-size:16px}.rol-resumen small{display:block;font-size:12px;color:var(--muted)}
+#rol .grid{align-items:start}#rol .preparation select,#rol .preparation input:not([type=checkbox]){width:100%}
