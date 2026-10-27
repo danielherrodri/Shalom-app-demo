@@ -59,6 +59,8 @@ body.theme-cream[data-shalom-space="kids"] :is(header nav a,header>.muted,a,.mut
 body.theme-cream[data-shalom-space="kids"] header nav a:hover {
   background:#fff0e7;
 }
+body.theme-cream[data-shalom-space="kids"] header nav a[aria-current="page"],
+body.theme-cream[data-shalom-space="kids"] header nav a[aria-current="page"]:hover { background:#b84810; color:#fff; }
 body.theme-cream[data-shalom-space="kids"] :is(.stat,.card,.notice,.quick-action,.teacher-card,.menu-day,.preparation,.teacher-portrait,.scripture-actions .button) {
   background:#fff;color:#1f2937;border-color:#e5e7eb;
 }

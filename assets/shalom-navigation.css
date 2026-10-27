@@ -151,3 +151,14 @@ html[data-shalom-frame="true"] body .shalom-more-profile small{display:block;col
 html[data-shalom-frame="true"] body .shalom-more-avatar{grid-row:span 2;display:grid;place-items:center;width:48px;height:48px;border-radius:50%;background:var(--sh-accent);color:var(--sh-on);font-weight:700;font-size:18px}
 html[data-shalom-frame="true"] body .shalom-more-cta{grid-column:2;color:var(--sh-accent-text);font-weight:600;font-size:14px}
 html[data-shalom-frame="true"] body .shalom-more-signout{width:100%;min-height:48px;margin-top:16px;border:1px solid var(--sh-line);border-radius:999px;background:transparent;color:var(--sh-ink);font:600 16px Inter,Arial,sans-serif;cursor:pointer}
+/* Kids claro: franja, barra inferior y «Más» con los neutros y acentos de Kids, no el crema general. */
+html[data-shalom-theme-scope="kids"][data-shalom-theme="cream"][data-shalom-frame="true"] body .shalom-demo-strip{background:#fff0e7;border-color:#ffd8c2;color:#4b5563}
+html[data-shalom-theme-scope="kids"][data-shalom-theme="cream"][data-shalom-frame="true"] body .shalom-demo-strip .shalom-demo-dot{background:#b84810}
+html[data-shalom-theme-scope="kids"][data-shalom-theme="cream"][data-shalom-frame="true"] body .shalom-demo-strip .shalom-frame-aa{color:#1f2937;border-color:#ffd8c2}
+html[data-shalom-theme-scope="kids"][data-shalom-theme="cream"][data-shalom-frame="true"] body[data-shalom-space] .shalom-sheet{--sh-bg:#fff;--sh-ink:#1f2937;--sh-muted:#4b5563;--sh-line:#e5e7eb;--sh-strong:#d1d5db;--sh-accent:#b84810;--sh-accent-text:#8f360c;--sh-on:#fff}
+@media(max-width:860px){
+  html[data-shalom-theme-scope="kids"][data-shalom-theme="cream"][data-shalom-frame="true"] body .shalom-tabbar{background:#fff;border-color:#e5e7eb}
+  html[data-shalom-theme-scope="kids"][data-shalom-theme="cream"][data-shalom-frame="true"] body .shalom-tab{color:#4b5563}
+  html[data-shalom-theme-scope="kids"][data-shalom-theme="cream"][data-shalom-frame="true"] body .shalom-tabbar .shalom-tab[aria-current="page"]{color:#8f360c}
+  html[data-shalom-theme-scope="kids"][data-shalom-theme="cream"][data-shalom-frame="true"] body .shalom-tab:focus-visible{outline-color:#b84810}
+}
