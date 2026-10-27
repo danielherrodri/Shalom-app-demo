@@ -316,7 +316,7 @@ function renderProcessing() {
       "Cada trabajo, a su ritmo.",
       "Solicitudes de exportación y correos por prioridades, lotes y reintentos. Esta pantalla solo representa el comportamiento futuro.",
     ) +
-    '<p><a href="docs/pipelines-releases-v07.md">Arquitectura, límites y releases →</a></p><div data-processing-panel>' +
+    '<p><a href="docs/pipelines-releases-v07.html">Arquitectura, límites y releases →</a></p><div data-processing-panel>' +
     window.ShalomProcessing.render() +
     "</div>"
   );
@@ -420,7 +420,7 @@ function renderEmails() {
       "Mensajes que se sienten de casa.",
       "Plantillas editables inspiradas en el HTML que compartiste. Shalom conserva Noche, Crema y cobre; Kids usa blanco, fuego y oro.",
     ) +
-    `<section class="panel quiet-panel"><p>Esta galería no envía correos ni valida destinatarios. Los campos entre corchetes quedan pendientes. Los enlaces abren demostraciones.</p><p class="small">Los correos optativos incluyen preferencias y baja de ejemplo; los transaccionales explican su relación con una acción solicitada. La baja real de un clic requiere backend y proveedor de correo.</p><a href="docs/plantillas-correo-v06.md">Guía de edición y compatibilidad →</a></section><div class="toolbar">${field("mail-search", "Buscar plantilla o tipo", mailSearch, "search", 'maxlength="90"')}${select("mail-theme", "Temática", ["Todos", "Shalom", "Kids"], mailTheme)}</div><div class="row list-actions">${btn("csv-emails", "Solicitar catálogo por correo")}<a href="#admin">Volver a administración</a></div><div id="email-results">${emailResults()}</div>`
+    `<section class="panel quiet-panel"><p>Esta galería no envía correos ni valida destinatarios. Los campos entre corchetes quedan pendientes. Los enlaces abren demostraciones.</p><p class="small">Los correos optativos incluyen preferencias y baja de ejemplo; los transaccionales explican su relación con una acción solicitada. La baja real de un clic requiere backend y proveedor de correo.</p><a href="docs/plantillas-correo-v06.html">Guía de edición y compatibilidad →</a></section><div class="toolbar">${field("mail-search", "Buscar plantilla o tipo", mailSearch, "search", 'maxlength="90"')}${select("mail-theme", "Temática", ["Todos", "Shalom", "Kids"], mailTheme)}</div><div class="row list-actions">${btn("csv-emails", "Solicitar catálogo por correo")}<a href="#admin">Volver a administración</a></div><div id="email-results">${emailResults()}</div>`
   );
 }
 function editPost(id) {
@@ -490,10 +490,10 @@ function render(focus = false) {
       avisos: "Avisos",
       preferencias: "Preferencias",
       privacidad: "Privacidad",
-      admin: "Administración demo",
+      admin: "Administración de prueba",
       correos: "Plantillas de correo",
-      procesamiento: "Procesamiento demo",
-    }[r] + " · Shalom v0.7";
+      procesamiento: "Procesamiento de prueba",
+    }[r] + " · Shalom";
   if (focus) $("#main").focus();
   prefsDirty = false;
 }

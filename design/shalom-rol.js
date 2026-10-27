@@ -29,7 +29,7 @@
   const section = addDemoView('rol', 'Rol de clases', 'calendar', 'CADA DOMINGO, CADA GRUPO', 'Quién da <em>cada clase.</em>', 'El rol de los dos grupos con los cambios ya aplicados: elige un domingo, registra una permuta y revisa la asistencia.', `
 <div class="module-toolbar"><div><label for="rol-fecha">Domingo</label><select id="rol-fecha">${DOMINGOS.map(f => `<option value="${f}">${fecha(f)}</option>`).join('')}</select></div><span class="badge">Rol de ejemplo · coordinación</span></div>
 <div class="grid"><section aria-labelledby="rol-titulo"><div class="subheading"><h2 id="rol-titulo">Rol del domingo</h2><span id="rol-cambios" role="status"></span></div><div id="rol-grupos" class="menu-days"></div></section>
-<aside class="card preparation"><span class="icon-box sand">${icon('users')}</span><h2>Registrar permuta</h2><p>Para un solo domingo. Si es intercambio, indica cuándo devuelve el turno.</p>
+<section class="card preparation"><span class="icon-box sand">${icon('users')}</span><h2>Registrar permuta</h2><p>Para un solo domingo. Si es intercambio, indica cuándo devuelve el turno.</p>
 <form id="rol-form" novalidate>
 <label for="rol-grupo">Grupo</label><select id="rol-grupo">${GRUPOS.map(([g, n]) => `<option value="${g}">${g} años · ${n}</option>`).join('')}</select>
 <label for="rol-servicio">Servicio</label><select id="rol-servicio">${SERVICIOS.map(([s]) => `<option>${s}</option>`).join('')}</select>
@@ -40,7 +40,7 @@
 <label for="rol-devuelve-servicio">Servicio en que devuelve</label><select id="rol-devuelve-servicio">${SERVICIOS.map(([s]) => `<option>${s}</option>`).join('')}</select></div>
 <label for="rol-motivo">Motivo (opcional)</label><input id="rol-motivo" type="text" maxlength="120" placeholder="Viaje, enfermedad…">
 <button class="button primary" type="submit" id="rol-registrar">Registrar permuta</button>
-<p class="form-status" id="rol-estado" role="status"></p></form></aside></div>
+<p class="form-status" id="rol-estado" role="status"></p></form></section></div>
 <div class="subheading"><h2>Resumen de asistencia</h2><span>Niños por domingo y servicio · ejemplo</span></div>
 <section class="card"><table class="rol-resumen"><thead><tr><th scope="col">Domingo</th><th scope="col">4 a 6</th><th scope="col">7 a 12</th><th scope="col">Total</th></tr></thead>
 <tbody>${resumen.slice().reverse().map(([f, a, b]) => `<tr><td>${fecha(f)}</td><td><strong>${a[0]}</strong><small>${a.slice(1).join(' · ')}</small></td><td><strong>${b[0]}</strong><small>${b.slice(1).join(' · ')}</small></td><td><strong>${a[0] + b[0]}</strong></td></tr>`).join('')}</tbody></table>

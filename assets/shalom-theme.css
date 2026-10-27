@@ -152,3 +152,9 @@ body.theme-night[data-shalom-space="feedback"] .shalom-theme-control {
 }
 body.theme-night[data-shalom-space="feedback"] .error { color:#f0d5bd; }
 body.theme-night[data-shalom-space="feedback"] .shalom-feedback-skip {background:#2a221c;color:#f0f0f0;}
+
+/* Revisión de demo: textos que conservaban colores de Noche sobre fondos claros (contraste ≥4.5:1). */
+body.theme-cream[data-shalom-space="cafe"] .chip.on { color:#5e3d24; border-color:#c8956c; }
+body.theme-cream[data-shalom-space="cafe"] .timer.warn { color:#82552f; }
+body.theme-cream[data-shalom-space="kids"] :is(.sidebar-bottom,.prep-count>span,.material-counts>div) { color:#4f4a44; }
+body.theme-cream[data-shalom-space="kids"] .skip-link { background:#fff; color:#2d2d2d; border:1px solid #c8956c; }
