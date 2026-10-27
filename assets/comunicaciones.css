@@ -319,6 +319,34 @@ p {
 }
 .card.featured {
   border-top: 3px solid var(--copper);
+  grid-column: 1 / -1;
+}
+.featured-label {
+  font-weight: 700;
+}
+@media (min-width: 900px) {
+  .card.featured:has(.photo) {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    align-items: center;
+  }
+  .card.featured .photo {
+    grid-column: 1;
+    grid-row: 1;
+    height: 100%;
+    min-height: 320px;
+  }
+  .card.featured .photo-caption {
+    grid-column: 1;
+    grid-row: 2;
+  }
+  .card.featured .card-body {
+    grid-column: 2;
+    grid-row: 1 / span 2;
+  }
+  .card.featured .card-body h2 {
+    font-size: 28px;
+  }
 }
 .photo {
   width: 100%;

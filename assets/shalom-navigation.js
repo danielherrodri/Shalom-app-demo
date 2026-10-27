@@ -11,13 +11,23 @@
     { id: 'comms', label: 'Avisos', path: 'comunicaciones.html#avisos' },
     { id: 'feedback', label: 'Tu opinión', path: 'feedback.html' }
   ];
+  let currentService = '';
   const feedbackServices = new Set(['welcome','parking','cafe','events','kids','courses','advice','pastoral','giving','other']);
   function isVisitor(options) {
     if (typeof options.visitor === 'boolean') return options.visitor;
     try { return !JSON.parse(localStorage.getItem('shalom-demo-v03') || 'null')?.session; } catch (_) { return false; }
   }
+  /** «Tu opinión» abre con el servicio de la pantalla actual ya elegido. */
+  function withService(url) {
+    if (feedbackServices.has(currentService)) url.searchParams.set('service', currentService);
+    return url;
+  }
+  function isTeam() {
+    try { return ['voluntario', 'admin'].includes(JSON.parse(localStorage.getItem('shalom-demo-v03') || 'null')?.session?.role); } catch (_) { return false; }
+  }
   function mount(container, options = {}) {
     if (!container) return;
+    currentService = options.service;
     // La sección exterior no compite con las pestañas internas del módulo.
     const existing = container.querySelector('.shalom-area-nav');
     // Mantiene la apertura si la misma vista vuelve a renderizarse.
@@ -62,8 +72,7 @@
     for (const section of otherAreas) {
       const link = document.createElement('a');
       const url = new URL(section.path, root);
-      if (section.id === 'feedback' && feedbackServices.has(options.service))
-        url.searchParams.set('service', options.service);
+      if (section.id === 'feedback') withService(url);
       link.href = url.href;
       link.textContent = section.label;
       if (section.id === area) {
@@ -95,7 +104,7 @@
     mas: 'M5 5h5v5H5zM14 5h5v5h-5zM5 14h5v5H5zM14 14h5v5h-5z'
   };
   // Inicio comparte sus accesos de perfil con «Más»; cada render vuelve a llamar setLocal.
-  let local = { items: [], current: '' };
+  let local = { items: [], current: '', options: {} };
   let tabbar = null, moreSheet = null;
   const area = () => document.body.dataset.shalomSpace || 'main';
   const svg = d => `<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="${d}"/></svg>`;
@@ -106,7 +115,8 @@
     if (id === 'inicio') return inMain ? { action: 'goto', id: 'home' } : { href: new URL('index.html', root).href };
     if (id === 'eventos') return inMain ? { action: 'goto', id: 'events' } : { href: new URL('index.html#events', root).href };
     if (id === 'kids') return { href: new URL(sections[1].path, root).href };
-    if (id === 'cafe') return { href: new URL(sections[2].path, root).href };
+    // Congregantes y visitantes llegan a «Pedir»; voluntarios y administración, a Caja.
+    if (id === 'cafe') return { href: new URL(sections[2].path + (isTeam() ? '' : '#pedir'), root).href };
     return null;
   }
   function activeTab() {
@@ -143,11 +153,20 @@
       moreSheet.addEventListener('close', () => { opener.setAttribute('aria-expanded', 'false'); opener.focus(); });
       document.body.append(moreSheet);
     }
-    // Si Inicio ya ofrece su pantalla de avisos en «Más», no se repite el área Avisos.
-    const ownNotices = local.items.some(item => item.id === 'notices');
-    const others = sections.filter(s => s.id === 'feedback' || (s.id === 'comms' && !ownNotices)).map(s => ({ label: s.label, href: new URL(s.path, root).href, current: s.id === area() }));
-    const group = (title, items) => items.length ? `<div class="shalom-sheet-group"><span>${title}</span><div class="shalom-more-list">${items.map(item => control(item, 'shalom-more-item', `${esc(item.label)}<span aria-hidden="true">›</span>`)).join('')}</div></div>` : '';
-    moreSheet.innerHTML = `<div class="shalom-sheet-head"><h2 id="shalom-more-title">Más</h2><button type="button" class="shalom-sheet-close" data-sheet-close>Cerrar</button></div>${group('En esta sección', local.items.map(item => ({ ...item, current: item.id === local.current })))}${group('Áreas de Shalom', others)}`;
+    // Si Inicio ya ofrece Avisos o Tu opinión en «Más», no se repiten como áreas.
+    const own = id => local.items.some(item => item.id === id || (id === 'comms' && item.id === 'notices'));
+    const others = sections.filter(s => (s.id === 'feedback' || s.id === 'comms') && !own(s.id)).map(s => ({ label: s.label, href: (s.id === 'feedback' ? withService(new URL(s.path, root)) : new URL(s.path, root)).href, current: s.id === area() }));
+    const group = (title, items) => items.length ? `<div class="shalom-sheet-group"><span>${esc(title)}</span><div class="shalom-more-list">${items.map(item => control(item, 'shalom-more-item', `${esc(item.label)}<span aria-hidden="true">›</span>`)).join('')}</div></div>` : '';
+    const groups = new Map();
+    local.items.forEach(item => {
+      const title = item.group || 'En esta sección';
+      if (!groups.has(title)) groups.set(title, []);
+      groups.get(title).push({ ...item, href: item.id === 'feedback' && item.href ? withService(new URL(item.href, root)).href : item.href, current: item.id === local.current });
+    });
+    const p = local.options.profile;
+    const profile = p ? control({ ...p, current: p.id === local.current }, 'shalom-more-profile', `<span class="shalom-more-avatar" aria-hidden="true">${esc(p.title.charAt(0))}</span><span><strong>${esc(p.title)}</strong><small>${esc(p.subtitle)}</small></span><span class="shalom-more-cta">${esc(p.label)} ›</span>`) : '';
+    const signout = local.options.signout ? '<button type="button" class="shalom-more-signout" data-action="signout">Cerrar sesión</button>' : '';
+    moreSheet.innerHTML = `<div class="shalom-sheet-head"><h2 id="shalom-more-title">Más</h2><button type="button" class="shalom-sheet-close" data-sheet-close>Cerrar</button></div>${profile}${[...groups].map(([title, items]) => group(title, items)).join('')}${group('Áreas de Shalom', others)}${signout}`;
     opener.setAttribute('aria-expanded', 'true');
     moreSheet.showModal();
   }
@@ -171,8 +190,8 @@
     renderTabbar();
   }
   /** Accesos propios del área que van en «Más» (p. ej. los del perfil en Inicio) y la pantalla actual. */
-  function setLocal(items, current = '') {
-    local = { items: items || [], current };
+  function setLocal(items, current = '', options = {}) {
+    local = { items: items || [], current, options: options || {} };
     if (tabbar) renderTabbar();
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', startFrame);

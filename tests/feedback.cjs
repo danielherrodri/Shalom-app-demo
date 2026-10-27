@@ -13,18 +13,27 @@ const { chromium } = require('playwright');
       return file.startsWith(process.cwd() + path.sep) && fs.existsSync(file) && fs.statSync(file).isFile() ? route.fulfill({path: file}) : route.abort();
     });
     await page.goto('http://localhost/index.html');
-    await page.evaluate(() => goto('events'));
-    await page.getByRole('link', {name: 'Tu opinión'}).click();
+    // Desde «Más», Tu opinión abre con el servicio de la pantalla actual.
+    await page.evaluate(() => { state.session = {role: 'persona', kind: 'demo'}; goto('events'); });
+    await page.locator('[data-shalom-more]').click();
+    await page.locator('.shalom-more-sheet').getByRole('link', {name: 'Tu opinión'}).click();
     assert.equal(await page.locator('#service').inputValue(), 'events');
     await page.goto('http://localhost/feedback.html?service=kids');
     assert.equal(await page.locator('#service').inputValue(), 'kids');
+    // Tres pasos: «Continuar» avanza y los errores regresan al paso que corresponde.
+    const go = label => page.locator('fieldset[data-step]:not([hidden]) [data-step-go]', {hasText: label}).click();
+    await go('Continuar');
+    await go('Continuar');
     await page.locator('[name=tutor]').check();
     await page.getByRole('button', {name: 'Registrar opinión de prueba'}).click();
     assert.match(await page.locator('#form-error').innerText(), /valoración o un comentario/);
+    assert.match(await page.locator('#step-label').innerText(), /Paso 2 de 3/);
     await page.locator('#comment').fill('   ');
+    await go('Continuar');
     await page.getByRole('button', {name: 'Registrar opinión de prueba'}).click();
     assert.equal(await page.locator('article').count(), 0);
     await page.locator('#comment').fill('<img src=x onerror=alert(1)> Sugerencia ficticia');
+    await go('Continuar');
     await page.locator('#contact').check();
     await page.getByRole('button', {name: 'Registrar opinión de prueba'}).click();
     assert.equal(await page.locator('article').count(), 0);
@@ -67,11 +76,14 @@ const { chromium } = require('playwright');
     assert.equal(await page.locator('article').count(), 0);
     await page.locator('#service').selectOption('cafe');
     await page.locator('#rating').selectOption('4');
+    await go('Continuar');
+    await go('Continuar');
     await page.getByRole('button', {name: 'Registrar opinión de prueba'}).click();
     assert.match(await page.locator('.metrics').innerText(), /100%/);
     for (const [file, service] of [['cafeteria.html','cafe'], ['design/kids-paneles.html','kids'], ['comunicaciones.html','other']]) {
       await page.goto('http://localhost/' + file);
-      await page.getByRole('link', {name: 'Tu opinión'}).click();
+      await page.locator('[data-shalom-more]').click();
+      await page.locator('.shalom-more-sheet').getByRole('link', {name: 'Tu opinión'}).click();
       assert.equal(await page.locator('#service').inputValue(), service);
     }
     await page.setViewportSize({width: 1366, height: 900});

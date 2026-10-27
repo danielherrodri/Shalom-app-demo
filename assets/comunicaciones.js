@@ -230,7 +230,7 @@ function close() {
   if (opener?.isConnected) opener.focus();
 }
 function postCard(p) {
-  return `<article class="card ${p.pin ? "featured" : ""}">${p.kind === "imagen" ? `<img class="photo" src="assets/coffee-pexels-7241331.jpg" alt="${esc(p.alt)}" loading="lazy" width="1200" height="1800"><div class="photo-caption">Fotografía de referencia con licencia Pexels · No es una foto de Shalom</div>` : p.kind === "video" ? `<div class="video-poster"><span><span class="overline">COMUNIDAD SHALOM</span><br>Una casa para todos.</span><span class="play" aria-hidden="true">▷</span></div>` : ""}<div class="card-body"><div class="meta"><span>${esc(p.category)}</span>${p.pin ? "<span>Fijado</span>" : ""}<time datetime="${p.start}">${date(p.start)}</time></div><h2>${esc(p.title)}</h2><p>${esc(p.body)}</p><p class="small">Vigente hasta ${date(p.end)} · ${esc(p.audience)}${p.ministry !== "Todos" ? " · " + esc(p.ministry) : ""}</p>${p.kind === "video" ? btn("video", "Ver video de ejemplo", p.id) : ""}${p.kind === "imagen" ? '<a href="cafeteria.html" class="button secondary">Conocer la cafetería →</a>' : ""}</div></article>`;
+  return `<article class="card ${p.pin ? "featured" : ""}">${p.kind === "imagen" ? `<img class="photo" src="assets/coffee-pexels-7241331.jpg" alt="${esc(p.alt)}" loading="lazy" width="1200" height="1800"><div class="photo-caption">Fotografía de referencia con licencia Pexels · No es una foto de Shalom</div>` : p.kind === "video" ? `<div class="video-poster"><span><span class="overline">COMUNIDAD SHALOM</span><br>Una casa para todos.</span><span class="play" aria-hidden="true">▷</span></div>` : ""}<div class="card-body"><div class="meta"><span>${esc(p.category)}</span>${p.pin ? '<span class="featured-label">Destacado</span>' : ""}<time datetime="${p.start}">${date(p.start)}</time></div><h2>${esc(p.title)}</h2><p>${esc(p.body)}</p><p class="small">Vigente hasta ${date(p.end)} · ${esc(p.audience)}${p.ministry !== "Todos" ? " · " + esc(p.ministry) : ""}</p>${p.kind === "video" ? btn("video", "Ver video de ejemplo", p.id) : ""}${p.kind === "imagen" ? '<a href="cafeteria.html" class="button secondary">Conocer la cafetería →</a>' : ""}</div></article>`;
 }
 function filteredPosts() {
   return viewState === "vacío"
@@ -268,7 +268,8 @@ function results() {
       btn("state", "Reintentar", "normal") +
       "</div>"
     );
-  const list = filteredPosts();
+  // El aviso destacado va primero y ocupa todo el ancho.
+  const list = filteredPosts().sort((a, b) => Number(!!b.pin) - Number(!!a.pin));
   noticePage = Math.min(
     noticePage,
     Math.max(1, Math.ceil(list.length / pageSize)),

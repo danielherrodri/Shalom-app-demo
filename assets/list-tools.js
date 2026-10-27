@@ -118,6 +118,8 @@
     last = main;
     const screen = typeof state === "object" ? state.screen : "";
     if (["kids", "home", "login"].includes(screen)) return;
+    // Nombre visible de la pantalla («eventos», no «events»).
+    const name = typeof headerTitle === "object" && headerTitle[screen] ? headerTitle[screen].toLowerCase() : screen;
     main.querySelectorAll(".data-table").forEach((table) => {
       const body = table.tBodies[0] || table;
       const items = [...body.rows].filter((tr) => tr.querySelector("td"));
@@ -125,7 +127,7 @@
         attach(
           table.closest(".table-wrap") || table,
           items,
-          screen,
+          name,
           [...table.querySelectorAll("th")].map(text),
         );
     });
@@ -137,7 +139,7 @@
           [...grid.children].filter((n) =>
             n.matches(".item-card,section,.panel"),
           ),
-          screen,
+          name,
         );
     }
     if (screen === "giving") {
