@@ -181,4 +181,11 @@ check("Inicio sin repeticiones: una ilustración por tema, con versión Noche, y
   assert.equal((html.match(/data-action="theme"/g) || []).length, 2, "tema en la barra superior y en Mi perfil, no en la lateral");
 });
 
+check("barra superior: «Ampliar texto» del visitante en la barra de escritorio y sin etiqueta de tres líneas en celular", () => {
+  const html = read("index.html"), nav = read("assets/shalom-navigation.css");
+  assert(/if\(!state\.session\)window\.ShalomNavigation\.mount\(document\.querySelector\('\.top-actions'\),\{visitor:true/.test(html), "el visitante tiene «Ampliar texto» en la barra superior");
+  assert(/@media\(min-width:861px\)\{body\[data-shalom-space\] #main-view>\.shalom-area-nav\.shalom-area-visitor\{display:none\}\}/.test(html), "en escritorio no se repite sobre el título");
+  assert(/@media\(max-width:560px\)[\s\S]*\.shalom-area-caption \{ display:none; \}/.test(nav), "en celular la barra no repite «Más áreas de Shalom»");
+});
+
 console.log(`PASS manual celular 2026: ${ok} grupos de reglas`);
