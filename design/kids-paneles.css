@@ -78,10 +78,6 @@ header>*{flex-shrink:0}
 
 /* Perfil de ejemplo: docente o administración */
 .kids-oculta{display:none!important}
-.perfil-switch{display:flex;flex-wrap:wrap;align-items:center;gap:12px;margin:-12px 0 24px;font-size:13px;color:var(--muted)}
-.perfil-switch [role=group]{display:flex;gap:8px}
-.perfil-switch .button{width:auto;margin:0}
-.perfil-switch .button[aria-pressed=true]{background:#c8956c;border-color:#c8956c;color:#1a1a1a;font-weight:600}
-.perfil-switch [role=status]:empty{display:none}
+.perfil-sesion{display:flex;flex-wrap:wrap;align-items:center;gap:8px 12px;margin:-12px 0 24px;font-size:14px;color:var(--muted)}.perfil-sesion strong{color:var(--ink)}.perfil-sesion .button{width:auto;margin:0;min-height:44px}.perfil-sesion [role=status]{flex-basis:100%}.perfil-sesion [role=status]:empty{display:none}.perfil-opciones{list-style:none;margin:20px 0 0;padding:0;display:grid;gap:12px}.perfil-opcion{display:grid;gap:4px;width:100%;min-height:56px;padding:14px 16px;border:1px solid var(--line);border-radius:16px;background:transparent;color:var(--ink);text-align:left;text-decoration:none;font:inherit}.perfil-opcion strong{font-size:16px}.perfil-opcion span{font-size:14px;color:var(--muted)}.perfil-opcion:hover{border-color:var(--copper)}.perfil-opcion[aria-current=true]{border:2px solid var(--copper)}.perfil-nota{font-size:14px!important;margin-top:16px}
 .rol-resumen small{display:block;color:var(--muted)}
 .rol-resumen select,.rol-resumen input{min-height:44px}

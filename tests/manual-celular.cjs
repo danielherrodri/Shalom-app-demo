@@ -211,7 +211,7 @@ check("demo lista para enviar: títulos, idioma, regreso al Inicio, enlaces a do
   const pages = ["index.html", "cafeteria.html", "comunicaciones.html", "feedback.html", "design/kids-paneles.html"];
   for (const f of pages) {
     const html = read(f);
-    assert(/<html lang="es-MX">/.test(html), f + " declara es-MX");
+    assert(/<html lang="es-MX"[ >]/.test(html), f + " declara es-MX");
     assert(/<title>[^<]+ · Shalom<\/title>/.test(html), f + " usa el título «Sección · Shalom»");
     assert(!/Inicio Shalom|Shalom App/.test(html), f + " nombra el regreso como «Inicio de Shalom»");
   }
