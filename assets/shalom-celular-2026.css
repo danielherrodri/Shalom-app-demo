@@ -126,3 +126,7 @@ button:disabled, .btn:disabled, .btn[aria-disabled="true"], input:disabled, sele
   min-height: 44px;
 }
 .mobile-brand { min-height: 44px; } /* sin tocar display: en escritorio sigue oculto */
+/* Casillas: la etiqueta que las envuelve es el área táctil de 44 px; la casilla mide 24 px. */
+label:has(> input[type="checkbox"]), label:has(> input[type="radio"]) { display: flex; align-items: center; gap: 12px; min-height: 44px; }
+input[type="checkbox"], input[type="radio"] { width: 24px; height: 24px; flex-shrink: 0; margin: 0; }
+.external-link { display: inline-flex; align-items: center; min-height: 44px; font-size: 14px; }
