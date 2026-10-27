@@ -143,6 +143,6 @@ document.querySelectorAll('[data-detail]').forEach(button => {
 document.querySelector('header > strong').textContent = 'SHALOM';
 document.querySelector('.sidebar-bottom').textContent = 'Comunidad Shalom · Demostración';
 document.querySelector('.topline > span').textContent = 'Shalom / Comunidad';
-document.querySelector('#alcance > p').textContent = 'Vistas de Kids, equipo, cocina, eventos, libros, familias, acompañamiento, buzón y recogida. Cambios de prueba en memoria, sin autenticación ni operaciones reales. No ingreses información personal. Todo se reinicia al recargar.';
+document.querySelector('#alcance > p').textContent = 'Vistas por perfil: Docente (su clase, agenda, pase de lista de su grupo, permutas de sus turnos y temario) y Administración (rol completo, asistencia, alumnos, maestros y horarios). En la app real el perfil lo asigna el servidor, no este selector. También: equipo, cocina, eventos, libros, familias, acompañamiento, buzón y recogida. Cambios de prueba en memoria, sin autenticación ni operaciones reales. No ingreses información personal. Todo se reinicia al recargar.';
 const initialView = location.hash.slice(1);
 if (document.getElementById(initialView)?.classList.contains('panel')) showView(initialView);

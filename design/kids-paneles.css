@@ -75,3 +75,13 @@ a{color:#d9ad86}header{border-right:1px solid var(--line)}header>strong{display:
 body[data-shalom-space="kids"] header nav .nav-grupo{grid-column:1/-1;margin:16px 0 0;padding:0 16px;font-size:13px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
 /* El menú agrupado es más alto que la pantalla: sin esto la columna aplasta el logo (font-size 0) a 0 px. */
 header>*{flex-shrink:0}
+
+/* Perfil de ejemplo: docente o administración */
+.kids-oculta{display:none!important}
+.perfil-switch{display:flex;flex-wrap:wrap;align-items:center;gap:12px;margin:-12px 0 24px;font-size:13px;color:var(--muted)}
+.perfil-switch [role=group]{display:flex;gap:8px}
+.perfil-switch .button{width:auto;margin:0}
+.perfil-switch .button[aria-pressed=true]{background:#c8956c;border-color:#c8956c;color:#1a1a1a;font-weight:600}
+.perfil-switch [role=status]:empty{display:none}
+.rol-resumen small{display:block;color:var(--muted)}
+.rol-resumen select,.rol-resumen input{min-height:44px}
