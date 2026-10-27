@@ -196,4 +196,24 @@ check("versículo del día arriba del Inicio: solo YouVersion, sin texto bíblic
   assert(/fetch\('\/api\/v1\/scripture\/verse-of-day\/'/.test(mod) && !/blockquote>|textContent = '[^']*(Señor|Dios|Jesús)/.test(mod), "el texto solo llega de la API");
 });
 
+check("demo lista para enviar: títulos, idioma, regreso al Inicio, enlaces a documentos y horas", () => {
+  const pages = ["index.html", "cafeteria.html", "comunicaciones.html", "feedback.html", "design/kids-paneles.html"];
+  for (const f of pages) {
+    const html = read(f);
+    assert(/<html lang="es-MX">/.test(html), f + " declara es-MX");
+    assert(/<title>[^<]+ · Shalom<\/title>/.test(html), f + " usa el título «Sección · Shalom»");
+    assert(!/Inicio Shalom|Shalom App/.test(html), f + " nombra el regreso como «Inicio de Shalom»");
+  }
+  assert(/\}\[r\] \+ " · Shalom";/.test(read("assets/comunicaciones.js")), "Avisos cambia el título sin versión");
+  for (const f of ["comunicaciones.html", "assets/comunicaciones.js", "design/kids-paneles.html"])
+    assert(!/href="(?:\.\.\/)?docs\/(?!aviso-privacidad-DEMO)[\w-]+\.md"/.test(read(f)), f + " enlaza la versión HTML de los documentos (GitHub Pages)");
+  assert(/if\(!deep\|\|!headerTitle\[deep\]\)return false;[\s\S]*addEventListener\('hashchange',openDeepLink\)/.test(read("index.html")), "index.html#agenda abre la pantalla pedida");
+  assert(/fechaHora\(get\('meeting-date'\)\.value,get\('meeting-time'\)\.value\)/.test(read("design/shalom-reuniones.js")), "Reuniones muestra horas en formato 7:00 PM");
+  assert(/class="skip-link"/.test(read("design/kids-paneles.html")) && /\.skip-link:focus\{top:16px\}/.test(read("design/kids-paneles.css")), "Kids oculta «Saltar al contenido» hasta recibir el foco");
+  const theme = read("assets/shalom-theme.css");
+  assert(/theme-cream\[data-shalom-space="cafe"\] \.chip\.on/.test(theme) && /theme-cream\[data-shalom-space="kids"\] :is\(\.sidebar-bottom/.test(theme), "Crema sin textos claros de Noche en Cafetería y Kids");
+  for (const f of ["design/kids-paneles.html", "design/shalom-vistas.js", "design/shalom-reuniones.js"])
+    assert(!/<aside/.test(read(f)), f + " no anida regiones complementarias dentro del contenido");
+});
+
 console.log(`PASS manual celular 2026: ${ok} grupos de reglas`);

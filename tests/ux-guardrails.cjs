@@ -26,7 +26,7 @@ const mobileNav = communications.match(/<nav class="mobile-nav"[^>]*>([\s\S]*?)<
 assert.ok(mobileNav, 'communications must have mobile navigation');
 assert.equal((mobileNav[1].match(/data-route=/g) || []).length, 3, 'community mobile nav must expose 3 destinations');
 assert.doesNotMatch(mobileNav[1], /procesamiento|admin/, 'technical routes must not be on community mobile nav');
-assert.match(read('design/kids-paneles.html'), /href="\.\.\/index\.html">Inicio Shalom/);
+assert.match(read('design/kids-paneles.html'), /href="\.\.\/index\.html">Inicio de Shalom/);
 assert.match(css, /\.mobile-bottom button[\s\S]*?font-size:\s*\.8125rem/);
 assert.match(css, /\.mobile-nav a[\s\S]*?font-size:\s*var\(--shalom-text-nav\)/);
 const shell = read('frontend/src/ui/AppShell.tsx');

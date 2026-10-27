@@ -263,7 +263,7 @@
       document.body.append(dialog);
     }
     dialog.innerHTML =
-      '<h2 id="processing-title">Centro de procesamiento · Demo</h2><p>' +
+      '<h2 id="processing-title">Centro de procesamiento · Demostración</h2><p>' +
       escape(message) +
       "</p><div data-processing-panel>" +
       render() +
