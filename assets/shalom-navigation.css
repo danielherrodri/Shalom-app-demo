@@ -101,5 +101,45 @@ body.night[data-shalom-space="comms"] .shalom-area-actions .shalom-text-toggle {
   body[data-shalom-space] .shalom-areas-toggle::before,
   body[data-shalom-space] .shalom-area-nav[data-mobile-open="true"] .shalom-areas-toggle::before {content:none}
 }
-/* Visitante: sin barra de áreas, solo el ajuste de texto alineado a la derecha. */
-body[data-shalom-space] .shalom-area-nav.shalom-area-visitor,body.theme-night[data-shalom-space] .shalom-area-nav.shalom-area-visitor,body.night[data-shalom-space] .shalom-area-nav.shalom-area-visitor{display:flex;justify-content:flex-end;background:none;border:0;padding:0;margin:0 0 16px}
+
+/* Marco común: franja de demostración única y barra inferior compartida (celular). */
+html[data-shalom-frame="true"] body .shalom-demo-strip{display:flex;align-items:center;gap:8px;padding:4px 16px;background:#222222;border-bottom:1px solid #2e2e2e;color:#9a9a9a;font:400 12px/1.4 Inter,Arial,sans-serif}
+html[data-shalom-frame="true"] body .shalom-demo-strip .shalom-demo-dot{width:6px;height:6px;flex:none;border-radius:50%;background:#c8956c}
+html[data-shalom-frame="true"] body .shalom-demo-strip .shalom-demo-text{flex:1;min-width:0}
+html[data-shalom-frame="true"] body .shalom-demo-strip .shalom-frame-aa{margin:0;color:#f0f0f0;border-color:#4a4a4a;background:transparent}
+html[data-shalom-theme="cream"][data-shalom-frame="true"] body .shalom-demo-strip .shalom-frame-aa{color:#2d2d2d;border-color:#cfc4b4}
+html[data-shalom-theme="cream"][data-shalom-frame="true"] body .shalom-demo-strip{background:#f2ece3;border-color:#e6ddd0;color:#6b655d}
+html[data-shalom-frame="true"] body .shalom-tabbar{display:none}
+@media(max-width:860px){
+  html[data-shalom-frame="true"] body .shalom-tabbar{position:fixed;z-index:40;inset:auto 0 0;display:grid;grid-template-columns:repeat(5,minmax(0,1fr));padding:6px 4px max(10px,env(safe-area-inset-bottom));background:#1a1a1a;border-top:1px solid #2e2e2e}
+  html[data-shalom-theme="cream"][data-shalom-frame="true"] body .shalom-tabbar{background:#faf7f2;border-color:#e6ddd0}
+  html[data-shalom-frame="true"] body .shalom-tab{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;min-height:52px;padding:4px 2px;border:0;background:transparent;color:#9a9a9a;font:500 12px/1.2 Inter,Arial,sans-serif;text-decoration:none;cursor:pointer}
+  html[data-shalom-theme="cream"][data-shalom-frame="true"] body .shalom-tab{color:#6b655d}
+  html[data-shalom-frame="true"] body .shalom-tab svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+  html[data-shalom-frame="true"] body .shalom-tabbar .shalom-tab[aria-current="page"]{color:#c8956c;font-weight:700;background:transparent}
+  html[data-shalom-theme="cream"][data-shalom-frame="true"] body .shalom-tabbar .shalom-tab[aria-current="page"]{color:#82552f}
+  html[data-shalom-frame="true"] body .shalom-tab:focus-visible{outline:2px solid #c8956c;outline-offset:-2px;border-radius:16px}
+  html[data-shalom-large-text="true"][data-shalom-frame="true"] body .shalom-tab,html[data-shalom-large-text="true"][data-shalom-frame="true"] body .shalom-tab span{font-size:13px!important;line-height:1.2!important;white-space:normal}
+  html[data-shalom-frame="true"] body{padding-bottom:calc(76px + env(safe-area-inset-bottom))}
+  /* La barra común ya lleva a las otras áreas. */
+  .shalom-area-nav{display:none!important}
+}
+html[data-shalom-frame="true"] body .shalom-more-list{display:grid;border:1px solid var(--sh-line);border-radius:16px;overflow:hidden}
+html[data-shalom-frame="true"] body .shalom-more-item{display:flex;justify-content:space-between;align-items:center;min-height:52px;padding:0 16px;border:0;border-top:1px solid var(--sh-line);background:transparent;color:var(--sh-ink);font:600 16px Inter,Arial,sans-serif;text-align:left;text-decoration:none;cursor:pointer}
+html[data-shalom-frame="true"] body .shalom-more-item:first-child{border-top:0}
+html[data-shalom-frame="true"] body .shalom-more-item span{color:var(--sh-muted)}
+html[data-shalom-frame="true"] body .shalom-more-item[aria-current="page"]{color:var(--sh-accent-text)}
+/* Inicio, Kids y Avisos tienen menú lateral fijo en escritorio: la franja empieza a su derecha. */
+@media(min-width:861px){
+  html[data-shalom-frame="true"] body[data-shalom-space="main"] .shalom-demo-strip{margin-left:var(--navw)}
+  html[data-shalom-frame="true"] body[data-shalom-space="comms"] .shalom-demo-strip{margin-left:220px}
+}
+@media(min-width:921px){
+  html[data-shalom-frame="true"] body[data-shalom-space="kids"] .shalom-demo-strip{margin-left:215px}
+}
+@media(min-width:1151px){
+  html[data-shalom-frame="true"] body[data-shalom-space="comms"] .shalom-demo-strip{margin-left:242px}
+}
+@media(min-width:1201px){
+  html[data-shalom-frame="true"] body[data-shalom-space="kids"] .shalom-demo-strip{margin-left:245px}
+}

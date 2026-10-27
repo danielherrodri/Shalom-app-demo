@@ -62,10 +62,9 @@ assert.equal(list.map(x=>x.textContent).join('|'),'Inicio|Shalom Kids|Avisos|Tu 
 assert.equal(nav.children[0].className,'shalom-area-top');
 assert.equal(nav.children[0].children[1].className,'shalom-area-actions');
 assert.equal(nav.children[1].className,'shalom-area-panel');
-const quickText=nav.children[0].children[1].children[0];
-assert.equal(quickText.className,'shalom-text-toggle shalom-text-quick');
-assert.equal(quickText.attributes['data-large-text'],'');
-const toggle=nav.children[0].children[1].children[1];
+// Aa vive en la franja común; la barra de áreas solo trae el botón para mostrarlas.
+assert.equal(nav.children[0].children[1].children.length,1);
+const toggle=nav.children[0].children[1].children[0];
 assert.equal(toggle.className,'shalom-areas-toggle');
 assert.equal(toggle.attributes['aria-expanded'],'false');
 assert.equal(nav.attributes['data-mobile-open'],'false');
@@ -101,14 +100,15 @@ console.log('PASS: secciones complementarias por area, tipografia accesible y si
 
 const accessible=read('assets/shalom-accessibility.css');
 assert.match(accessible,/\.kids-context\s*>\s*\.grid\s*\{[\s\S]*?grid-template-columns:minmax\(0,1fr\)/);
-assert.doesNotMatch(accessible,/\.mobile-bottom\s*\{flex-wrap:wrap;position:static\}/);
-assert.match(accessible,/body\[data-shalom-space="main"\]\s+\.mobile-bottom\s*\{[\s\S]*?position:fixed/);
+// Marco común en celular: barra inferior fija con los mismos 5 destinos en todas las áreas.
+const navJs=read('assets/shalom-navigation.js');
+assert.match(navJs,/\[\['inicio', 'Inicio'\], \['eventos', 'Eventos'\], \['kids', 'Kids'\], \['cafe', 'Cafetería'\], \['mas', 'Más'\]\]/);
+assert.match(navCss,/\.shalom-tabbar\{position:fixed;[^}]*grid-template-columns:repeat\(5,minmax\(0,1fr\)\)/);
+assert.match(navCss,/html\[data-shalom-large-text="true"\]\[data-shalom-frame="true"\] body \.shalom-tab/,'large text keeps the shared bottom bar legible');
 assert.match(navCss,/\.shalom-area-panel\s*\{\s*display:none;/);
 assert.match(navCss,/\[data-mobile-open="true"\]\s+\.shalom-area-panel/);
-// Visitante (sin sesión de prueba): sin barra de áreas, solo «Ampliar texto».
+// Visitante (sin sesión de prueba): sin barra de áreas; Aa está en la franja común.
 const visitorHost=element('main');
 window.ShalomNavigation.mount(visitorHost,{service:'cafe',visitor:true});
-assert.equal(visitorHost.children.length,1);
-assert.equal(visitorHost.children[0].className,'shalom-area-nav shalom-area-visitor');
-assert.equal(visitorHost.children[0].children.map(x=>x.textContent).join('|'),'Ampliar texto');
+assert.equal(visitorHost.children.length,0);
 assert.ok(read('index.html').includes('visitor:!state.session'),'Inicio oculta la barra de áreas a visitantes');

@@ -72,11 +72,16 @@
             src="assets/shalom-logo-negro.png"
             alt="Shalom" /></a
         ><span class="breadcrumb">SHALOM / COMUNICACIONES</span
-        ><span class="badge">DEMOSTRACIÓN</span
         ><button data-action="theme" class="secondary mobile-theme">
           Cambiar tema
         </button>
       </header>
+      <nav class="mobile-nav" aria-label="Comunicaciones">
+        <a href="#avisos" data-route="avisos">Avisos</a
+        ><a href="#preferencias" data-route="preferencias">Preferencias</a
+        ><a href="#privacidad" data-route="privacidad">Privacidad</a
+        >
+      </nav>
       <div class="demo-note" role="region" aria-label="Aviso de demostración">
         <strong>Un espacio para explorar.</strong> No envía correos ni guarda
         consentimientos reales. Los cambios de este módulo se pierden al
@@ -93,12 +98,6 @@
         </div>
       </footer>
     </div>
-    <nav class="mobile-nav" aria-label="Comunicaciones">
-      <a href="#avisos" data-route="avisos">Avisos</a
-      ><a href="#preferencias" data-route="preferencias">Preferencias</a
-      ><a href="#privacidad" data-route="privacidad">Privacidad</a
-      >
-    </nav>
     <dialog id="dialog" aria-labelledby="dialog-title">
       <button type="button" class="dialog-dismiss" data-action="close" aria-label="Cerrar ventana" title="Cerrar">×</button>
       <div id="dialog-content"></div>

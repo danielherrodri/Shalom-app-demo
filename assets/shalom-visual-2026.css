@@ -106,7 +106,6 @@ body[data-shalom-space="kids"] :is(.quick-action[data-home-view="acompanamiento"
 body[data-shalom-space="kids"] :is(.quick-action[data-home-view="cocina"],.quick-action[data-detail="books"]){
   --sh-module:var(--sh-blue);--sh-module-soft:var(--sh-blue-soft);
 }
-body[data-shalom-space="kids"] .module-demo{border-left-color:var(--sh-fire)}
 /* Acentos de información para áreas adicionales, no nuevos CTAs primarios. */
 body[data-shalom-space="cafe"] .stat:first-child{border-left:4px solid var(--sh-olive)}
 body[data-shalom-space="cafe"] .stat:nth-child(2){border-left:4px solid var(--sh-sky)}
