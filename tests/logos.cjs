@@ -107,13 +107,33 @@ const { chromium } = require("playwright"),
         );
         rows.push({ width, theme, role: "comunicaciones", src });
       }
+      await p.goto("http://127.0.0.1:4177/design/kids-paneles.html#inicio");
+      for (const theme of ["night", "cream"]) {
+        const logo = await p.evaluate((t) => {
+          document.body.classList.toggle("theme-night", t === "night");
+          document.body.classList.toggle("theme-cream", t === "cream");
+          const s = document.querySelector("header>strong");
+          return {
+            height: s.getBoundingClientRect().height,
+            image: getComputedStyle(s).backgroundImage,
+          };
+        }, theme);
+        assert(logo.height >= 40, JSON.stringify({ width, theme, logo }));
+        assert(
+          logo.image.includes(
+            theme === "night" ? "/shalom-logo.png" : "/shalom-logo-negro.png",
+          ),
+          JSON.stringify({ width, theme, logo }),
+        );
+        rows.push({ width, theme, role: "kids", logo });
+      }
     }
     fs.writeFileSync(
       path.join(out,"Evidencia-logotipos.json"),
       JSON.stringify(rows, null, 2),
     );
     console.log(
-      "PASS: 16 perfiles/temas/tamaños con logos y contraste correctos; 4 variantes en Comunicaciones.",
+      "PASS: 16 perfiles/temas/tamaños con logos y contraste correctos; 4 variantes en Comunicaciones y 4 en Kids.",
     );
   } finally {
     await b.close();

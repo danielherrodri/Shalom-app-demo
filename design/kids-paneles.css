@@ -73,3 +73,5 @@ a{color:#d9ad86}header{border-right:1px solid var(--line)}header>strong{display:
 
 /* Menú agrupado por público (shalom-menu.js): Docentes, Coordinación Kids, Comunidad y Más. */
 body[data-shalom-space="kids"] header nav .nav-grupo{grid-column:1/-1;margin:16px 0 0;padding:0 16px;font-size:13px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+/* El menú agrupado es más alto que la pantalla: sin esto la columna aplasta el logo (font-size 0) a 0 px. */
+header>*{flex-shrink:0}
