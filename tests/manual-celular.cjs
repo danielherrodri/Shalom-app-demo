@@ -168,4 +168,17 @@ check("contenido de prueba con la voz de Shalom: datos pendientes entre corchete
   assert(!/prueba\/kids\.svg/.test(read("index.html")), "el Inicio de Iglesia no usa ilustraciones de Kids");
 });
 
+check("Inicio sin repeticiones: una ilustración por tema, con versión Noche, y enlaces que dicen a dónde llevan", () => {
+  const html = read("index.html");
+  const used = [...html.matchAll(/art\('([\w-]+)'\)|\['[^']+','([\w-]+)','[^']*\[(?:fecha|lugar)\]/g)].map((m) => m[1] || m[2]);
+  assert.equal(new Set(used).size, used.length, "ilustraciones repetidas en el Inicio: " + used);
+  for (const name of used)
+    for (const f of [name, name + "-noche"])
+      assert(fs.existsSync(path.join(root, "assets/prueba", f + ".svg")), "falta assets/prueba/" + f + ".svg");
+  assert(!/Abrir comunicaciones/.test(html), "cada aviso tiene un enlace con su propio nombre");
+  assert(/aria-label="Leer aviso: \$\{X\(n\.title\)\}">Leer aviso</.test(html), "el nombre accesible empieza con el texto visible");
+  assert.equal((html.match(/DEMOSTRACIÓN · SIN PAGOS/g) || []).length, 1, "una sola etiqueta Demostración");
+  assert.equal((html.match(/data-action="theme"/g) || []).length, 2, "tema en la barra superior y en Mi perfil, no en la lateral");
+});
+
 console.log(`PASS manual celular 2026: ${ok} grupos de reglas`);
