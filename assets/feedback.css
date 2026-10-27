@@ -2,3 +2,14 @@
 /* Ilustración según el tema: Crema por omisión, Noche cuando el tema compartido lo pide. */
 .shalom-feedback-media.solo-noche,body.theme-night .shalom-feedback-media.solo-crema{display:none}
 body.theme-night .shalom-feedback-media.solo-noche{display:block}
+
+/* Tu opinión en tres pasos. */
+#opinion-form fieldset{border:0;margin:0;padding:0;min-width:0}
+#opinion-form legend{font-size:1.25rem;font-weight:700;margin:0 0 8px;padding:0}
+.shalom-feedback-progress{margin:16px 0 8px;font-weight:600}
+.shalom-feedback-bar{height:8px;border-radius:999px;background:var(--shalom-feedback-line,#e6ddd0);overflow:hidden;margin-bottom:24px}
+.shalom-feedback-bar span{display:block;height:100%;background:#c8956c;border-radius:999px;transition:width .2s}
+.shalom-feedback-steps-nav{display:flex;flex-wrap:wrap;gap:12px;margin-top:24px}
+.shalom-feedback-steps-nav button{flex:1 1 160px}
+@media (prefers-reduced-motion:reduce){.shalom-feedback-bar span{transition:none}}
+body.theme-night .shalom-feedback-bar{background:#2e2e2e}

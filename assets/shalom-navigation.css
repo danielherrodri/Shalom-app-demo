@@ -143,3 +143,11 @@ html[data-shalom-frame="true"] body .shalom-more-item[aria-current="page"]{color
 @media(min-width:1201px){
   html[data-shalom-frame="true"] body[data-shalom-space="kids"] .shalom-demo-strip{margin-left:245px}
 }
+
+/* «Más»: tarjeta del perfil arriba y «Cerrar sesión» al final. */
+html[data-shalom-frame="true"] body .shalom-more-profile{display:grid;grid-template-columns:auto minmax(0,1fr);align-items:center;gap:4px 12px;width:100%;margin:0 0 16px;padding:16px;border:1px solid var(--sh-line);border-radius:16px;background:transparent;color:var(--sh-ink);font:inherit;text-align:left;text-decoration:none;cursor:pointer}
+html[data-shalom-frame="true"] body .shalom-more-profile strong{display:block;font-size:16px}
+html[data-shalom-frame="true"] body .shalom-more-profile small{display:block;color:var(--sh-muted);font-size:14px}
+html[data-shalom-frame="true"] body .shalom-more-avatar{grid-row:span 2;display:grid;place-items:center;width:48px;height:48px;border-radius:50%;background:var(--sh-accent);color:var(--sh-on);font-weight:700;font-size:18px}
+html[data-shalom-frame="true"] body .shalom-more-cta{grid-column:2;color:var(--sh-accent-text);font-weight:600;font-size:14px}
+html[data-shalom-frame="true"] body .shalom-more-signout{width:100%;min-height:48px;margin-top:16px;border:1px solid var(--sh-line);border-radius:999px;background:transparent;color:var(--sh-ink);font:600 16px Inter,Arial,sans-serif;cursor:pointer}
