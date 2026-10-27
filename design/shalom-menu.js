@@ -5,12 +5,12 @@ const COMUNIDAD = ['Comunidad', ['equipo', 'reuniones', 'cocina', 'acompanamient
 const MENU_POR_PERFIL = {
   docente: [
     ['', ['inicio']],
-    ['Docente', ['maestro', 'agenda', 'lista', 'rol', 'lecciones', 'reservas']],
+    ['Docente', ['maestro', 'agenda', 'lista', 'recepcion', 'rol', 'lecciones', 'reservas', 'familia']],
     COMUNIDAD,
   ],
   admin: [
     ['', ['inicio']],
-    ['Administración Kids', ['coordinacion', 'rol', 'asistencia', 'alumnos', 'maestros', 'lecciones', 'reservas', 'incidencias', 'recogida', 'libros', 'eventos', 'familias', 'configuracion']],
+    ['Administración Kids', ['coordinacion', 'recepcion', 'rol', 'asistencia', 'alumnos', 'maestros', 'lecciones', 'reservas', 'incidencias', 'recogida', 'libros', 'eventos', 'familias', 'familia', 'decisiones', 'configuracion']],
     COMUNIDAD,
   ],
 };

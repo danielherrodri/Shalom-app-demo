@@ -146,7 +146,7 @@ check("menú de Kids agrupado por público y enlaces directos a cada vista", () 
   const html = read("design/kids-paneles.html"), menu = read("design/shalom-menu.js");
   assert(html.indexOf('<script src="shalom-menu.js" type="module"></script>') > html.indexOf('<script src="shalom-inicio.js" type="module"></script>'), "el menú se ordena después de crear todas las vistas");
   const vistas = ["maestro", "reservas", "coordinacion", "equipo"];
-  for (const f of ["shalom-vistas.js", "shalom-pagos.js", "shalom-reuniones.js", "shalom-acompanamiento.js", "shalom-rol.js", "shalom-kids-perfil.js", "shalom-inicio.js"])
+  for (const f of ["shalom-vistas.js", "shalom-pagos.js", "shalom-reuniones.js", "shalom-acompanamiento.js", "shalom-rol.js", "shalom-kids-asistencia.js", "shalom-kids-perfil.js", "shalom-inicio.js"])
     for (const m of read("design/" + f).matchAll(/addDemoView\(\s*'([a-z]+)'/g)) vistas.push(m[1]);
   for (const id of vistas) assert(menu.includes(`'${id}'`), `la vista ${id} tiene grupo en el menú`);
   assert(/if \(document\.getElementById\(vistaDelEnlace\)\?\.classList\.contains\('panel'\)\) showView\(vistaDelEnlace\)/.test(menu), "#rol, #pagos… abren su vista");
