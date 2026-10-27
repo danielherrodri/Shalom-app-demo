@@ -52,7 +52,9 @@ body.night[data-shalom-space="comms"] .shalom-area-links a[aria-current="page"] 
   /* La navegación secundaria se expande cuando la persona lo solicita. */
   body[data-shalom-space] .shalom-area-nav { margin:10px 0 16px; padding:10px 12px; }
   body[data-shalom-space] .shalom-area-top { margin-bottom:0;gap:8px; }
-  body[data-shalom-space] .shalom-area-caption { flex:1;min-width:0; }
+  /* El botón «Más áreas» ya lo nombra y la barra conserva su aria-label: la etiqueta ocuparía tres líneas. */
+  body[data-shalom-space] .shalom-area-caption { display:none; }
+  body[data-shalom-space] .shalom-area-actions { flex:1;justify-content:flex-end; }
   body[data-shalom-space] .shalom-areas-toggle { display:inline-flex;white-space:nowrap; }
   body[data-shalom-space] .shalom-area-panel { display:none; }
   body[data-shalom-space] .shalom-area-nav[data-mobile-open="true"] .shalom-area-panel { display:block;margin-top:12px; }
