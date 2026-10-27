@@ -18,15 +18,11 @@
     { nombre: 'Coordinación de ejemplo', grupo: 'Ambos', perfil: 'Administración', acceso: 'Activo' },
   ];
   const grupoDe = nombre => MAESTROS.find(m => m.nombre === nombre)?.grupo || '4 a 6';
-  const ALUMNOS = GRUPOS.flatMap(([g], gi) => 'ABCDEF'.split('').map((letra, i) => ({
-    id: `K-${gi + 1}${String(i + 1).padStart(2, '0')}`, nombre: `Menor de ejemplo ${gi ? 'P' : ''}${letra}`, edad: gi ? 7 + i : 4 + (i % 3), grupo: g, impresiones: 1 + (i % 2), estado: 'Activo', notas: '',
-  })));
-  ALUMNOS.push({ id: 'K-107', nombre: 'Menor de ejemplo C', edad: 5, grupo: '4 a 6', impresiones: 1, estado: 'Posible duplicado', notas: 'Registrado dos veces en recepción' });
-  // Pase de lista: «fecha|ID» → servicio al que vino (1°, 2° o 3°). Vacío = falta.
-  const asistencia = new Map([[`${DOMINGOS[0]}|K-101`, '1°'], [`${DOMINGOS[0]}|K-102`, '2°'], [`${DOMINGOS[0]}|K-201`, '1°']]);
-  const RESUMEN_PREVIO = [['2026-10-11', [7, 9, 5], [6, 8, 3]], ['2026-10-18', [8, 8, 4], [5, 7, 4]], ['2026-10-25', [6, 8, 4], [5, 7, 3]]];
-  const BITACORA = [['2026-10-25', '8:52 AM', 'K-101', '4 a 6', '1°', 'Entrada'], ['2026-10-25', '10:41 AM', 'K-101', '4 a 6', '1°', 'Entrega'], ['2026-10-25', '10:56 AM', 'K-203', '7 a 12', '2°', 'Entrada']];
-  const SIGLA = ['1°', '2°', '3°'];
+  const A = window.ShalomKidsAsistencia;
+  const ALUMNOS = A.alumnos;
+  A.grupoDe = grupoDe;
+  const RESUMEN_PREVIO = [['2026-10-11', [7, 9, 5], [6, 8, 3], 3], ['2026-10-18', [8, 8, 4], [5, 7, 4], 0], ['2026-10-25', [6, 8, 4], [5, 7, 3], 1]];
+  const SIGLA = A.SIGLA;
   const horario = si => SERVICIOS[si][1];
 
   /** Turnos de una persona con permutas ya aplicadas: como «Asignaciones» del archivo, que se arma sola. */
@@ -57,27 +53,6 @@
     }).join('') || '<tr><td colspan="4">No tienes turnos en este periodo.</td></tr>';
   }
 
-  addDemoView('lista', 'Pase de lista', 'check', 'QUIÉN VINO HOY', 'Cada niño, <em>contado.</em>', 'Marca a qué servicio vino cada niño de tu grupo. Vacío = falta.', `
-<div class="module-toolbar"><div><label for="lista-fecha">Domingo</label><select id="lista-fecha">${DOMINGOS.map(f => `<option value="${f}">${fecha(f)}</option>`).join('')}</select></div><span class="badge" id="lista-grupo"></span></div>
-<section class="card"><table class="rol-resumen"><thead><tr><th scope="col">Niño</th><th scope="col">Servicio al que vino</th></tr></thead><tbody id="lista-filas"></tbody></table>
-<p class="form-status" id="lista-estado" role="status"></p></section>`);
-  function pintaLista() {
-    const g = grupoDe(sesion.docente), f = $('lista-fecha').value;
-    const ninos = ALUMNOS.filter(a => a.grupo === g && a.estado === 'Activo');
-    $('lista-grupo').textContent = `Solo tu grupo · ${g} años`;
-    $('lista-filas').innerHTML = ninos.map(a => `<tr><td>${esc(a.nombre)}<small>${esc(a.id)}</small></td><td><select id="lista-${a.id}" aria-label="Servicio de ${esc(a.nombre)}" data-alumno="${a.id}"><option value="">Falta</option>${SIGLA.map(x => `<option${asistencia.get(`${f}|${a.id}`) === x ? ' selected' : ''}>${x}</option>`).join('')}</select></td></tr>`).join('');
-    const presentes = ninos.filter(a => asistencia.has(`${f}|${a.id}`)).length;
-    $('lista-estado').textContent = `${presentes} de ${ninos.length} presentes (ejemplo; se reinicia al recargar).`;
-  }
-  $('lista-fecha').addEventListener('change', pintaLista);
-  $('lista-filas').addEventListener('change', event => {
-    const id = event.target.dataset.alumno;
-    if (!id || grupoDe(sesion.docente) !== ALUMNOS.find(a => a.id === id)?.grupo) return;
-    const k = `${$('lista-fecha').value}|${id}`;
-    if (event.target.value) asistencia.set(k, event.target.value); else asistencia.delete(k);
-    pintaLista();
-  });
-
   // ---------- Ambos perfiles ----------
   addDemoView('lecciones', 'Lecciones', 'book', 'EL TEMARIO DE CADA DOMINGO', 'Qué enseñamos <em>cada semana.</em>', 'Temario de los dos grupos, con la página del manual del maestro.', `
 <section class="card"><table class="rol-resumen"><thead><tr><th scope="col">Domingo</th><th scope="col">4 a 6 · Tesoros del Rey</th><th scope="col">7 a 12 · Primarios</th></tr></thead><tbody>${DOMINGOS.map((f, i) => {
@@ -86,42 +61,91 @@
   }).join('')}</tbody></table><p class="muted" id="lecciones-nota"></p></section>`);
 
   // ---------- Administración ----------
-  addDemoView('asistencia', 'Asistencia', 'users', 'CUÁNTOS NIÑOS VINIERON', 'La asistencia, <em>de un vistazo.</em>', 'Resumen por domingo y servicio de los dos grupos, y bitácora de gafetes.', `
+  addDemoView('asistencia', 'Asistencia', 'users', 'CUÁNTOS NIÑOS VINIERON', 'La asistencia, <em>de un vistazo.</em>', 'Todo sale de las lecturas de recepción y las correcciones de los docentes. Nadie captura aparte.', `
 <div class="subheading"><h2>Resumen por domingo</h2><span>Debajo de cada total: 1er · 2° · 3er servicio</span></div>
-<section class="card"><table class="rol-resumen"><thead><tr><th scope="col">Domingo</th><th scope="col">4 a 6</th><th scope="col">7 a 12</th><th scope="col">Total</th></tr></thead><tbody id="asistencia-resumen"></tbody></table>
-<p class="muted">Los domingos de noviembre suman lo que marcan los docentes en «Pase de lista».</p></section>
-<div class="subheading"><h2>Bitácora de gafetes</h2><span>Lecturas del código QR · ejemplo</span></div>
-<section class="card"><table class="rol-resumen"><thead><tr><th scope="col">Fecha y hora</th><th scope="col">Gafete</th><th scope="col">Grupo · servicio</th><th scope="col">Tipo</th></tr></thead><tbody>${BITACORA.map(([f, h, id, g, s, t]) => `<tr><td>${fecha(f)}<small>${h}</small></td><td>${id}</td><td>${g} años · ${s}</td><td>${t}</td></tr>`).join('')}</tbody></table></section>`);
+<section class="card"><table class="rol-resumen"><thead><tr><th scope="col">Domingo</th><th scope="col">Tesoros</th><th scope="col">Primarios</th><th scope="col">Total</th><th scope="col">Correcciones</th></tr></thead><tbody id="asistencia-resumen"></tbody></table>
+<p class="muted">Cuenta niños con entrada confirmada (incluye provisionales y correcciones). Avisos sin llegada se reportan aparte como «No vino».</p><p class="muted" id="asistencia-novino" role="status"></p></section>
+<div class="subheading"><h2>Bitácora</h2><span id="bitacora-titulo"></span></div>
+<section class="card"><div class="ka-modos" role="group" aria-label="Filtrar la bitácora">${['Todo', 'Entradas', 'Entregas', 'Correcciones'].map(f => `<button type="button" class="button" data-bit="${f}" aria-pressed="${f === 'Todo'}">${f}</button>`).join('')}</div>
+<table class="rol-resumen"><thead><tr><th scope="col">Hora</th><th scope="col">ID</th><th scope="col">Tipo</th><th scope="col">Origen</th><th scope="col">Quién</th></tr></thead><tbody id="bitacora-filas"></tbody></table></section>`);
+  const TIPOS_BIT = { Entradas: ['Entrada'], Entregas: ['Entrega'], Correcciones: ['Corrección', 'Unión'] };
   function pintaAsistencia() {
-    const cuenta = (f, g) => SIGLA.map(x => ALUMNOS.filter(a => a.grupo === g && asistencia.get(`${f}|${a.id}`) === x).length);
-    const filas = [...RESUMEN_PREVIO, ...DOMINGOS.map(f => [f, cuenta(f, '4 a 6'), cuenta(f, '7 a 12')])];
+    const cuenta = g => SIGLA.map((_, si) => A.delGrupo(g, si).filter(r => r.estado === 'Dentro' || r.estado === 'Entregado').length);
     const suma = xs => xs.reduce((a, b) => a + b, 0);
-    $('asistencia-resumen').innerHTML = filas.slice().reverse().map(([f, a, b]) => `<tr><td>${fecha(f)}</td><td><strong>${suma(a)}</strong><small>${a.join(' · ')}</small></td><td><strong>${suma(b)}</strong><small>${b.join(' · ')}</small></td><td><strong>${suma(a) + suma(b)}</strong></td></tr>`).join('');
+    const hoy = [A.HOY, cuenta('4 a 6'), cuenta('7 a 12'), A.corregidas()];
+    const fila = ([f, a, b, c], enCurso) => `<tr><td>${fecha(f)}${enCurso ? ' <span class="badge">En curso</span>' : ''}</td><td><strong>${suma(a)}</strong><small>${a.map(n => n || '—').join(' · ')}</small></td><td><strong>${suma(b)}</strong><small>${b.map(n => n || '—').join(' · ')}</small></td><td><strong>${suma(a) + suma(b)}</strong></td><td>${c}</td></tr>`;
+    $('asistencia-resumen').innerHTML = fila(hoy, true) + RESUMEN_PREVIO.slice().reverse().map(r => fila(r)).join('');
+    const sinLlegar = [...A.st.registros.values()].filter(r => r.estado === 'Por confirmar').length;
+    $('asistencia-novino').textContent = `${sinLlegar} ${sinLlegar === 1 ? 'aviso' : 'avisos'} sin llegada hoy; pasan a «No vino» al cerrar el servicio.`;
+    const tipos = TIPOS_BIT[A.st.bitFiltro];
+    const ev = A.st.bitacora.filter(e => !tipos || tipos.includes(e.tipo)).slice().sort((a, b) => b.m - a.m);
+    $('bitacora-titulo').textContent = `${fecha(A.HOY)} · ${ev.length} ${ev.length === 1 ? 'registro' : 'registros'}`;
+    $('bitacora-filas').innerHTML = ev.map(e => `<tr><td>${A.hm(e.m)}</td><td>${esc(e.id)}</td><td>${esc(e.tipo)}</td><td>${esc(e.origen)}</td><td>${esc(e.quien)}</td></tr>`).join('') || '<tr><td colspan="5">Sin registros con este filtro.</td></tr>';
+    document.querySelectorAll('[data-bit]').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.bit === A.st.bitFiltro)));
   }
+  $('asistencia').addEventListener('click', event => {
+    const b = event.target.closest('[data-bit]');
+    if (!b) return;
+    A.st.bitFiltro = b.dataset.bit;
+    pintaAsistencia();
+  });
 
-  addDemoView('alumnos', 'Alumnos y gafetes', 'sprout', 'REGISTRO DE NIÑOS', 'Cada niño, <em>en su grupo.</em>', 'Registro y gafetes. Aquí solo se corrigen edad, grupo o notas; los duplicados se unen con cuidado.', `
-<div class="module-toolbar"><div><label for="alumnos-grupo">Grupo</label><select id="alumnos-grupo"><option value="">Todos</option>${GRUPOS.map(([g, n]) => `<option value="${g}">${g} años · ${n}</option>`).join('')}</select></div><span id="alumnos-total" role="status"></span></div>
-<section class="card"><table class="rol-resumen"><thead><tr><th scope="col">Gafete</th><th scope="col">Niño</th><th scope="col">Grupo</th><th scope="col">Estado</th></tr></thead><tbody id="alumnos-filas"></tbody></table>
-<p class="form-status" id="alumnos-estado" role="status"></p><p class="muted">Sin fotos ni datos de contacto en esta lista. Las fotos de gafete se consultan en el expediente autorizado.</p></section>`);
+  addDemoView('alumnos', 'Alumnos y gafetes', 'sprout', 'REGISTRO DE NIÑOS', 'Cada niño, <em>en su grupo.</em>', 'Registro y gafetes. Aquí solo se corrigen edad, grupo o notas; los duplicados y provisionales se unen con cuidado.', `
+<p class="notice" id="alumnos-aviso" role="status"></p>
+<div class="module-toolbar"><div><label for="alumnos-buscar">Nombre o ID</label><input id="alumnos-buscar" type="search" autocomplete="off"></div><div><label for="alumnos-grupo">Grupo</label><select id="alumnos-grupo"><option value="">Todos</option>${GRUPOS.map(([g, n]) => `<option value="${g}">${g} años · ${n}</option>`).join('')}</select></div><span id="alumnos-total" role="status"></span></div>
+<div class="ka-modos" role="group" aria-label="Filtrar por estado" id="alumnos-filtros"></div>
+<div class="grid"><section class="card"><table class="rol-resumen"><thead><tr><th scope="col">Gafete</th><th scope="col">Niño</th><th scope="col">Estado</th><th scope="col">Acción</th></tr></thead><tbody id="alumnos-filas"></tbody></table>
+<p class="form-status" id="alumnos-estado" role="status"></p><p class="muted">Sin fotos ni datos de contacto en esta lista. Las fotos de gafete se consultan en el expediente autorizado.</p></section>
+<section class="card" id="alumnos-gafete" aria-labelledby="gafete-t"><h2 id="gafete-t">Gafete</h2><div id="gafete-cuerpo"><p class="muted">Elige un niño de la lista para ver su gafete.</p></div></section></div>`);
+  let filtroEstado = 'Todos', gafeteId = '';
+  const ESTADOS = [['Todos', () => true], ['Provisionales', a => a.provisional], ['Posible duplicado', a => a.estado === 'Posible duplicado'], ['Gafete inactivo', a => a.gafete === 'inactivo']];
+  const visibles = () => {
+    const g = $('alumnos-grupo').value, q = $('alumnos-buscar').value.trim().toLowerCase();
+    return ALUMNOS.filter(a => a.estado !== 'Unido' && (!g || a.grupo === g) && (!q || a.nombre.toLowerCase().includes(q) || a.id.toLowerCase().includes(q)));
+  };
   function pintaAlumnos() {
-    const g = $('alumnos-grupo').value, lista = ALUMNOS.filter(a => !g || a.grupo === g);
-    $('alumnos-total').textContent = `${lista.length} niños de ejemplo`;
-    $('alumnos-filas').innerHTML = lista.map(a => `<tr><td>${esc(a.id)}<small>${a.impresiones} ${a.impresiones === 1 ? 'impresión' : 'impresiones'}</small></td><td>${esc(a.nombre)}<small>${a.edad} años${a.notas ? ` · ${esc(a.notas)}` : ''}</small></td><td><select id="grupo-${a.id}" aria-label="Grupo de ${esc(a.nombre)}" data-grupo="${a.id}">${GRUPOS.map(([x]) => `<option${x === a.grupo ? ' selected' : ''}>${x}</option>`).join('')}</select></td><td>${a.estado === 'Posible duplicado' ? `<button class="button" type="button" data-unir="${a.id}">Unir con su registro</button>` : `<span class="badge">${esc(a.estado)}</span>`}</td></tr>`).join('');
+    const lista = visibles(), prov = ALUMNOS.filter(a => a.provisional).length, dup = ALUMNOS.filter(a => a.estado === 'Posible duplicado').length;
+    $('alumnos-aviso').textContent = prov || dup ? `${prov} ${prov === 1 ? 'registro provisional' : 'registros provisionales'} por completar y ${dup} ${dup === 1 ? 'posible duplicado' : 'posibles duplicados'}.` : 'Sin pendientes de registro.';
+    $('alumnos-filtros').innerHTML = ESTADOS.map(([n, f]) => `<button type="button" class="button" data-estado="${n}" aria-pressed="${n === filtroEstado}">${n} · ${lista.filter(f).length}</button>`).join('');
+    const filas = lista.filter(ESTADOS.find(([n]) => n === filtroEstado)[1]);
+    $('alumnos-total').textContent = `${filas.length} niños de ejemplo`;
+    $('alumnos-filas').innerHTML = filas.map(a => `<tr><td><button class="ka-enlace" type="button" data-gafete="${a.id}">${esc(a.id)}</button><small>${a.gafete === 'temporal' ? 'Temporal · ' : ''}${a.impresiones} ${a.impresiones === 1 ? 'impresión' : 'impresiones'}</small></td><td>${esc(a.nombre)}${A.atencion(a)}<small>${A.NOMBRE_GRUPO[a.grupo]} · ${a.edad} años${a.notas ? ` · ${esc(a.notas)}` : ''}</small></td><td><span class="badge">${esc(a.estado)}</span></td><td>${a.provisional || a.estado === 'Posible duplicado' ? `<button class="button" type="button" data-unir="${a.id}">${a.provisional ? 'Completar o unir' : 'Unir con su registro'}</button>` : a.gafete === 'inactivo' ? `<button class="button" type="button" data-reimprime="${a.id}">Imprimir nuevo</button>` : `<button class="button" type="button" data-gafete="${a.id}">Ver</button>`}</td></tr>`).join('') || '<tr><td colspan="4">Ningún niño coincide con el filtro.</td></tr>';
+    pintaGafete();
+  }
+  function pintaGafete() {
+    const a = ALUMNOS.find(x => x.id === gafeteId);
+    if (!a) return;
+    const lecturas = A.st.bitacora.filter(e => e.id === a.id && e.tipo === 'Entrada').length;
+    $('gafete-cuerpo').innerHTML = `<div class="ka-qr" aria-hidden="true"></div><p><strong>${esc(a.nombre)}</strong><small>${A.NOMBRE_GRUPO[a.grupo]} · ${esc(a.id)}</small></p><dl class="ka-datos"><dt>Impresiones</dt><dd>${a.impresiones}</dd><dt>Lecturas hoy</dt><dd>${lecturas}</dd><dt>Estado del gafete</dt><dd>${a.gafete === 'activo' ? 'Activo' : a.gafete === 'temporal' ? 'Temporal' : 'Inactivo'}</dd></dl>
+<div class="ka-acciones"><button class="button primary" type="button" data-reimprime="${a.id}">Reimprimir gafete</button><button class="button" type="button" data-desactiva="${a.id}"${a.gafete === 'inactivo' ? ' disabled' : ''}>Desactivar gafete perdido</button></div>
+<p class="muted">Al reimprimir, el QR anterior deja de funcionar. Quedará la ${a.impresiones + 1}ª impresión.</p>`;
   }
   $('alumnos-grupo').addEventListener('change', pintaAlumnos);
-  $('alumnos-filas').addEventListener('change', event => {
-    const a = ALUMNOS.find(x => x.id === event.target.dataset.grupo);
-    if (!a) return;
-    a.grupo = event.target.value;
-    pintaAlumnos();
-    $('alumnos-estado').textContent = `${a.nombre} pasa al grupo de ${a.grupo} años (ejemplo).`;
+  $('alumnos-buscar').addEventListener('input', pintaAlumnos);
+  $('alumnos').addEventListener('click', event => {
+    const t = event.target.closest('button'); if (!t) return;
+    const d = t.dataset, a = ALUMNOS.find(x => x.id === (d.gafete || d.unir || d.reimprime || d.desactiva));
+    if (d.estado) { filtroEstado = d.estado; pintaAlumnos(); }
+    if (d.gafete) { gafeteId = d.gafete; pintaGafete(); $('alumnos-estado').textContent = ''; }
+    if (d.reimprime) { a.impresiones += 1; if (a.gafete === 'inactivo') a.gafete = 'activo'; if (a.estado === 'Gafete inactivo') a.estado = 'Activo'; gafeteId = a.id; pintaAlumnos(); $('alumnos-estado').textContent = `Gafete de ${a.nombre} reimpreso (${a.impresiones}ª impresión). El QR anterior ya no funciona (ejemplo).`; }
+    if (d.desactiva) { a.gafete = 'inactivo'; a.estado = 'Gafete inactivo'; pintaAlumnos(); $('alumnos-estado').textContent = `Gafete de ${a.nombre} desactivado. Si se escanea, recepción verá «Gafete desactivado».`; }
+    if (d.unir) abreUnir(a);
   });
-  $('alumnos-filas').addEventListener('click', event => {
-    const a = ALUMNOS.find(x => x.id === event.target.closest('[data-unir]')?.dataset.unir);
-    if (!a) return;
-    a.estado = 'Unido'; a.notas = 'Unido a K-103';
-    pintaAlumnos();
-    $('alumnos-estado').textContent = `${a.id} quedó unido a K-103. La asistencia se cuenta en un solo registro (ejemplo).`;
+  /** Une un provisional o duplicado con el registro que queda; la asistencia de hoy se cuenta una sola vez. */
+  function abreUnir(a) {
+    const destinos = ALUMNOS.filter(x => x.id !== a.id && x.estado !== 'Unido' && !x.provisional && x.estado !== 'Posible duplicado');
+    const sugerido = a.duplicaDe || destinos.find(x => x.id === 'K-109')?.id || destinos[0].id;
+    A.modal('Unir registros', `<h3>¿${esc(a.nombre)} es el mismo niño que otro registro?</h3><form id="unir-form"><label for="unir-destino">Registro que queda</label><select id="unir-destino">${destinos.map(x => `<option value="${x.id}"${x.id === sugerido ? ' selected' : ''}>${esc(x.id)} · ${esc(x.nombre)} · ${x.edad} años</option>`).join('')}</select>
+<p class="muted">Se retira ${esc(a.id)}. La asistencia de hoy pasa al registro que queda y se cuenta una sola vez. El gafete temporal deja de funcionar. Queda en la bitácora.</p><div class="ka-acciones"><button class="button primary" type="submit">Unir registros</button><button class="button" type="button" data-cerrar="1">Cancelar</button></div><input type="hidden" id="unir-id" value="${a.id}"></form>`);
+  }
+  A.dialogo.addEventListener('submit', event => {
+    if (event.target.id !== 'unir-form') return;
+    event.preventDefault();
+    const id = $('unir-id').value, destino = $('unir-destino').value;
+    A.unir(id, destino);
+    A.dialogo.close();
+    A.pintaTodo();
+    $('alumnos-estado').textContent = `${id} quedó unido a ${destino}. La asistencia se cuenta en un solo registro.`;
   });
 
   addDemoView('maestros', 'Maestros', 'users', 'EL EQUIPO DOCENTE', 'Quién enseña <em>y cuándo.</em>', 'Lista del equipo, su perfil de acceso, clases asignadas y próxima fecha.', `
@@ -151,7 +175,7 @@
     $('maestros-estado').textContent = `${nombre} se agregó como ${perfil.toLowerCase()} (ejemplo; no se envió la invitación).`;
   });
 
-  addDemoView('configuracion', 'Configuración', 'grid', 'HORARIOS DE LOS SERVICIOS', 'Un cambio, <em>en todas partes.</em>', 'Si cambia un horario, se modifica aquí y se actualiza en el rol, las agendas y el pase de lista.', `
+  addDemoView('configuracion', 'Configuración', 'grid', 'HORARIOS DE LOS SERVICIOS', 'Un cambio, <em>en todas partes.</em>', 'Si cambia un horario, se modifica aquí y se actualiza en el rol, las agendas y Recepción.', `
 <section class="card"><form id="config-form" novalidate><table class="rol-resumen"><thead><tr><th scope="col">Servicio</th><th scope="col">Inicio</th><th scope="col">Fin</th></tr></thead><tbody>${SERVICIOS.map(([s], si) => {
     const [ini, fin] = ['09:00', '10:30', '11:00', '12:30', '13:00', '14:30'].slice(si * 2, si * 2 + 2);
     return `<tr><td>${s}</td><td><input type="time" id="config-ini-${si}" aria-label="Inicio del ${s}" value="${ini}" required></td><td><input type="time" id="config-fin-${si}" aria-label="Fin del ${s}" value="${fin}" required></td></tr>`;
@@ -167,10 +191,11 @@
   });
 
   function pintaTodo() {
-    pintaAgenda(); pintaLista(); pintaAsistencia(); pintaAlumnos(); pintaMaestros();
+    pintaAgenda(); pintaAsistencia(); pintaAlumnos(); pintaMaestros();
     $('lecciones-nota').textContent = sesion.perfil === 'admin' ? 'Administración actualiza el temario al inicio de cada periodo.' : 'Consulta: el temario lo actualiza administración.';
   }
   window.addEventListener('shalom-kids-rol', pintaTodo);
   window.addEventListener('shalom-kids-perfil', pintaTodo);
+  window.addEventListener('shalom-kids-asistencia', pintaTodo);
   pintaTodo();
 })();
