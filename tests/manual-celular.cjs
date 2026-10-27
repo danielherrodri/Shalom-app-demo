@@ -188,4 +188,12 @@ check("barra superior: «Ampliar texto» del visitante en la barra de escritorio
   assert(/@media\(max-width:560px\)[\s\S]*\.shalom-area-caption \{ display:none; \}/.test(nav), "en celular la barra no repite «Más áreas de Shalom»");
 });
 
+check("versículo del día arriba del Inicio: solo YouVersion, sin texto bíblico propio", () => {
+  const html = read("index.html"), mod = read("assets/versiculo-del-dia.js");
+  assert(html.indexOf("data-daily-verse") > 0 && html.indexOf("data-daily-verse") < html.indexOf('class="feature home-hero"'), "la tarjeta va antes de la acción principal");
+  assert(html.includes('<script type="importmap">{"imports":{"dompurify":"./assets/vendor/purify.es.mjs"}}</script>') && html.includes('from "./assets/versiculo-del-dia.js"'), "Inicio carga el módulo compartido con DOMPurify");
+  assert(/from '\.\.\/assets\/versiculo-del-dia\.js'/.test(read("design/shalom-inicio.js")), "Kids usa el mismo módulo");
+  assert(/fetch\('\/api\/v1\/scripture\/verse-of-day\/'/.test(mod) && !/blockquote>|textContent = '[^']*(Señor|Dios|Jesús)/.test(mod), "el texto solo llega de la API");
+});
+
 console.log(`PASS manual celular 2026: ${ok} grupos de reglas`);

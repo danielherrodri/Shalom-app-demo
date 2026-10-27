@@ -4,7 +4,7 @@ Demostración estática con datos exclusivamente ficticios, para revisar desde c
 
 ## Vistas
 
-- Inicio y tarjeta prevista para el versículo del día de YouVersion.
+- Inicio con la tarjeta del versículo del día de YouVersion; la misma tarjeta (`assets/versiculo-del-dia.js`) aparece arriba del Inicio de Iglesia (`index.html`).
 - Clase Kids y equipo que imparte cada sesión.
 - Reservas de clase, cancelación y conteo para materiales y dulces.
 - Coordinación, acompañamiento e incidencias de prueba.
