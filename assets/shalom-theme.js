@@ -2,17 +2,20 @@
    Nunca guarda roles, consentimientos, datos de menores ni formularios. */
 (function () {
   'use strict';
-  const KEY = 'shalom-ui-theme-v1';
+  // Kids abre en tema claro y guarda su propia preferencia; el resto de las áreas comparte una.
+  const kids = document.documentElement.dataset.shalomThemeScope === 'kids';
+  const KEY = kids ? 'shalom-ui-theme-kids-v1' : 'shalom-ui-theme-v1';
   const valid = value => value === 'cream' || value === 'night';
   function read() {
     try {
       const saved = localStorage.getItem(KEY);
       if (valid(saved)) return saved;
+      if (kids) return 'cream';
       // Respeta la preferencia de Inicio que existia antes de unificar los modulos.
       const previous = JSON.parse(localStorage.getItem('shalom-demo-v03') || 'null');
       if (previous && valid(previous.theme)) return previous.theme;
     } catch (_) { /* Navegacion privada o almacenamiento restringido. */ }
-    return 'night';
+    return kids ? 'cream' : 'night';
   }
   let current = read();
   document.documentElement.dataset.shalomTheme = current;

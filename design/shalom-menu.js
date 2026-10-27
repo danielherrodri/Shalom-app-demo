@@ -50,14 +50,26 @@ showView = (name, moveFocus = false) => {
   mostrarVista(permitida ? name : 'inicio', moveFocus);
 };
 
-const selector = document.createElement('div');
-selector.className = 'perfil-switch';
-selector.innerHTML = `<span id="perfil-titulo">Ver como</span><div role="group" aria-labelledby="perfil-titulo">${Object.entries(PERFILES).map(([id, nombre]) => `<button type="button" class="button" data-perfil="${id}">${nombre}</button>`).join('')}</div><span id="perfil-aviso" role="status"></span>`;
-document.querySelector('.topline').after(selector);
+// Sesión de ejemplo: el perfil se elige como en un inicio de sesión, no con un «Ver como».
+const sesionBarra = document.createElement('div');
+sesionBarra.className = 'perfil-sesion';
+sesionBarra.innerHTML = `<span class="perfil-etiqueta">Sesión de ejemplo</span><strong id="perfil-nombre"></strong><button type="button" class="button" id="perfil-cambiar" aria-haspopup="dialog" aria-controls="perfil-dialogo">Cambiar perfil</button><span id="perfil-aviso" role="status"></span>`;
+document.querySelector('.topline').after(sesionBarra);
+const dialogo = document.createElement('dialog');
+dialogo.id = 'perfil-dialogo';
+dialogo.setAttribute('aria-labelledby', 'perfil-dialogo-titulo');
+dialogo.innerHTML = `<h2 id="perfil-dialogo-titulo">Entrar con un perfil de ejemplo</h2><p>En la versión real entrarás con tu cuenta y verás solo lo que te corresponde. Aquí no hay contraseñas: elige un perfil para probarlo.</p>
+<ul class="perfil-opciones">
+<li><a class="perfil-opcion" href="../index.html#login"><strong>Congregante</strong><span>Inicio, tu familia y la asistencia de tus hijos en Kids</span></a></li>
+<li><a class="perfil-opcion" href="../index.html#login"><strong>Voluntario</strong><span>Tu agenda de servicio y estacionamiento</span></a></li>
+${Object.entries(PERFILES).map(([id, nombre]) => `<li><button type="button" class="perfil-opcion" data-perfil="${id}"><strong>${nombre}</strong><span>${id === 'admin' ? 'Coordinación de Kids: rol, asistencia, alumnos y docentes' : 'Tu grupo, tu agenda, el rol y las lecciones'}</span></button></li>`).join('')}
+</ul><p class="perfil-nota">Congregante y Voluntario se abren en el inicio de sesión de Shalom.</p><button type="button" class="button" id="perfil-cerrar">Cerrar</button>`;
+document.body.append(dialogo);
 
 function cambiaPerfil(nuevo, moveFocus = false) {
   perfil = nuevo;
-  selector.querySelectorAll('[data-perfil]').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.perfil === perfil)));
+  document.getElementById('perfil-nombre').textContent = PERFILES[perfil];
+  dialogo.querySelectorAll('[data-perfil]').forEach(b => b.setAttribute('aria-current', String(b.dataset.perfil === perfil)));
   const url = new URL(location.href);
   if (perfil === 'admin') url.searchParams.set('perfil', 'admin'); else url.searchParams.delete('perfil');
   history.replaceState(null, '', url);
@@ -67,9 +79,13 @@ function cambiaPerfil(nuevo, moveFocus = false) {
   const actual = location.hash.slice(1);
   showView(vistasDe(perfil).includes(actual) ? actual : 'inicio', moveFocus);
 }
-selector.addEventListener('click', event => {
+document.getElementById('perfil-cambiar').addEventListener('click', () => dialogo.showModal());
+document.getElementById('perfil-cerrar').addEventListener('click', () => dialogo.close());
+dialogo.addEventListener('click', event => {
   const boton = event.target.closest('[data-perfil]');
-  if (boton && boton.dataset.perfil !== perfil) cambiaPerfil(boton.dataset.perfil, true);
+  if (!boton) return;
+  dialogo.close();
+  if (boton.dataset.perfil !== perfil) cambiaPerfil(boton.dataset.perfil, true);
 });
 
 cambiaPerfil(perfil);

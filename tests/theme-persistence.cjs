@@ -8,11 +8,11 @@ const themeSource = fs.readFileSync(path.join(root, 'assets/shalom-theme.js'), '
 const read = filename => fs.readFileSync(path.join(root, filename), 'utf8');
 const KEY = 'shalom-ui-theme-v1';
 
-function boot(space, storage, blocked = false) {
+function boot(space, storage, blocked = false, scope) {
   const classes = new Set();
   const events = new Map();
   const page = { dataset: {}, classList: { toggle(name, yes) { if (yes) classes.add(name); else classes.delete(name); } } };
-  const html = { dataset: {} };
+  const html = { dataset: scope ? { shalomThemeScope: scope } : {} };
   const button = { textContent: '', attrs: {}, setAttribute(k, v) { this.attrs[k] = v; } };
   const meta = { attrs: {}, setAttribute(k, v) { this.attrs[k] = v; } };
   page.dataset.shalomSpace = space;
@@ -75,6 +75,17 @@ storage.set(KEY, 'unexpected');
 assert.equal(boot('kids', storage).api.get(), 'cream', 'invalid shared value falls back to legacy or default');
 assert.equal(boot('cafe', new Map(), true).api.get(), 'night', 'storage blocked still uses a safe default');
 
+// Kids abre en tema claro y guarda su propia preferencia, sin cambiar la del resto de las áreas.
+const shared = new Map([[KEY, 'night']]);
+const kidsPage = boot('kids', shared, false, 'kids');
+assert.equal(kidsPage.api.get(), 'cream', 'Kids opens in its light theme');
+assert.ok(kidsPage.classes.has('theme-cream'));
+kidsPage.api.toggle();
+assert.equal(shared.get('shalom-ui-theme-kids-v1'), 'night', 'Kids keeps its own choice');
+assert.equal(shared.get(KEY), 'night', 'Kids does not change the shared theme');
+assert.equal(boot('kids', new Map(), true, 'kids').api.get(), 'cream', 'Kids light theme without storage');
+assert.match(read('design/kids-paneles.html'), /data-shalom-theme-scope="kids"/);
+
 const required = [
   ['index.html', 'assets/shalom-theme.js'],
   ['cafeteria.html', 'assets/shalom-theme.js'],
@@ -93,4 +104,4 @@ assert.match(read('feedback.html'), /data-shalom-theme-toggle/);
 assert.ok(read('design/kids-paneles.js').includes('a[href^="#"]'), 'Kids external Inicio link is not intercepted');
 assert.match(read('index.html'), /state\.theme=window\.ShalomTheme\.get\(\)/);
 assert.match(read('assets/comunicaciones.js'), /window\.ShalomTheme\.toggle\(\)/);
-console.log('Tema compartido: migración, guardado, 4 módulos, sincronización y modo privado correctos.');
+console.log('Tema compartido: migración, guardado, 4 módulos, sincronización, modo privado y Kids claro correctos.');
