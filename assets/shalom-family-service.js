@@ -7,7 +7,7 @@ function familyEventOpen(id) {
 }
 const teacherSessions = (() => {
   const start = new Date(); start.setHours(12,0,0,0); start.setDate(start.getDate()+((7-start.getDay())%7));
-  return [0,1,2].map((i)=>{const d=new Date(start);d.setDate(d.getDate()+7*i);return {id:'clase-'+i,date:d.toLocaleDateString('es-MX',{weekday:'long',day:'numeric',month:'long'}),group:i===1?'Primarios (7–12)':'Tesoros del Rey (4–6)',time:i===1?'Segundo servicio · 12:00':'Primer servicio · 9:00',unavailable:false};});
+  return [0,1,2].map((i)=>{const d=new Date(start);d.setDate(d.getDate()+7*i);return {id:'clase-'+i,date:d.toLocaleDateString('es-MX',{weekday:'long',day:'numeric',month:'long'}),group:i===1?'Primarios (7–12)':'Tesoros del Rey (4–6)',time:i===1?'Segundo servicio · 12:00 PM':'Primer servicio · 9:00 AM',unavailable:false};});
 })();
 function teacherAgenda() {
   if (!state.session || !['voluntario','admin'].includes(state.role)) return home();

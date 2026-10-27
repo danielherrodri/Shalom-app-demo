@@ -127,6 +127,9 @@ check("errores bajo el campo con ícono; estados vacíos que dicen qué pasa", (
 check("horas en formato 9:00 AM", () => {
   assert(/hour12:true/.test(read("cafeteria.html")) && /hour12:true/.test(read("assets/notifications.js")));
   assert(/const h12=/.test(read("design/shalom-acompanamiento.js")) && !/time\+'–'\+time/.test(read("design/shalom-acompanamiento.js")));
+  // Horas escritas a mano en textos visibles: siempre con AM/PM.
+  for (const f of ["design/kids-paneles.html", "design/kids-paneles.js", "assets/shalom-family-service.js"])
+    for (const m of read(f).matchAll(/(?:· |–|<strong>\d+ \w+ · )(\d{1,2}:\d{2})(?! ?[AP]M)/g)) assert.fail(`${f}: hora ${m[1]} sin AM/PM`);
 });
 
 check("rol de clases de Kids: mismo cálculo que el sistema (permutas simples e intercambios)", () => {
@@ -148,6 +151,21 @@ check("menú de Kids agrupado por público y enlaces directos a cada vista", () 
 
 check("enlaces sueltos con área táctil de 44 px", () => {
   assert(/\.row > a, \.list-actions > a, \.panel > a:not\(\.btn\):not\(\.button\), \.preview > a,\s*\.shalom-feedback-heading > a \{[^}]*min-height: 44px/.test(read("assets/shalom-celular-2026.css")));
+});
+
+check("casillas con etiqueta táctil de 44 px", () => {
+  const css = read("assets/shalom-celular-2026.css");
+  assert(/label:has\(> input\[type="checkbox"\]\)[^{]*\{[^}]*min-height: 44px/.test(css));
+  assert(/input\[type="checkbox"\], input\[type="radio"\] \{ width: 24px; height: 24px;/.test(css));
+  assert(/\.external-link \{[^}]*min-height: 44px/.test(css));
+});
+
+check("contenido de prueba con la voz de Shalom: datos pendientes entre corchetes, sin lorem ipsum", () => {
+  for (const f of ["index.html", "feedback.html"]) {
+    assert(!/lorem|ipsum/i.test(read(f)), f + " sin lorem ipsum");
+    assert(/\[fecha\]/.test(read(f)), f + " marca los datos pendientes entre corchetes");
+  }
+  assert(!/prueba\/kids\.svg/.test(read("index.html")), "el Inicio de Iglesia no usa ilustraciones de Kids");
 });
 
 console.log(`PASS manual celular 2026: ${ok} grupos de reglas`);
