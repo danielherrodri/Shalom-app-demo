@@ -105,3 +105,10 @@ assert.doesNotMatch(accessible,/\.mobile-bottom\s*\{flex-wrap:wrap;position:stat
 assert.match(accessible,/body\[data-shalom-space="main"\]\s+\.mobile-bottom\s*\{[\s\S]*?position:fixed/);
 assert.match(navCss,/\.shalom-area-panel\s*\{\s*display:none;/);
 assert.match(navCss,/\[data-mobile-open="true"\]\s+\.shalom-area-panel/);
+// Visitante (sin sesión de prueba): sin barra de áreas, solo «Ampliar texto».
+const visitorHost=element('main');
+window.ShalomNavigation.mount(visitorHost,{service:'cafe',visitor:true});
+assert.equal(visitorHost.children.length,1);
+assert.equal(visitorHost.children[0].className,'shalom-area-nav shalom-area-visitor');
+assert.equal(visitorHost.children[0].children.map(x=>x.textContent).join('|'),'Ampliar texto');
+assert.ok(read('index.html').includes('visitor:!state.session'),'Inicio oculta la barra de áreas a visitantes');

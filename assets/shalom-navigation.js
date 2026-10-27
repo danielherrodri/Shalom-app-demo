@@ -12,6 +12,11 @@
     { id: 'feedback', label: 'Tu opinión', path: 'feedback.html' }
   ];
   const feedbackServices = new Set(['welcome','parking','cafe','events','kids','courses','advice','pastoral','giving','other']);
+  // Quien entra como visitante (sin sesión de prueba) solo ve su menú lateral, sin la barra de áreas.
+  function isVisitor(options) {
+    if (typeof options.visitor === 'boolean') return options.visitor;
+    try { return !JSON.parse(localStorage.getItem('shalom-demo-v03') || 'null')?.session; } catch (_) { return false; }
+  }
   function mount(container, options = {}) {
     if (!container) return;
     // La sección exterior no compite con las pestañas internas del módulo.
@@ -20,6 +25,18 @@
     const wasExpanded = existing?.getAttribute?.('data-mobile-open') === 'true';
     if (existing) existing.remove();
     const area = document.body.dataset.shalomSpace || 'main';
+    if (isVisitor(options)) {
+      const bar = document.createElement('div');
+      bar.className = 'shalom-area-nav shalom-area-visitor';
+      const textOnly = document.createElement('button');
+      textOnly.type = 'button';
+      textOnly.className = 'shalom-text-toggle shalom-text-quick';
+      textOnly.setAttribute('data-large-text', '');
+      textOnly.textContent = 'Ampliar texto';
+      bar.append(textOnly);
+      place(container, bar, options);
+      return;
+    }
     const nav = document.createElement('nav');
     nav.className = 'shalom-area-nav';
     nav.setAttribute('aria-label', 'Más áreas de Shalom');
@@ -74,16 +91,12 @@
     }
     panel.append(links);
     nav.append(panel);
-    if (options.after) {
-      const anchor = container.querySelector(options.after);
-      if (anchor) {
-        anchor.insertAdjacentElement('afterend', nav);
-        window.ShalomNotifications?.mountInNavigation?.();
-        window.ShalomAccessibility?.apply();
-        return;
-      }
-    }
-    container.prepend(nav);
+    place(container, nav, options);
+  }
+  function place(container, nav, options) {
+    const anchor = options.after && container.querySelector(options.after);
+    if (anchor) anchor.insertAdjacentElement('afterend', nav);
+    else container.prepend(nav);
     window.ShalomNotifications?.mountInNavigation?.();
     window.ShalomAccessibility?.apply();
   }
