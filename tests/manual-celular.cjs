@@ -136,4 +136,18 @@ check("rol de clases de Kids: mismo cálculo que el sistema (permutas simples e 
   assert(!/localStorage|fetch\(/.test(rol), "datos ficticios en memoria: no guarda ni envía nada");
 });
 
+check("menú de Kids agrupado por público y enlaces directos a cada vista", () => {
+  const html = read("design/kids-paneles.html"), menu = read("design/shalom-menu.js");
+  assert(html.indexOf('<script src="shalom-menu.js" type="module"></script>') > html.indexOf('<script src="shalom-inicio.js" type="module"></script>'), "el menú se ordena después de crear todas las vistas");
+  const vistas = ["maestro", "reservas", "coordinacion", "equipo"];
+  for (const f of ["shalom-vistas.js", "shalom-pagos.js", "shalom-reuniones.js", "shalom-acompanamiento.js", "shalom-rol.js", "shalom-inicio.js"])
+    for (const m of read("design/" + f).matchAll(/addDemoView\(\s*'([a-z]+)'/g)) vistas.push(m[1]);
+  for (const id of vistas) assert(menu.includes(`'${id}'`), `la vista ${id} tiene grupo en el menú`);
+  assert(/if \(document\.getElementById\(vistaDelEnlace\)\?\.classList\.contains\('panel'\)\) showView\(vistaDelEnlace\)/.test(menu), "#rol, #pagos… abren su vista");
+});
+
+check("enlaces sueltos con área táctil de 44 px", () => {
+  assert(/\.row > a, \.list-actions > a, \.panel > a:not\(\.btn\):not\(\.button\), \.preview > a,\s*\.shalom-feedback-heading > a \{[^}]*min-height: 44px/.test(read("assets/shalom-celular-2026.css")));
+});
+
 console.log(`PASS manual celular 2026: ${ok} grupos de reglas`);
