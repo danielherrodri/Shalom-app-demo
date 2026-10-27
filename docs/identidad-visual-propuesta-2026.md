@@ -1,6 +1,6 @@
 # Shalom · aplicación del manual visual 2026
 
-**Estado:** implementación de diseño propuesta para el prototipo público. No sustituye la guía oficial ni constituye aprobación institucional de las paletas complementarias.
+**Estado:** paletas complementarias aprobadas para el prototipo público el 27 de octubre de 2026 (`palette2026` en `assets/design-tokens.json`). No sustituyen la guía oficial: el cobre de Iglesia y el fuego/oro de Kids siguen siendo los acentos principales.
 
 **Fuente de diseño:** `Manual_Identidad_Visual_Shalom_2026.pdf` (octubre de 2026, 20 páginas; la página 14 «Reglas para celular» es nueva). Para trabajar con producción, solicitar aprobación y conservar una versión maestra de la guía.
 

@@ -8,7 +8,7 @@ La navegación principal conecta cinco espacios: **Inicio**, **Shalom Kids**, **
 
 ## Evolución visual institucional 2026 (propuesta)
 
-La identidad oficial permanece: Inter, logotipos originales blanco/negro, Noche/Crema y cobre en Iglesia; fuego/oro en Kids. La nueva hoja compartida `assets/shalom-visual-2026.css` usa colores complementarios **propuestos, no aprobados institucionalmente**, para distinguir funciones sin sacrificar contraste. Alcance, tokens, accesibilidad y asignación semántica: [Identidad visual 2026](docs/identidad-visual-propuesta-2026.md). No modifica el Shalom Kids operativo.
+La identidad oficial permanece: Inter, logotipos originales blanco/negro, Noche/Crema y cobre en Iglesia; fuego/oro en Kids. La nueva hoja compartida `assets/shalom-visual-2026.css` usa los colores complementarios **aprobados para el prototipo** el 27 de octubre de 2026 para distinguir funciones sin sacrificar contraste. Alcance, tokens, accesibilidad y asignación semántica: [Identidad visual 2026](docs/identidad-visual-propuesta-2026.md). No modifica el Shalom Kids operativo.
 
 ## Explorar
 
@@ -77,7 +77,8 @@ Documentación anterior de cafetería: [diseño v0.4](docs/cafeteria-diseno-mvp-
 
 - **Marco común en celular** (fase 1 de la propuesta UX): una sola franja «Versión de demostración» con el botón **Aa** y la misma barra inferior en las cinco áreas (Inicio · Eventos · Kids · Cafetería · Más). Las pestañas propias de Cafetería y Avisos van arriba del contenido; los accesos del perfil en Inicio, Avisos y Tu opinión están en «Más».
 - **Aa · Accesibilidad**: tema Noche o Crema, texto Normal, Grande o Máximo y «Reducir movimiento». Las preferencias se conservan en este navegador al recargar y navegar.
-- Los colores nuevos de la propuesta están en `assets/design-tokens.json` bajo `proposed2026`, marcados como **no aprobados**.
+- Los colores nuevos de la propuesta están en `assets/design-tokens.json` bajo `palette2026`, aprobados para el prototipo.
+- **Inicio reordenado** (fase 2): bienvenida con «Soy nuevo» y «Ver reunión en línea», reuniones con «Cómo llegar», próximos eventos, cuatro accesos rápidos (Kids, Cafetería, Estacionamiento, Tu opinión), novedades y el versículo del día al final. Horarios y dirección quedan entre corchetes hasta tener los oficiales.
 - **Eventos → Inscripción familiar**: seleccionar integrantes verificados, editar o cancelar la selección y respetar cupos sin duplicados. Solo registra perfiles ficticios en este navegador.
 - **Voluntario / Administración → Mi agenda docente**: próximos servicios ilustrativos, preparación de clase y acceso a asistencia con grupo preseleccionado. Los avisos de ausencia y su retiro son simulaciones en memoria, sin notificar a coordinación ni asignar suplentes.
 

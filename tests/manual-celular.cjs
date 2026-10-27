@@ -191,9 +191,17 @@ check("una franja de demostración con el botón Aa, igual en todas las áreas",
   assert(/@media\(max-width:560px\)[\s\S]*\.shalom-area-caption \{ display:none; \}/.test(nav), "en celular la barra no repite «Más áreas de Shalom»");
 });
 
-check("versículo del día arriba del Inicio: solo YouVersion, sin texto bíblico propio", () => {
+check("Inicio en orden: bienvenida, reuniones, eventos, accesos rápidos, novedades y versículo al final", () => {
+  const html = read("index.html"), body = html.slice(html.indexOf("function home(){"), html.indexOf("function parking(){"));
+  const order = ['class="home-welcome"', 'class="home-meetings"', 'class="home-events"', 'class="home-priorities"', 'class="home-announcements"', "${versiculo()}"].map((m) => body.indexOf(m));
+  assert(order.every((n, i) => n > 0 && (i === 0 || n > order[i - 1])), "orden de secciones: " + order);
+  assert(/data-action="visit">Soy nuevo</.test(body) && /data-action="online">Ver reunión en línea</.test(body) && /data-action="directions">Cómo llegar</.test(body), "acciones de quien visita por primera vez");
+  assert(/MEETINGS=\[\['Domingo','\[hora\]'\]/.test(html), "horarios pendientes entre corchetes, no inventados");
+});
+
+check("versículo del día en Inicio: solo YouVersion, sin texto bíblico propio", () => {
   const html = read("index.html"), mod = read("assets/versiculo-del-dia.js");
-  assert(html.indexOf("data-daily-verse") > 0 && html.indexOf("data-daily-verse") < html.indexOf('class="feature home-hero"'), "la tarjeta va antes de la acción principal");
+  assert(html.includes("data-daily-verse"), "Inicio muestra la tarjeta del versículo");
   assert(html.includes('<script type="importmap">{"imports":{"dompurify":"./assets/vendor/purify.es.mjs"}}</script>') && html.includes('from "./assets/versiculo-del-dia.js"'), "Inicio carga el módulo compartido con DOMPurify");
   assert(/from '\.\.\/assets\/versiculo-del-dia\.js'/.test(read("design/shalom-inicio.js")), "Kids usa el mismo módulo");
   assert(/fetch\('\/api\/v1\/scripture\/verse-of-day\/'/.test(mod) && !/blockquote>|textContent = '[^']*(Señor|Dios|Jesús)/.test(mod), "el texto solo llega de la API");
