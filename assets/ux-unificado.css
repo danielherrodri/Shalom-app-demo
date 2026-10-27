@@ -86,9 +86,10 @@ body[data-shalom-space="main"] .tile h3{font-size:var(--shalom-card-title);line-
 body[data-shalom-space="main"] .tile p{font-size:.875rem;line-height:1.55}
 body[data-shalom-space="main"] :is(.label,.tiny,.form-help,.announcement-meta){font-size:.875rem;line-height:1.5}
 body[data-shalom-space="main"] :is(.tile,.priority-grid .tile){min-height:144px;padding:var(--shalom-space-4)}
-body[data-shalom-space="main"] .home-hero{margin-bottom:var(--shalom-space-4)}
+body[data-shalom-space="main"] .home-welcome{margin-bottom:var(--shalom-space-5)}
 body[data-shalom-space="main"] .home-priorities{margin-bottom:var(--shalom-space-5)}
-body[data-shalom-space="main"] .priority-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:var(--shalom-space-3)}
+body[data-shalom-space="main"] .priority-grid{grid-template-columns:repeat(4,minmax(0,1fr));gap:var(--shalom-space-3)}
+@media(max-width:1100px){body[data-shalom-space="main"] .priority-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
 body[data-shalom-space="main"] .priority-grid .tile{
   border-color:var(--borderstrong);background:var(--surface2);
 }
@@ -101,7 +102,6 @@ body[data-shalom-space="main"] .family-confirmation .family-confirmation-list{
 }
 body[data-shalom-space="main"] .family-confirmation .family-confirmation-list li{font-size:1rem;padding:4px 0}
 @media(max-width:540px){
-  body[data-shalom-space="main"] .priority-grid,
   body[data-shalom-space="main"] .service-grid{grid-template-columns:minmax(0,1fr)}
   body[data-shalom-space="main"] :is(.tile,.priority-grid .tile){min-height:auto;padding:18px}
   body[data-shalom-space="main"] .tile h3{font-size:var(--shalom-card-title)}

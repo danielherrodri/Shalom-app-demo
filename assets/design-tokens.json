@@ -66,8 +66,8 @@
   "semantics": {
     "note": "Operational states are not additional brand colors; never rely on color alone. The red «live» token is reserved for «En línea»."
   },
-  "proposed2026": {
-    "status": "Propuesta de la revisión UX para celular. No aprobada institucionalmente: no sustituye la paleta oficial.",
+  "palette2026": {
+    "status": "Aprobada para el prototipo el 27 de octubre de 2026. Complementa la paleta oficial; el cobre de Iglesia y el fuego/oro de Kids siguen siendo los acentos principales.",
     "use": "Estados y categorías (verificado, pendiente, avisos), tonos fuego/oro del modo Noche y neutros del tema Kids claro.",
     "themes": {
       "night": {"fuego-900": "#ffb48a", "fuego-700": "#f08a4b", "fuego-200": "#5a2a10", "fuego-50": "#34201a", "on-fuego": "#1c1712", "oro-400": "#a8862e", "oro-200": "#4a3a14", "oro-50": "#2c2416", "on-oro": "#2c2416", "bosque-700": "#24483e", "bosque-500": "#4e8069", "bosque-50": "#e4f0e7", "cielo-700": "#244f65", "cielo-500": "#4c88a4", "cielo-50": "#e8f3f7", "ciruela-700": "#6e3d62", "ciruela-500": "#ad789c", "ciruela-50": "#f5e9f1", "oliva-700": "#5a5b28", "oliva-500": "#888b43", "oliva-50": "#f2f0da", "turquesa-700": "#14635a", "turquesa-500": "#25a895", "turquesa-50": "#d9f5ee", "azul-700": "#2e4f88", "azul-500": "#5b8de0", "azul-50": "#e8f0ff", "violeta-700": "#5f3c90", "violeta-500": "#9871d6", "violeta-50": "#f1e9ff", "verde-700": "#3b651c", "verde-500": "#80af3c", "verde-50": "#edf6df", "coral-700": "#973d38", "coral-500": "#df7667", "coral-50": "#fdece8"},
