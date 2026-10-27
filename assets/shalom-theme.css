@@ -64,10 +64,10 @@ body.theme-cream[data-shalom-space="kids"] header nav a:hover {
 body.theme-cream[data-shalom-space="kids"] :is(.stat,.card,.notice,.quick-action,.teacher-card,.menu-day,.preparation,.teacher-portrait,.scripture-actions .button) {
   background:#fff;color:#2d2d2d;border-color:#cfc4b4;
 }
-body.theme-cream[data-shalom-space="kids"] :is(.hero,.daily-scripture,.soft-banner,.teacher-next,.booking-note,.module-demo) {
+body.theme-cream[data-shalom-space="kids"] :is(.hero,.daily-scripture,.soft-banner,.teacher-next,.booking-note) {
   background:#f2ece3;color:#4a4a4a;border-color:#cfc4b4;
 }
-body.theme-cream[data-shalom-space="kids"] :is(.icon-box,.sand,.amber,.lilac,.badge,.menu-date,.hero small,.demo-pill) {
+body.theme-cream[data-shalom-space="kids"] :is(.icon-box,.sand,.amber,.lilac,.badge,.menu-date,.hero small) {
   background:#e6ddd0;color:#5e3d24;border-color:#d9ad86;
 }
 body.theme-cream[data-shalom-space="kids"] :is(.hero-label,.hero p,.hero small,.hero-art svg,.soft-banner p,.teacher-next p,.teacher-next li span,.teacher-next small,.preparation p,.daily-scripture #daily-content p,.daily-scripture small,.daily-verse-art figcaption,.form-status) {
@@ -85,7 +85,6 @@ body.theme-cream[data-shalom-space="kids"] :is(.care-request-card .button[aria-p
   background:#e6ddd0;color:#5e3d24;
 }
 body.theme-cream[data-shalom-space="kids"] :is(.planning-line,.teacher-next li,.teacher-bio) { border-color:#cfc4b4; }
-body.theme-cream[data-shalom-space="kids"] .module-demo { color:#4a4a4a !important; }
 body.theme-cream[data-shalom-space="kids"] .scripture-actions .button:hover { background:#f2ece3; }
 body.theme-cream[data-shalom-space="kids"] .meeting-preview-content { color:#2d2d2d; }
 body.theme-cream[data-shalom-space="kids"] .topline { color:#4a4a4a; }

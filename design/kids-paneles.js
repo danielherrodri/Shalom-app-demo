@@ -22,7 +22,7 @@ document.getElementById('titulo-maestro').innerHTML = 'Un lugar para <em>crecer.
 document.getElementById('titulo-coordinacion').innerHTML = 'Kids, en <em>armonía.</em>';
 maestro.querySelector('h1 + p').textContent = 'Todo listo para acompañar a tu grupo, un pequeño paso a la vez.';
 maestro.querySelector('.notice').insertAdjacentHTML('beforebegin', `<div class="hero"><div><span class="hero-label">${icon('sprout')} TU GRUPO DE HOY</span><h2>Semillas</h2><p>Aprendemos, compartimos y crecemos juntos.</p><small>Sesión ficticia · Domingo · 10:00 AM a 12:00 PM</small></div><div class="hero-art" aria-hidden="true">${icon('sprout')}</div></div>`);
-document.querySelector('main').insertAdjacentHTML('afterbegin', '<div class="topline"><span>Shalom / Kids</span><span class="demo-pill">● Boceto interactivo · datos ficticios</span></div>');
+document.querySelector('main').insertAdjacentHTML('afterbegin', '<div class="topline"><span>Shalom / Kids</span></div>');
 const nav = document.querySelector('header nav');
 // Celular (pág. 14 del manual): las vistas quedan detrás de un botón «Menú», en una sola columna.
 nav.id = 'kids-vistas';

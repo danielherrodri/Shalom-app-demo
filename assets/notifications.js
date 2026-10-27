@@ -11,8 +11,10 @@
   const host=document.createElement('div');host.id='notification-entry';document.body.append(host);
   const dialog=document.createElement('dialog');dialog.id='notification-dialog';dialog.setAttribute('aria-labelledby','notification-title');document.body.append(dialog);
   function mountInNavigation(){
-    const slot=document.querySelector('.shalom-area-nav .shalom-area-actions');
-    if(slot&&host.parentNode!==slot)slot.append(host);
+    // La campana va junto al botón Aa de la franja común; sin franja, en la barra de áreas.
+    const strip=document.querySelector('.shalom-demo-strip');
+    const slot=strip||document.querySelector('.shalom-area-nav .shalom-area-actions');
+    if(slot&&host.parentNode!==slot)slot.insertBefore(host,strip?strip.querySelector('.shalom-frame-aa'):null);
   }
   function refresh(){
     const r=role();host.hidden=!r;const count=visible().filter(n=>!isRead(n)).length;

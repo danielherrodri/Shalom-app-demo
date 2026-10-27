@@ -27,7 +27,6 @@ assert.ok(mobileNav, 'communications must have mobile navigation');
 assert.equal((mobileNav[1].match(/data-route=/g) || []).length, 3, 'community mobile nav must expose 3 destinations');
 assert.doesNotMatch(mobileNav[1], /procesamiento|admin/, 'technical routes must not be on community mobile nav');
 assert.match(read('design/kids-paneles.html'), /href="\.\.\/index\.html">Inicio de Shalom/);
-assert.match(css, /\.mobile-bottom button[\s\S]*?font-size:\s*\.8125rem/);
 assert.match(css, /\.mobile-nav a[\s\S]*?font-size:\s*var\(--shalom-text-nav\)/);
 const shell = read('frontend/src/ui/AppShell.tsx');
 const attendance = read('frontend/src/main.tsx');
@@ -39,7 +38,7 @@ assert.match(attendance, /g\.results\.length === 1/, 'single group should be aut
 assert.match(attendance, /aria-live="polite"/);
 const accessibility = read('assets/shalom-accessibility.css');
 assert.match(accessibility, /\.kids-context\s*>\s*\.grid\s*\{[\s\S]*?grid-template-columns:minmax\(0,1fr\)/, 'Kids cards need full width on phones');
-assert.match(accessibility, /data-shalom-large-text="true"[\s\S]*?\.mobile-bottom\s*\{[\s\S]*?position:fixed/, 'large text must preserve mobile bottom navigation');
+assert.match(read('assets/shalom-navigation.css'), /data-shalom-large-text="true"\]\[data-shalom-frame="true"\] body \.shalom-tab[\s\S]*?font-size:13px!important/, 'large text must keep the shared bottom bar legible');
 console.log('UX guardrails: responsive Kids cards, persistent mobile nav, areas and accessibility passed.');
 
 const kidsCss=read('design/kids-paneles.css');
@@ -61,5 +60,5 @@ assert.match(visual,/--sh-status:var\(--sh-attention\)/, 'pending is not coral c
 assert.match(visual,/quick-action\[data-detail="incident"\]/, 'incidents have distinct attention semantics');
 console.log('PASS: SPARK main priorities, Kids reflow, accessible typography and family summary');
 
-assert.match(main,/aria-label="Accesos frecuentes de tu perfil"/,'mobile navigation is contextual, not a second global menu');
+assert.match(main,/window\.ShalomNavigation\.setLocal\(mobileNav\(\)/,'profile shortcuts live in «Más» of the shared bottom bar');
 assert.match(main,/state\.session&&state\.role===/, 'technical processing control stays with demo administration');

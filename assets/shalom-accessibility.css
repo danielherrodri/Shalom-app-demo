@@ -1,4 +1,5 @@
-.shalom-text-toggle { margin-top:10px; min-height:44px; padding:8px 12px; border:1px solid currentColor; border-radius:16px; color:inherit; background:transparent; cursor:pointer; font:600 15px/1.4 Inter,Arial,sans-serif; }
+.shalom-text-toggle { margin-top:10px; width:44px; height:44px; min-height:44px; padding:0; border:1px solid currentColor; border-radius:50%; color:inherit; background:transparent; cursor:pointer; font:700 15px/1 Inter,Arial,sans-serif; flex:none; }
+html[data-shalom-large-text="true"] body .shalom-text-toggle {font-size:15px!important;line-height:1!important;width:44px;height:44px}
 .shalom-text-toggle:focus-visible {outline:2px solid #c8956c;outline-offset:2px}
 html[data-shalom-large-text="true"] body :is(p,li,label,input,select,textarea,button,a,td,th,small,span,.tiny,.muted,.lead,.tag,.badge,.mini-help,.sub,.label,.eyebrow,.shalom-area-caption) {font-size:18px!important;line-height:1.6!important;letter-spacing:normal!important}
 html[data-shalom-large-text="true"] body :is(h1,.h1) {font-size:clamp(32px,5vw,48px)!important;line-height:1.2!important}
@@ -6,20 +7,15 @@ html[data-shalom-large-text="true"] body :is(h2,.section-title) {font-size:26px!
 html[data-shalom-large-text="true"] body h3 {font-size:22px!important;line-height:1.4!important}
 html[data-shalom-large-text="true"] body :is(button,a,.rowline,.item-foot,.top-actions) {white-space:normal;overflow-wrap:anywhere;height:auto}
 html[data-shalom-large-text="true"] body :is(.btnrow,.topline,.rowline,.item-foot) {flex-wrap:wrap}
-/* El texto ampliado no debe desmontar ni desplazar la navegación inferior. */
-@media(max-width:860px) {
-  html[data-shalom-large-text="true"] body[data-shalom-space="main"] .mobile-bottom {
-    position:fixed;display:grid;grid-template-columns:repeat(5,minmax(0,1fr));
-  }
-  html[data-shalom-large-text="true"] body[data-shalom-space="main"] .mobile-bottom button,
-  html[data-shalom-large-text="true"] body[data-shalom-space="main"] .mobile-bottom button span {
-    font-size:clamp(12px,3.2vw,14px)!important;line-height:1.25!important;
-    white-space:normal;overflow-wrap:normal;
-  }
-  html[data-shalom-large-text="true"] body[data-shalom-space="main"] .app-content {
-    padding-bottom:135px;
-  }
-}
+/* Máximo: un paso más que Grande, con los mismos ajustes de diseño. */
+html[data-shalom-text-size="max"] body :is(p,li,label,input,select,textarea,button,a,td,th,small,span,.tiny,.muted,.lead,.tag,.badge,.mini-help,.sub,.label,.eyebrow,.shalom-area-caption) {font-size:21px!important;line-height:1.6!important}
+html[data-shalom-text-size="max"] body :is(h1,.h1) {font-size:clamp(34px,7vw,52px)!important}
+html[data-shalom-text-size="max"] body :is(h2,.section-title) {font-size:29px!important}
+html[data-shalom-text-size="max"] body h3 {font-size:24px!important}
+/* Reducir movimiento, elegido en el panel Aa (además de la preferencia del sistema). */
+html[data-shalom-reduce-motion="true"] *, html[data-shalom-reduce-motion="true"] *::before, html[data-shalom-reduce-motion="true"] *::after {animation:none!important;transition:none!important;scroll-behavior:auto!important}
+/* El tema se elige en el panel Aa: los botones sueltos de tema ya no se muestran. */
+:is([data-shalom-theme-toggle], body[data-shalom-space="comms"] .topbar [data-action="theme"], body .top-actions [data-action="theme"]) {display:none!important}
 /* Las tarjetas de menores requieren una columna completa en teléfono,
    incluso con textos grandes o zoom del navegador. */
 @media(max-width:640px) {
@@ -38,3 +34,28 @@ html[data-shalom-large-text="true"] body :is(.btnrow,.topline,.rowline,.item-foo
 .family-choice span {flex:1;min-width:0}
 .family-choice small {display:block}
 .agenda-actions {display:flex;flex-wrap:wrap;gap:10px;margin-top:16px}
+
+/* Hoja inferior compartida (Accesibilidad y Más), con los colores del tema activo. */
+html[data-shalom-frame="true"] body .shalom-sheet{--sh-bg:#1a1a1a;--sh-ink:#f0f0f0;--sh-muted:#9a9a9a;--sh-line:#2e2e2e;--sh-strong:#4a4a4a;--sh-accent:#c8956c;--sh-accent-text:#c8956c;--sh-on:#1a1a1a;
+  margin:auto auto 0;width:min(560px,100%);max-width:100%;max-height:85vh;overflow:auto;border:1px solid var(--sh-line);border-bottom:0;border-radius:24px 24px 0 0;padding:16px 16px max(24px,env(safe-area-inset-bottom));
+  background:var(--sh-bg);color:var(--sh-ink);font-family:Inter,Arial,sans-serif;box-sizing:border-box}
+html[data-shalom-theme="cream"][data-shalom-frame="true"] body .shalom-sheet{--sh-bg:#faf7f2;--sh-ink:#2d2d2d;--sh-muted:#6b655d;--sh-line:#e6ddd0;--sh-strong:#cfc4b4;--sh-accent:#c8956c;--sh-accent-text:#82552f;--sh-on:#1a1a1a}
+html[data-shalom-frame="true"] body .shalom-sheet::backdrop{background:rgba(0,0,0,.55)}
+html[data-shalom-frame="true"] body .shalom-sheet-head{display:flex;justify-content:space-between;align-items:center;gap:16px;margin-bottom:20px}
+html[data-shalom-frame="true"] body .shalom-sheet-head::before{content:"";position:absolute;left:50%;top:8px;width:40px;height:4px;margin-left:-20px;border-radius:999px;background:var(--sh-strong)}
+html[data-shalom-frame="true"] body .shalom-sheet h2{margin:12px 0 0;font-size:24px;line-height:1.2;color:var(--sh-ink)}
+html[data-shalom-frame="true"] body .shalom-sheet button{font-family:inherit;color:var(--sh-ink);cursor:pointer}
+html[data-shalom-frame="true"] body .shalom-sheet-close{min-height:44px;padding:0 16px;border:1px solid var(--sh-strong);border-radius:999px;background:transparent;font-weight:600}
+html[data-shalom-frame="true"] body .shalom-sheet-group{display:grid;gap:8px;margin-bottom:20px}
+html[data-shalom-frame="true"] body .shalom-sheet-group>span{font-size:14px;font-weight:600;color:var(--sh-muted)}
+html[data-shalom-frame="true"] body .shalom-segmented{display:grid;grid-auto-flow:column;grid-auto-columns:1fr;gap:4px;padding:4px;border:1px solid var(--sh-line);border-radius:999px}
+html[data-shalom-frame="true"] body .shalom-segmented button{min-height:44px;border:0;border-radius:999px;background:transparent;font-weight:600;font-size:15px}
+html[data-shalom-frame="true"] body .shalom-segmented button[aria-pressed="true"]{background:var(--sh-accent);color:var(--sh-on);font-weight:700}
+html[data-shalom-frame="true"] body .shalom-sheet-switch{display:flex;justify-content:space-between;align-items:center;gap:16px}
+html[data-shalom-frame="true"] body .shalom-sheet-switch span{display:grid;gap:2px}
+html[data-shalom-frame="true"] body .shalom-sheet-switch small{font-size:13px;color:var(--sh-muted)}
+html[data-shalom-frame="true"] body [data-a11y-motion]{flex:none;width:52px;height:32px;padding:4px;border:0;border-radius:999px;background:var(--sh-strong);display:flex;justify-content:flex-start}
+html[data-shalom-frame="true"] body [data-a11y-motion]::after{content:"";width:24px;height:24px;border-radius:50%;background:var(--sh-ink)}
+html[data-shalom-frame="true"] body [data-a11y-motion][aria-checked="true"]{background:var(--sh-accent);justify-content:flex-end}
+html[data-shalom-frame="true"] body [data-a11y-motion][aria-checked="true"]::after{background:var(--sh-on)}
+html[data-shalom-frame="true"] body .shalom-sheet :focus-visible{outline:2px solid var(--sh-accent);outline-offset:2px}

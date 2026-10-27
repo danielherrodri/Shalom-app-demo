@@ -75,7 +75,9 @@ Documentación anterior de cafetería: [diseño v0.4](docs/cafeteria-diseno-mvp-
 
 ## Ideas integradas del primer prototipo
 
-- **Ampliar texto** en las cinco áreas. Conserva la preferencia local al recargar y navegar, independientemente del tema.
+- **Marco común en celular** (fase 1 de la propuesta UX): una sola franja «Versión de demostración» con el botón **Aa** y la misma barra inferior en las cinco áreas (Inicio · Eventos · Kids · Cafetería · Más). Las pestañas propias de Cafetería y Avisos van arriba del contenido; los accesos del perfil en Inicio, Avisos y Tu opinión están en «Más».
+- **Aa · Accesibilidad**: tema Noche o Crema, texto Normal, Grande o Máximo y «Reducir movimiento». Las preferencias se conservan en este navegador al recargar y navegar.
+- Los colores nuevos de la propuesta están en `assets/design-tokens.json` bajo `proposed2026`, marcados como **no aprobados**.
 - **Eventos → Inscripción familiar**: seleccionar integrantes verificados, editar o cancelar la selección y respetar cupos sin duplicados. Solo registra perfiles ficticios en este navegador.
 - **Voluntario / Administración → Mi agenda docente**: próximos servicios ilustrativos, preparación de clase y acceso a asistencia con grupo preseleccionado. Los avisos de ausencia y su retiro son simulaciones en memoria, sin notificar a coordinación ni asignar suplentes.
 

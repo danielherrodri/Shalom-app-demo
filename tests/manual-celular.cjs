@@ -94,7 +94,10 @@ check("barra inferior: máximo 5 destinos, ícono y texto, sin iniciar sesión",
     assert(n <= 5, "más de 5 destinos: " + group.slice(0, 60));
   }
   assert(!/navItem\('login'/.test(nav), "iniciar sesión debe vivir solo en el encabezado");
-  assert(/aria-current="\$\{state\.screen===id\?'page':'false'\}" data-action="goto" data-id="\$\{id\}">\$\{I\(ic\)\}<span>/.test(html), "ícono, texto y aria-current");
+  // Barra común: 5 destinos con ícono y texto; los accesos del perfil van a «Más».
+  const marco = read("assets/shalom-navigation.js");
+  assert(/const inner = `\$\{svg\(ICONS\[id\]\)\}<span>\$\{label\}<\/span>`/.test(marco) && /aria-current="page"/.test(marco), "ícono, texto y aria-current");
+  assert(/window\.ShalomNavigation\.setLocal\(mobileNav\(\)/.test(html), "Inicio pasa sus accesos de perfil a «Más»");
 });
 
 check("un nombre por concepto, en español", () => {
@@ -181,10 +184,10 @@ check("Inicio sin repeticiones: una ilustración por tema, con versión Noche, y
   assert.equal((html.match(/data-action="theme"/g) || []).length, 2, "tema en la barra superior y en Mi perfil, no en la lateral");
 });
 
-check("barra superior: «Ampliar texto» del visitante en la barra de escritorio y sin etiqueta de tres líneas en celular", () => {
-  const html = read("index.html"), nav = read("assets/shalom-navigation.css");
-  assert(/if\(!state\.session\)window\.ShalomNavigation\.mount\(document\.querySelector\('\.top-actions'\),\{visitor:true/.test(html), "el visitante tiene «Ampliar texto» en la barra superior");
-  assert(/@media\(min-width:861px\)\{body\[data-shalom-space\] #main-view>\.shalom-area-nav\.shalom-area-visitor\{display:none\}\}/.test(html), "en escritorio no se repite sobre el título");
+check("una franja de demostración con el botón Aa, igual en todas las áreas", () => {
+  const nav = read("assets/shalom-navigation.css"), js = read("assets/shalom-navigation.js"), a11y = read("assets/shalom-accessibility.js");
+  assert(/Versión de demostración · datos de ejemplo<\/span><button type="button" class="shalom-text-toggle shalom-frame-aa" data-large-text>Aa<\/button>/.test(js), "la franja lleva el aviso y Aa");
+  assert(/\['false', 'Normal'\], \['true', 'Grande'\], \['max', 'Máximo'\]/.test(a11y) && /Reducir movimiento/.test(a11y), "Aa reúne tema, 3 tamaños y reducir movimiento");
   assert(/@media\(max-width:560px\)[\s\S]*\.shalom-area-caption \{ display:none; \}/.test(nav), "en celular la barra no repite «Más áreas de Shalom»");
 });
 

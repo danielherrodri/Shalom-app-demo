@@ -1,13 +1,12 @@
 "use strict";
 // Interacciones efímeras para revisar las vistas. Sin persistencia ni servicios externos.
-const demoNote = '<p class="module-demo">Solo pruebas con datos ficticios. Los cambios se reinician al recargar y no se envían al servidor.</p>';
 function addDemoView(id, label, iconName, eyebrow, title, description, content) {
   const section = document.createElement('section');
   section.id = id;
   section.className = 'panel module-view';
   section.hidden = true;
   section.setAttribute('aria-labelledby', `titulo-${id}`);
-  section.innerHTML = `<p class="muted">${eyebrow}</p><h1 id="titulo-${id}">${title}</h1><p>${description}</p>${demoNote}${content}`;
+  section.innerHTML = `<p class="muted">${eyebrow}</p><h1 id="titulo-${id}">${title}</h1><p>${description}</p>${content}`;
   document.getElementById('alcance').before(section);
   const link = document.createElement('a');
   link.href = `#${id}`;

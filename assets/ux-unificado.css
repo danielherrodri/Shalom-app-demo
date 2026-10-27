@@ -29,13 +29,9 @@ body[data-shalom-space="cafe"] .mobile-return { display: none; }
 body[data-shalom-space="comms"] :is(.card p, .demo-note, .notice, .help, .error, .success) { font-size: var(--shalom-text-support); }
 body[data-shalom-space="comms"] :is(label, legend) { font-size: 1rem; }
 body[data-shalom-space="comms"] :is(.meta, .breadcrumb, .overline) { font-size: .875rem; }
-body[data-shalom-space="kids"] :is(.module-demo, .module-toolbar p, .teacher-role, .meeting-summary) { font-size: var(--shalom-text-support) !important; }
+body[data-shalom-space="kids"] :is(.module-toolbar p, .teacher-role, .meeting-summary) { font-size: var(--shalom-text-support) !important; }
 body[data-shalom-space="kids"] header nav a { font-size: var(--shalom-text-nav); min-height: var(--shalom-touch-target); }
 @media (max-width: 850px) {
-  body[data-shalom-space="main"] .mobile-bottom button {
-    font-size: .8125rem; line-height: 1.25; min-height: 60px; padding: 6px 2px;
-  }
-  body[data-shalom-space="main"] .app-content { padding-bottom: 120px; }
   body[data-shalom-space="cafe"] .mobile-nav { grid-template-columns: repeat(3, minmax(0, 1fr)); }
   body[data-shalom-space="cafe"] .mobile-nav button {
     min-height: 58px; font-size: var(--shalom-text-nav); line-height: 1.2; gap: 4px;
@@ -100,8 +96,6 @@ body[data-shalom-space="main"] .home-services{margin-top:var(--shalom-space-5)}
 body[data-shalom-space="main"] .service-grid .tile{min-height:140px}
 body[data-shalom-space="main"] .feature-action .btn{min-height:48px;font-size:1rem}
 body[data-shalom-space="main"] :is(.btn,.tiny-btn,.pill-select button,.tab-row button){min-height:44px}
-body[data-shalom-space="main"] .mobile-bottom button{min-width:0}
-body[data-shalom-space="main"] .mobile-bottom button span{overflow-wrap:normal}
 body[data-shalom-space="main"] .family-confirmation .family-confirmation-list{
   padding-left:24px;margin:14px 0;line-height:1.7;
 }

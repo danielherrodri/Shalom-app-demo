@@ -32,7 +32,7 @@ textarea { min-height: 96px; }
 }
 
 /* — Sin sombras, tampoco en barras fijas: se separan con un borde de 1 px — */
-.modal, .dialog, #dialog, #toast, .toast, .mobile-top, .mobile-bottom, .sticky-bar { box-shadow: none !important; }
+.modal, .dialog, #dialog, #toast, .toast, .mobile-top, .sticky-bar { box-shadow: none !important; }
 .modal, #toast, .toast { border: 1px solid var(--borderstrong, var(--border2, #4a4a4a)); }
 
 /* — Deshabilitado: texto ink-muted (sin transparencia) y una frase que explica por qué — */
@@ -64,14 +64,6 @@ button:disabled, .btn:disabled, .btn[aria-disabled="true"], input:disabled, sele
 .filtros-toggle[aria-expanded="true"]::after { content: "✓"; }
 .filtros-panel[hidden] { display: none !important; }
 
-/* — Barra inferior: ícono y texto; destino activo en cobre y con texto — */
-.mobile-bottom button, .mobile-bottom a { min-height: 52px; min-width: 0; }
-.mobile-bottom button span, .mobile-bottom a span {
-  font-size: 12px; font-weight: 600; line-height: 1.15; text-align: center;
-  white-space: normal; overflow-wrap: normal; hyphens: manual; max-width: 100%;
-}
-.mobile-bottom button.active, .mobile-bottom [aria-current="page"] { font-weight: 700; }
-.mobile-bottom button.active span, .mobile-bottom [aria-current="page"] span { font-weight: 700; text-decoration: underline; text-underline-offset: 3px; text-decoration-thickness: 2px; }
 
 /* ================= Escala web y dos columnas desde 600 px ================= */
 @media (min-width: 600px) {
