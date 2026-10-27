@@ -99,3 +99,5 @@ body.night[data-shalom-space="comms"] .shalom-area-actions .shalom-text-toggle {
   body[data-shalom-space] .shalom-areas-toggle::before,
   body[data-shalom-space] .shalom-area-nav[data-mobile-open="true"] .shalom-areas-toggle::before {content:none}
 }
+/* Visitante: sin barra de áreas, solo el ajuste de texto alineado a la derecha. */
+body[data-shalom-space] .shalom-area-nav.shalom-area-visitor,body.theme-night[data-shalom-space] .shalom-area-nav.shalom-area-visitor,body.night[data-shalom-space] .shalom-area-nav.shalom-area-visitor{display:flex;justify-content:flex-end;background:none;border:0;padding:0;margin:0 0 16px}

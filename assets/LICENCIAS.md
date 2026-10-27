@@ -10,3 +10,7 @@
 DOMPurify 3.4.17, de Cure53 y colaboradores. Copia local para la demo en `assets/vendor/purify.es.mjs`, con licencia en `assets/vendor/DOMPurify-LICENSE.txt`; dependencia fijada en los manifiestos y archivos de bloqueo. Verificar con `node scripts/sync_bible_sanitizer.cjs --check`; actualizar mediante npm y sincronizar con ese mismo script sin `--check`.
 
 Las imágenes y fuentes de YouVersion no se distribuyen en este repositorio. Se solicitan a sus servicios oficiales cuando exista una App Key autorizada; las imágenes requieren crédito visible y las tipografías permanecen en su CDN.
+
+# Imágenes de prueba
+
+`assets/prueba/*.svg`: ilustraciones geométricas locales creadas para el prototipo, sin personas ni fotos de Shalom. Cada una lleva el rótulo «IMAGEN DE PRUEBA» y acompaña textos lorem ipsum de relleno. Reemplazar con material autorizado antes de operar.
