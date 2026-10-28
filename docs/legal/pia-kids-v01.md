@@ -201,7 +201,8 @@ Plazos: **20 días hábiles** para responder y **15 días hábiles** para ejecut
 **Condiciones antes de la Fase 3 (Datos Kids):**
 - [ ] Respuestas del abogado a las preguntas K1–K4 (salud, emergencia, custodia).
 - [ ] Texto del consentimiento expreso de salud, separado del religioso y del de imagen. Responsable: abogado + producto.
-- [ ] Rango de edad de Kids y quién ve el detalle de alergias, confirmados por coordinación (la demo propone: el docente del grupo el día de su clase).
+- [x] Quién ve el detalle de alergias: confirmado, el docente del grupo el día de su clase (y coordinación).
+- [ ] Rango de edad de Kids, confirmado por coordinación.
 
 **Condiciones antes del piloto (Fase 7):**
 - [ ] Aviso de privacidad con el apartado de Kids (sección 4), revisado por el abogado.
@@ -248,5 +249,5 @@ Complementan las 12 de la [investigación](investigacion-lfpdppp-2025.md).
 ## Siguientes pasos
 
 1. **Llevar al abogado** este documento junto con la [evaluación de cuentas](pia-cuentas-google-v01.md), la [investigación](investigacion-lfpdppp-2025.md) y la [arquitectura](../arquitectura-produccion-v01.md). Prioridades: K1–K4 y K13.
-2. **Coordinación Kids** confirma el rango de edad, quién ve las alergias y el borrador del procedimiento de custodia y autorizados.
+2. **Coordinación Kids** confirma el rango de edad y redacta el borrador del procedimiento de custodia y autorizados. (Quién ve las alergias ya está confirmado: el docente del grupo el día de su clase.)
 3. Con las respuestas, ajustar esta evaluación (v0.2) y diseñar los modelos de la Fase 3 con las pruebas de la sección 7.
