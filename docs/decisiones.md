@@ -33,3 +33,7 @@ Estado: aceptado. La primera versión real incluye administración de cuentas y 
 ## 2026-10-28 · Fase 2 · Acceso
 
 Estado: implementado en el backend, sin interfaz. Enlace por correo de un solo uso (15 min) como único acceso fuera de desarrollo; Google OpenID Connect apagado hasta tener credenciales. Registro con consentimientos versionados e inmutables; de la fecha de nacimiento solo se conserva la declaración de mayoría de edad. TOTP con secreto cifrado, anti-reuso y bloqueo; las rutas de administración exigen la verificación en la sesión. Reinicio de MFA solo por otra persona de administración. «Cerrar sesión en todos los dispositivos» por versión de sesión. Los textos legales siguen pendientes de revisión del abogado. Ver [plan](plan-v1-kids.md).
+
+## 2026-10-28 · Evaluación de impacto de Shalom Kids (borrador)
+
+Estado: borrador para el abogado; sin implementación ni datos reales. Riesgo alto antes de mitigar (menores, salud y afiliación religiosa, además del riesgo físico de entregar un niño a quien no debe recogerlo) y medio después de las condiciones. El diseño mantiene la salud cifrada y visible solo para el docente del grupo el día de su clase y para coordinación, el QR opaco que por sí solo no libera al niño, los cambios de autorizados en persona y Checkout Pro sin datos de tarjeta. Quedan abiertos tres puntos de criterio legal u operativo: qué hacer si el tutor no da los datos de salud, el procedimiento de custodia y los deberes ante sospecha de maltrato. La Fase 3 espera las respuestas a K1–K4. Ver [evaluación](legal/pia-kids-v01.md).
