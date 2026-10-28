@@ -5,6 +5,8 @@ from django.db import models
 
 class User(AbstractUser):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    # Bumped by "cerrar sesión en todos los dispositivos"; each session keeps the value it started with.
+    session_version = models.PositiveIntegerField(default=0)
 
 
 class Identified(models.Model):
@@ -119,3 +121,60 @@ class OutboundEmail(Identified):
     created_at = models.DateTimeField(auto_now_add=True)
     sent_at = models.DateTimeField(null=True, blank=True)
     failed = models.BooleanField(default=False)
+
+
+class EmailIdentity(Identified):
+    user = models.ForeignKey(User, on_delete=models.PROTECT, related_name='email_identities')
+    email = models.EmailField(unique=True)
+    verified_at = models.DateTimeField()
+
+
+class AccountProfile(models.Model):
+    user = models.OneToOneField(User, primary_key=True, on_delete=models.CASCADE, related_name='profile')
+    display_name = models.CharField(max_length=120)
+    # Minimization: adults keep only the declaration, never the birth date.
+    adult_declared_at = models.DateTimeField()
+    completed_at = models.DateTimeField(auto_now_add=True)
+
+
+class LoginLink(Identified):
+    email = models.EmailField()
+    # SHA-256 of the emailed token; the token itself is never stored.
+    verifier = models.CharField(max_length=64, unique=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    expires_at = models.DateTimeField()
+    used_at = models.DateTimeField(null=True, blank=True)
+    class Meta:
+        indexes = [models.Index(fields=['email', 'created_at'], name='login_link_email_date')]
+
+
+class ConsentKind(models.TextChoices):
+    AVISO = 'aviso', 'Aviso de privacidad'
+    DATO_SENSIBLE = 'dato_sensible', 'Consentimiento de dato sensible'
+
+
+class ConsentText(Identified):
+    kind = models.CharField(max_length=30, choices=ConsentKind.choices)
+    version = models.CharField(max_length=20)
+    body = models.TextField()
+    published_at = models.DateTimeField(auto_now_add=True)
+    class Meta:
+        constraints = [models.UniqueConstraint(fields=['kind', 'version'], name='one_text_per_version')]
+
+
+class ConsentRecord(Identified):
+    user = models.ForeignKey(User, on_delete=models.PROTECT, related_name='consents')
+    text = models.ForeignKey(ConsentText, on_delete=models.PROTECT)
+    method = models.CharField(max_length=60)
+    granted_at = models.DateTimeField(auto_now_add=True)
+    revoked_at = models.DateTimeField(null=True, blank=True)
+
+
+class TotpDevice(models.Model):
+    user = models.OneToOneField(User, primary_key=True, on_delete=models.CASCADE, related_name='totp')
+    sealed_secret = models.TextField()
+    confirmed_at = models.DateTimeField(null=True, blank=True)
+    # Highest accepted time step; a code is never accepted twice.
+    last_step = models.BigIntegerField(default=0)
+    failures = models.PositiveSmallIntegerField(default=0)
+    locked_until = models.DateTimeField(null=True, blank=True)

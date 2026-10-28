@@ -96,3 +96,10 @@ else:
     EMAIL_HOST_PASSWORD = os.environ.get('SHALOM_EMAIL_PASSWORD', '')
     EMAIL_USE_TLS = True
     EMAIL_TIMEOUT = 10
+# Fernet key for field encryption (TOTP secrets). Development uses an ephemeral key.
+FIELD_ENCRYPTION_KEY = os.environ.get('SHALOM_FIELD_KEY', '')
+if not FIELD_ENCRYPTION_KEY:
+    if not DEVELOPMENT:
+        raise ImproperlyConfigured('Se requiere SHALOM_FIELD_KEY')
+    from cryptography.fernet import Fernet
+    FIELD_ENCRYPTION_KEY = Fernet.generate_key().decode()
