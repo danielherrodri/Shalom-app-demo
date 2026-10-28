@@ -9,7 +9,7 @@ import pyotp
 from django.conf import settings
 from django.contrib.auth import login, logout
 from django.core.cache import cache
-from django.db import transaction
+from django.db import IntegrityError, transaction
 from django.db.models import F
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404
@@ -34,6 +34,7 @@ MFA_ATTEMPTS = 5
 MFA_LOCK = timedelta(minutes=15)
 # Provisional personal-device policy; shared Kids equipment keeps the stricter one.
 PERSONAL_IDLE, PERSONAL_ABSOLUTE = 1800, 12 * 3600
+SHARED_IDLE, SHARED_ABSOLUTE = 300, 8 * 3600
 INVALID_LINK = 'Este enlace ya no es válido. Pide uno nuevo.'
 UNDER_18 = 'Para crear tu cuenta, tu mamá, papá o tutor debe solicitarla a administración de Shalom.'
 
@@ -83,14 +84,13 @@ class LinkInput(Strict):
 
 
 def over_limit(key, limit):
-    count = cache.get_or_set(key, 0, int(LINK_TTL.total_seconds()))
-    if count >= limit:
-        return True
+    # add + incr is atomic on shared caches; the window starts with the first request.
+    cache.add(key, 0, int(LINK_TTL.total_seconds()))
     try:
-        cache.incr(key)
+        return cache.incr(key) > limit
     except ValueError:
         cache.set(key, 1, int(LINK_TTL.total_seconds()))
-    return False
+        return False
 
 
 @require_POST
@@ -173,16 +173,19 @@ def complete_profile(request):
     texts = current_texts()
     if texts is None or (data['privacy_version'], data['sensitive_version']) != (texts[ConsentKind.AVISO].version, texts[ConsentKind.DATO_SENSIBLE].version):
         return JsonResponse({'detail': 'Los textos cambiaron. Revísalos de nuevo.'}, status=409)
-    with transaction.atomic():
-        if EmailIdentity.objects.select_for_update().filter(email=signup['email']).exists():
-            return JsonResponse({'detail': INVALID_LINK}, status=400)
-        user = User.objects.create_user(username=f'cuenta-{uuid.uuid4().hex[:16]}')
-        now = timezone.now()
-        EmailIdentity.objects.create(user=user, email=signup['email'], verified_at=now)
-        AccountProfile.objects.create(user=user, display_name=data['display_name'].strip(), adult_declared_at=now)
-        for text in texts.values():
-            ConsentRecord.objects.create(user=user, text=text, method='casilla en la app · enlace por correo')
-        audit(user, 'account.create', user)
+    try:
+        with transaction.atomic():
+            # The unique email settles concurrent submissions from the same link.
+            user = User.objects.create_user(username=f'cuenta-{uuid.uuid4().hex[:16]}')
+            now = timezone.now()
+            EmailIdentity.objects.create(user=user, email=signup['email'], verified_at=now)
+            AccountProfile.objects.create(user=user, display_name=data['display_name'], adult_declared_at=now)
+            for text in texts.values():
+                ConsentRecord.objects.create(user=user, text=text, method='casilla en la app · enlace por correo')
+            audit(user, 'account.create', user)
+    except IntegrityError:
+        return JsonResponse({'detail': INVALID_LINK}, status=400)
+    del request.session['signup']
     start_session(request, user)
     return JsonResponse({'status': 'signed_in', 'mfaRequired': False}, status=201)
 
@@ -294,4 +297,12 @@ def account_summary(request):
         'displayName': profile.display_name if profile else user.username,
         'roles': roles_of(user),
         'mfaPending': needs_mfa(user) and not request.session.get('mfa_verified_at'),
+        'mfaEnrolled': TotpDevice.objects.filter(user=user, confirmed_at__isnull=False).exists(),
     }
+
+
+@require_GET
+@never_cache
+def providers(request):
+    # Google OpenID Connect stays off until the church's Google Cloud project and credentials exist.
+    return JsonResponse({'emailLink': True, 'google': settings.GOOGLE_OIDC_ENABLED})

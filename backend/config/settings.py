@@ -79,7 +79,7 @@ X_FRAME_OPTIONS = 'DENY'
 DATA_UPLOAD_MAX_MEMORY_SIZE = 65536
 # Password login is a synthetic-data development adapter, never production auth.
 LOCAL_PASSWORD_LOGIN = DEVELOPMENT
-# Admin APIs need a verified second factor (phase 2); development skips it with synthetic data.
+# Admin APIs need a TOTP code verified in the session; development skips it with synthetic data.
 ADMIN_MFA_REQUIRED = not DEVELOPMENT
 PUBLIC_APP_URL = os.environ.get('SHALOM_PUBLIC_APP_URL', 'http://localhost:5173' if DEVELOPMENT else '')
 if not DEVELOPMENT and not PUBLIC_APP_URL.startswith('https://'):
@@ -103,3 +103,5 @@ if not FIELD_ENCRYPTION_KEY:
         raise ImproperlyConfigured('Se requiere SHALOM_FIELD_KEY')
     from cryptography.fernet import Fernet
     FIELD_ENCRYPTION_KEY = Fernet.generate_key().decode()
+# Google OpenID Connect stays off until the church provides the Google Cloud project and credentials.
+GOOGLE_OIDC_ENABLED = False

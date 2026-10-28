@@ -1,7 +1,7 @@
 import json
 import time
 from django.conf import settings
-from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth import authenticate, logout
 from django.db import transaction
 from django.http import JsonResponse
 from django.middleware.csrf import get_token
@@ -12,7 +12,7 @@ from django.views.decorators.http import require_GET, require_POST
 from rest_framework import generics, serializers
 from rest_framework.response import Response
 from rest_framework.exceptions import ValidationError
-from .admin_api import roles_of
+from .access import SHARED_ABSOLUTE, SHARED_IDLE, account_summary, start_session
 from .models import Group, Person, Meeting, Enrollment, Assignment, Attendance, AuditEvent
 
 
@@ -39,10 +39,8 @@ def login_view(request):
     user = authenticate(request, username=username, password=password)
     if user is None:
         return JsonResponse({'detail': 'No fue posible iniciar sesión.'}, status=401)
-    login(request, user)
-    now = time.time()
     # This first workflow is for shared Kids equipment, with the strictest policy.
-    request.session.update({'started_at': now, 'active_at': now, 'idle_limit': 300, 'absolute_limit': 28800})
+    start_session(request, user, idle=SHARED_IDLE, absolute=SHARED_ABSOLUTE)
     return JsonResponse({'username': user.username})
 
 
@@ -58,7 +56,7 @@ def logout_view(request):
 def me(request):
     if not request.user.is_authenticated:
         return JsonResponse({'detail': 'Inicia sesión.'}, status=401)
-    return JsonResponse({'username': request.user.username, 'roles': roles_of(request.user), 'activeAt': request.session['active_at'], 'startedAt': request.session['started_at'], 'idleSeconds': request.session['idle_limit'], 'absoluteSeconds': request.session['absolute_limit']})
+    return JsonResponse({'username': request.user.username, **account_summary(request), 'activeAt': request.session['active_at'], 'startedAt': request.session['started_at'], 'idleSeconds': request.session['idle_limit'], 'absoluteSeconds': request.session['absolute_limit']})
 
 
 @require_POST

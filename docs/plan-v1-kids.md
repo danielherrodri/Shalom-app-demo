@@ -1,6 +1,6 @@
 # Plan de la versión 1 · Administración, correos y Shalom Kids
 
-**Fecha:** 28 de octubre de 2026 · **Estado:** alcance aceptado; Fase 1 en código (backend).
+**Fecha:** 28 de octubre de 2026 · **Estado:** alcance aceptado; fases 1 y 2 en código (backend).
 
 ## Alcance
 
@@ -43,6 +43,16 @@ Antes de la Fase 7: aviso publicado, persona de datos personales designada y con
 
 - Primera cuenta de administración: `python backend/manage.py bootstrap_admin <usuario>`. Solo funciona mientras no exista ninguna; esa persona invita a la segunda.
 - API (sesión y CSRF): `admin/accounts/`, `admin/grants/` (asignar, `confirm/`, `revoke/`), `admin/invitations/` (crear, `revoke/`) e `invitations/accept/`. `auth/me/` devuelve los perfiles vigentes.
-- Fuera de desarrollo, las rutas de administración quedan **cerradas** hasta que exista la verificación en dos pasos (Fase 2).
-- El perfil Joven no se puede asignar hasta que exista el consentimiento del tutor (Fase 2).
+- Fuera de desarrollo, las rutas de administración solo se abren en una sesión con la verificación en dos pasos hecha (Fase 2).
+- El perfil Joven no se puede asignar hasta que exista el consentimiento del tutor (Fase 3).
 - Correo: en desarrollo y pruebas los mensajes quedan en memoria; en producción usa SMTP con TLS y credenciales de variables de entorno. El enlace lleva el token en el fragmento (`#`) para que no llegue a registros del servidor.
+
+## Fase 2 · Uso
+
+- **Textos de consentimiento:** `python backend/manage.py publish_consent_text <aviso|dato_sensible> <versión> <archivo.txt>`. Cada versión es inmutable; sin los dos textos publicados, el registro responde «todavía no está disponible». Los textos de `docs/legal/` son borradores: se publican solo después de la revisión del abogado.
+- **Entrar por correo:** `auth/link/` envía un enlace de un solo uso que vence en 15 minutos (`/entrar#<token>`; solo se guarda su verificador). Responde lo mismo exista o no la cuenta. Límite: 3 enlaces por correo y 10 solicitudes por origen cada 15 minutos. `auth/link/consume/` abre la sesión o, si el correo es nuevo, una ventana de registro de 30 minutos.
+- **Completa tu perfil:** `auth/consents/` muestra las versiones vigentes; `auth/profile/` crea la cuenta con nombre, declaración de mayoría de edad y los dos consentimientos con su versión. La fecha de nacimiento solo se usa para calcular la edad y no se guarda; con menos de 18 años no se guarda nada y se indica que el tutor la solicite a administración. La cuenta nueva no tiene perfiles: los asigna administración.
+- **Verificación en dos pasos (TOTP):** `auth/mfa/setup/` (el secreto se muestra una vez y se guarda cifrado con `SHALOM_FIELD_KEY`), `auth/mfa/confirm/` y `auth/mfa/verify/`. Cada código se acepta una sola vez; tras 5 fallos se bloquea 15 minutos. `auth/me/` indica `mfaPending` y `mfaEnrolled`. Si alguien pierde su dispositivo, otra persona de administración, en persona, usa `admin/accounts/<id>/mfa-reset/`, que también cierra sus sesiones.
+- **Sesiones:** dispositivo personal 30 minutos de inactividad y 12 horas absolutas; el acceso local de desarrollo (equipo compartido de Kids) conserva 5 minutos y 8 horas. `auth/logout-everywhere/` cierra todas las sesiones de la cuenta; las sesiones sin versión vigente se cierran.
+- **Google OpenID Connect:** apagado (`GOOGLE_OIDC_ENABLED = False`; `auth/providers/` lo informa) hasta tener el proyecto de Google Cloud y sus credenciales.
+- **Pendiente para producción:** el límite por origen usa la caché local del proceso y la IP que recibe Django; con varias instancias detrás de Firebase Hosting y Cloud Run hace falta una caché compartida y tomar la IP del encabezado que fije el balanceador. La cola de correo con Cloud Scheduler es de la fase de Infraestructura.
