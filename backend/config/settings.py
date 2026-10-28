@@ -79,3 +79,20 @@ X_FRAME_OPTIONS = 'DENY'
 DATA_UPLOAD_MAX_MEMORY_SIZE = 65536
 # Password login is a synthetic-data development adapter, never production auth.
 LOCAL_PASSWORD_LOGIN = DEVELOPMENT
+# Admin APIs need a verified second factor (phase 2); development skips it with synthetic data.
+ADMIN_MFA_REQUIRED = not DEVELOPMENT
+PUBLIC_APP_URL = os.environ.get('SHALOM_PUBLIC_APP_URL', 'http://localhost:5173' if DEVELOPMENT else '')
+if not DEVELOPMENT and not PUBLIC_APP_URL.startswith('https://'):
+    raise ImproperlyConfigured('SHALOM_PUBLIC_APP_URL debe usar https')
+DEFAULT_FROM_EMAIL = os.environ.get('SHALOM_FROM_EMAIL', 'Shalom <no-responder@example.invalid>')
+if DEVELOPMENT:
+    # Messages stay in memory: emailed links carry single-use tokens and must not reach consoles or logs.
+    EMAIL_BACKEND = 'django.core.mail.backends.locmem.EmailBackend'
+else:
+    EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+    EMAIL_HOST = os.environ.get('SHALOM_EMAIL_HOST', '')
+    EMAIL_PORT = int(os.environ.get('SHALOM_EMAIL_PORT', '587'))
+    EMAIL_HOST_USER = os.environ.get('SHALOM_EMAIL_USER', '')
+    EMAIL_HOST_PASSWORD = os.environ.get('SHALOM_EMAIL_PASSWORD', '')
+    EMAIL_USE_TLS = True
+    EMAIL_TIMEOUT = 10
