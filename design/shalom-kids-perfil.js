@@ -116,18 +116,19 @@
     const a = ALUMNOS.find(x => x.id === gafeteId);
     if (!a) return;
     const lecturas = A.st.bitacora.filter(e => e.id === a.id && e.tipo === 'Entrada').length;
-    $('gafete-cuerpo').innerHTML = `<div class="ka-qr" aria-hidden="true"></div><p><strong>${esc(a.nombre)}</strong><small>${A.NOMBRE_GRUPO[a.grupo]} · ${esc(a.id)}</small></p><dl class="ka-datos"><dt>Impresiones</dt><dd>${a.impresiones}</dd><dt>Lecturas hoy</dt><dd>${lecturas}</dd><dt>Estado del gafete</dt><dd>${a.gafete === 'activo' ? 'Activo' : a.gafete === 'temporal' ? 'Temporal' : 'Inactivo'}</dd></dl>
-<div class="ka-acciones"><button class="button primary" type="button" data-reimprime="${a.id}">Reimprimir gafete</button><button class="button" type="button" data-desactiva="${a.id}"${a.gafete === 'inactivo' ? ' disabled' : ''}>Desactivar gafete perdido</button></div>
+    $('gafete-cuerpo').innerHTML = `<div class="ka-qr" aria-hidden="true"></div><p><strong>${esc(a.nombre)}</strong><small>${A.NOMBRE_GRUPO[a.grupo]} · ${esc(a.id)}</small></p><dl class="ka-datos"><dt>Impresiones</dt><dd>${a.impresiones}</dd><dt>Última impresión</dt><dd>${esc(a.ultimaImpresion || (a.impresiones ? '18 oct 2026' : 'Sin imprimir'))}</dd><dt>Lecturas hoy</dt><dd>${lecturas}</dd><dt>Lecturas este mes</dt><dd>${(a.impresiones ? 2 + (Number(a.id.slice(-1)) % 4) : 0) + lecturas}</dd><dt>Estado del gafete</dt><dd>${a.gafete === 'activo' ? 'Activo' : a.gafete === 'temporal' ? 'Temporal' : 'Inactivo'}</dd></dl>
+<div class="ka-acciones"><button class="button primary" type="button" data-reimprime="${a.id}">Reimprimir gafete</button><button class="button" type="button" data-desactiva="${a.id}"${a.gafete === 'inactivo' ? ' disabled' : ''}>Desactivar gafete perdido</button><button class="button" type="button" data-expediente="${a.id}">Abrir expediente autorizado</button></div>
 <p class="muted">Al reimprimir, el QR anterior deja de funcionar. Quedará la ${a.impresiones + 1}ª impresión.</p>`;
   }
   $('alumnos-grupo').addEventListener('change', pintaAlumnos);
   $('alumnos-buscar').addEventListener('input', pintaAlumnos);
   $('alumnos').addEventListener('click', event => {
     const t = event.target.closest('button'); if (!t) return;
-    const d = t.dataset, a = ALUMNOS.find(x => x.id === (d.gafete || d.unir || d.reimprime || d.desactiva));
+    const d = t.dataset, a = ALUMNOS.find(x => x.id === (d.gafete || d.unir || d.reimprime || d.desactiva || d.expediente));
     if (d.estado) { filtroEstado = d.estado; pintaAlumnos(); }
     if (d.gafete) { gafeteId = d.gafete; pintaGafete(); $('alumnos-estado').textContent = ''; }
-    if (d.reimprime) { a.impresiones += 1; if (a.gafete === 'inactivo') a.gafete = 'activo'; if (a.estado === 'Gafete inactivo') a.estado = 'Activo'; gafeteId = a.id; pintaAlumnos(); $('alumnos-estado').textContent = `Gafete de ${a.nombre} reimpreso (${a.impresiones}ª impresión). El QR anterior ya no funciona (ejemplo).`; }
+    if (d.expediente) $('alumnos-estado').textContent = `El expediente de ${a.nombre} (contacto, salud y fotos) se abre solo con permiso de coordinación y queda en la bitácora. Este demo no tiene datos reales.`;
+    if (d.reimprime) { a.impresiones += 1; a.ultimaImpresion = fecha(DOMINGOS[0]); if (a.gafete === 'inactivo') a.gafete = 'activo'; if (a.estado === 'Gafete inactivo') a.estado = 'Activo'; gafeteId = a.id; pintaAlumnos(); $('alumnos-estado').textContent = `Gafete de ${a.nombre} reimpreso (${a.impresiones}ª impresión). El QR anterior ya no funciona (ejemplo).`; }
     if (d.desactiva) { a.gafete = 'inactivo'; a.estado = 'Gafete inactivo'; pintaAlumnos(); $('alumnos-estado').textContent = `Gafete de ${a.nombre} desactivado. Si se escanea, recepción verá «Gafete desactivado».`; }
     if (d.unir) abreUnir(a);
   });
