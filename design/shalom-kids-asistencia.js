@@ -151,7 +151,8 @@
 <div class="grid ka-rec"><div>
 <section class="card" aria-labelledby="rec-esc-t"><h2 id="rec-esc-t">Escanear gafete</h2><p class="muted">Gafete del niño o QR de la familia. Con un lector USB el cursor queda listo aquí. En este demo escribe un ID (K-101, K-103, KT-013…) y pulsa Enter.</p>
 <form id="rec-form" novalidate><label for="rec-codigo">Código leído</label><input id="rec-codigo" type="text" autocomplete="off" maxlength="24" placeholder="K-101"><div class="ka-acciones"><button class="button primary" type="submit">Leer gafete</button><label class="checkline"><input type="checkbox" id="rec-offline"> Simular sin conexión</label></div></form>
-<p class="muted">Probar un resultado: <button type="button" class="ka-enlace" data-prueba="XQ-000">código desconocido</button> · <button type="button" class="ka-enlace" data-prueba="K-105">gafete perdido</button> · <button type="button" class="ka-enlace" data-prueba="K-103">ya registrado</button></p>
+<p class="muted">Probar un resultado: <button type="button" class="ka-enlace" data-prueba="XQ-000">código desconocido</button> · <button type="button" class="ka-enlace" data-prueba="K-105">gafete perdido</button> · <button type="button" class="ka-enlace" data-prueba="K-103">ya registrado</button> · <button type="button" class="ka-enlace" data-camara="1">cámara bloqueada</button></p>
+<p class="muted">Probar la lista de avisos: <button type="button" class="ka-enlace" data-lista-prueba="cargando">cargando</button> · <button type="button" class="ka-enlace" data-lista-prueba="error">error al cargar</button></p>
 <div class="ka-buscar"><label for="rec-buscar">¿Gafete olvidado, roto o no se lee? Buscar por nombre o ID</label><input id="rec-buscar" type="search" autocomplete="off" placeholder="Menor de ejemplo D o K-104"><div id="rec-encontrados" role="status"></div><button class="button" type="button" id="rec-alta">No encuentro al niño · Alta rápida</button></div>
 <label for="rec-puerta">Puerta</label><select id="rec-puerta"><option value="">Todos los grupos</option>${GRUPOS.map(([g, n]) => `<option value="${g}">${n} (${g})</option>`).join('')}</select></section>
 <section class="card" id="rec-resultado" aria-live="polite" tabindex="-1"><p class="muted">Aquí aparece el resultado de cada lectura. Todos los estados llevan ícono, título y frase: el color nunca va solo.</p></section></div>
@@ -171,13 +172,16 @@
     if (!admin) return;
     $('rec-fecha').textContent = `Domingo ${fecha(HOY)} · ${hm(st.m)}`;
     $('rec-servicio').textContent = `${SERVICIOS[st.si][0]} · ${SERVICIOS[st.si][1].split(' a ')[0]}`;
-    $('rec-sync').textContent = st.offline ? `Sin conexión · ${st.cola.length} en cola` : 'Sincronizado';
+    $('rec-sync').textContent = st.offline ? `Sin conexión · ${st.cola.length} ${st.cola.length === 1 ? 'lectura' : 'lecturas'} en cola` : 'Sincronizado';
     $('rec-cola-card').hidden = !st.offline && !st.cola.length;
     $('rec-cola').innerHTML = st.cola.map(c => `<li>${esc(c.id)} · ${c.tipo} ${hm(c.m)} ${c.revisar ? badge('Revisar') : ''}</li>`).join('') || '<li class="muted">Nada pendiente.</li>';
     document.querySelectorAll('[data-modo]').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.modo === st.modo)));
     const esperados = [...st.registros.values()].filter(r => r.estado === 'Por confirmar' && r.si === st.si && (!st.puerta || alumno(r.id).grupo === st.puerta)).sort((a, b) => b.m - a.m);
-    $('rec-av-n').textContent = `${esperados.length} · ${SERVICIOS[st.si][0]}`;
-    $('rec-avisos').innerHTML = esperados.length ? `<p class="muted">Confirma solo con el niño frente a ti.</p><ul class="ka-lista">${esperados.map(r => { const a = alumno(r.id); return `<li><div>${filaNino(a).replace('<small>', `<small>${hm(r.m)} · `)}</div><button class="button" type="button" data-confirma="${r.id}">Confirmar<span class="sr-only"> a ${esc(a.nombre)}</span></button></li>`; }).join('')}</ul>` : `<p><strong>Aún no hay avisos para el ${SERVICIOS[st.si][0]}</strong></p><p class="muted">Los niños que lleguen se registran escaneando su gafete.</p>`;
+    $('rec-av-n').textContent = st.lista ? SERVICIOS[st.si][0] : `${esperados.length} · ${SERVICIOS[st.si][0]}`;
+    $('rec-avisos').setAttribute('aria-busy', String(st.lista === 'cargando'));
+    $('rec-avisos').innerHTML = st.lista === 'cargando' ? `<p role="status"><strong>Cargando la lista del ${SERVICIOS[st.si][0]}…</strong></p><p class="muted">Puedes escanear mientras carga.</p>`
+      : st.lista === 'error' ? tarjeta('ka-error', '⚠', 'No pudimos cargar la lista', 'El servidor no respondió. Tus lecturas siguen guardándose aquí.', '<div class="ka-acciones"><button class="button primary" type="button" data-lista-reintenta="1">Intentar de nuevo</button></div>')
+      : esperados.length ? `<p class="muted">Confirma solo con el niño frente a ti.</p><ul class="ka-lista">${esperados.map(r => { const a = alumno(r.id); return `<li><div>${filaNino(a).replace('<small>', `<small>${hm(r.m)} · `)}</div><button class="button" type="button" data-confirma="${r.id}">Confirmar<span class="sr-only"> a ${esc(a.nombre)}</span></button></li>`; }).join('')}</ul>` : `<p><strong>Aún no hay avisos para el ${SERVICIOS[st.si][0]}</strong></p><p class="muted">Los niños que lleguen se registran escaneando su gafete.</p>`;
     $('rec-vivo').innerHTML = GRUPOS.map(([g, n]) => { const c = cuenta(g); return `<div class="ka-vivo"><strong>${n}</strong> <span class="muted">${g}</span><div class="stats ka-stats"><div class="stat"><strong>${c.dentro}</strong>Dentro</div><div class="stat"><strong>${c.esperados}</strong>Esperados</div><div class="stat"><strong>${c.entregados}</strong>Entregados</div></div></div>`; }).join('');
     $('rec-ultimas').innerHTML = st.bitacora.filter(e => e.tipo !== 'Aviso').slice().sort((a, b) => b.m - a.m).slice(0, 4).map(e => `<li>${esc(e.id)} · ${esc(e.tipo)} · ${esc(e.origen)} ${hm(e.m)}</li>`).join('');
     const pend = [...st.registros.values()].filter(r => r.pendiente);
@@ -300,6 +304,11 @@
     if (d.modoIr) { st.modo = d.modoIr; pintaRec(); }
     if (d.puerta !== undefined) { st.puerta = ''; $('rec-puerta').value = ''; pintaRec(); }
     if (d.prueba) lee(d.prueba);
+    // En el demo no se pide la cámara: se muestra el estado que vería quien la tiene bloqueada.
+    if (d.camara) resultado(tarjeta('ka-aviso', '⚠', 'No tenemos acceso a la cámara', 'Actívala en los ajustes del navegador. Mientras, busca a cada niño por nombre o ID.', '<div class="ka-acciones"><button class="button primary" type="button" data-foco="rec-buscar">Buscar por nombre o ID</button></div>'));
+    if (d.listaPrueba === 'error') { st.lista = 'error'; pintaRec(); }
+    if (d.listaPrueba === 'cargando' || d.listaReintenta) { st.lista = 'cargando'; pintaRec(); setTimeout(() => { st.lista = ''; pintaRec(); }, 1500); }
+    if (d.temporal) { const a = alumno(d.temporal); a.gafete = 'temporal'; $('rec-msg').textContent = `Gafete temporal en blanco vinculado a ${a.id}. Sirve solo hoy; coordinación imprime el definitivo (ejemplo).`; }
     if (d.lee) { if (d.origen) st.origenBusqueda = d.origen; lee(d.lee); }
     if (d.confirma) { const a = alumno(d.confirma); st.modo = 'entrada'; if (st.puerta && a.grupo !== st.puerta) lee(d.confirma); else confirmaEntrada(d.confirma, 'Lista de avisos'); }
     if (d.entrada) { confirmaEntrada(d.entrada, st.origenBusqueda || d.origen); st.origenBusqueda = ''; }
@@ -327,7 +336,7 @@
       const a = altaRapida({ nombre, edad, grupo: $('alta-grupo-sel').value, adulto, atencion: dialogo.querySelector('[name=alergia]:checked').value === 'si' });
       const r = st.registros.get(a.id);
       dialogo.close(); pintaTodo();
-      resultado(tarjeta('ka-ok', '✓', `Dentro · ${hm(r.m)}`, `${esc(a.nombre)} · ${esc(NOMBRE_GRUPO[a.grupo])} · ${SIGLA[r.si]}`, `<div class="ka-codigo"><span>${esc(a.id)} · Registro provisional</span><small>Coordinación lo completa o lo une a un registro existente. Ya cuenta en el pase de lista.</small></div><div class="ka-codigo"><span>Código de recogida</span><strong>${esc(r.codigo)}</strong><small>Entrégalo al adulto. Solo ${esc(adulto)} puede recoger hoy.</small></div><div class="ka-acciones"><button class="button" type="button" data-etiqueta="${a.id}">Imprimir gafete</button><button class="button primary" type="button" data-foco="rec-codigo">Escanear siguiente</button></div><p class="form-status" id="rec-msg" role="status"></p>`));
+      resultado(tarjeta('ka-ok', '✓', `Dentro · ${hm(r.m)}`, `${esc(a.nombre)} · ${esc(NOMBRE_GRUPO[a.grupo])} · ${SIGLA[r.si]}`, `<div class="ka-codigo"><span>${esc(a.id)} · Registro provisional</span><small>Coordinación lo completa o lo une a un registro existente. Ya cuenta en el pase de lista.</small></div><div class="ka-codigo"><span>Código de recogida</span><strong>${esc(r.codigo)}</strong><small>Entrégalo al adulto. Solo ${esc(adulto)} puede recoger hoy.</small></div><div class="ka-acciones"><button class="button" type="button" data-etiqueta="${a.id}">Imprimir gafete</button><button class="button" type="button" data-temporal="${a.id}">Escanear gafete temporal en blanco</button><button class="button primary" type="button" data-foco="rec-codigo">Escanear siguiente</button></div><p class="form-status" id="rec-msg" role="status"></p>`));
     }
   });
   dialogo.addEventListener('click', e => {
@@ -384,7 +393,23 @@
   // ---------- Familia · Mis hijos ----------
   const HIJOS = ['K-101', 'K-201'];
   const sel = { 'K-101': 1, 'K-201': 1 };
-  let qr = 'A7F3-92KD';
+  let qr = 'A7F3-92KD', qrVence = Date.now() + 300000;
+  // Opinión una sola vez por entrega: clave niño-servicio. En memoria, como el resto del demo.
+  const opiniones = {};
+  const VALORES = ['Bien', 'Muy bien', 'Mejorable'], DESTACA = ['Entrada rápida', 'Maestros', 'Actividad', 'Entrega'];
+  const restante = () => { const s = Math.max(0, Math.ceil((qrVence - Date.now()) / 1000)); return `${Math.floor(s / 60)}:${pad(s % 60)}`; };
+  const renuevaQr = () => { qr = `${codigo()}-${codigo()}`; qrVence = Date.now() + 300000; };
+  setInterval(() => { const t = document.getElementById('fam-qr-tiempo'); if (!t) return; if (Date.now() >= qrVence) { renuevaQr(); pintaFamilia(); } else t.textContent = restante(); }, 1000);
+  const opinionCard = (id, r) => {
+    const a = alumno(id), k = `${id}-${r.si}`, o = opiniones[k];
+    if (o?.omitida || o?.visto) return '';
+    if (o) return `<section class="card ka-opinion" aria-labelledby="op-t-${id}"><h2 id="op-t-${id}">Gracias por contarnos</h2><p>La coordinación de Kids lee cada opinión. Si pediste que te contactemos, te escribimos esta semana.</p><p class="muted">LO QUE ENVIASTE</p><p><strong>${esc(o.valor)}</strong>${o.bien.length ? ` · ${o.bien.map(esc).join(', ')}` : ''}</p>${o.texto ? `<p>${esc(o.texto)}</p>` : ''}<p class="muted">Shalom Kids · ${SIGLA[r.si]} servicio · ${fecha(HOY)}. En la app real llega a «Tu opinión» con el área Shalom Kids ya elegida.</p><button class="button" type="button" data-fam-volver="${k}">Volver a Mis hijos</button></section>`;
+    return `<section class="card ka-opinion" aria-labelledby="op-t-${id}"><h2 id="op-t-${id}">Tu opinión</h2><p class="muted">Shalom Kids · ${SIGLA[r.si]} servicio · ${fecha(HOY)}</p><p>${esc(a.nombre)} fue entregado a las ${hm(r.entrega.m)}.</p>
+<form data-fam-opinion="${k}" novalidate><fieldset><legend>¿Cómo les fue hoy?</legend><div class="ka-chips">${VALORES.map(v => `<label class="checkline"><input type="radio" name="valor" value="${v}"> ${v}</label>`).join('')}</div></fieldset>
+<fieldset><legend>¿Qué salió bien? · opcional</legend><div class="ka-chips">${DESTACA.map(v => `<label class="checkline"><input type="checkbox" name="bien" value="${v}"> ${v}</label>`).join('')}</div></fieldset>
+<label for="op-txt-${id}">¿Qué podemos mejorar? · opcional</label><textarea id="op-txt-${id}" name="texto" maxlength="500" aria-describedby="op-ayuda-${id}"></textarea><p class="muted" id="op-ayuda-${id}">No escribas nombres de otros niños.</p>
+<p class="form-status" role="alert" data-op-msg></p><div class="ka-acciones"><button class="button primary" type="submit">Enviar opinión</button><button class="button" type="button" data-fam-op-no="${k}">Ahora no</button></div></form></section>`;
+  };
   addDemoView('familia', 'Mis hijos', 'heart', 'SHALOM KIDS · FAMILIAS', 'Mis hijos, <em>domingo a domingo.</em>', 'Avisa a qué servicio vienen, muestra el QR en la puerta y sigue su estado en vivo.', `<div class="grid ka-fam"><div id="fam-hijos"></div><section class="card" aria-labelledby="fam-qr-t"><h2 id="fam-qr-t">QR de check-in para la puerta</h2><div id="fam-qr"></div></section></div>`);
   const famEstado = (id) => {
     const r = st.registros.get(id), pasos = [['Avisaste que viene', r ? hm(r.avisoM ?? (r.estado === 'Por confirmar' ? r.m : r.m)) : ''], ['Dentro', r && (r.estado === 'Dentro' || r.estado === 'Entregado') ? `Entró ${hm(r.m)}, confirmado en recepción` : 'Se confirma en la puerta'], ['Entregado', r?.entrega ? `${hm(r.entrega.m)} · ${esc(r.entrega.adulto)}` : 'Al terminar, cerca de 12:30 PM']];
@@ -396,16 +421,30 @@
       const a = alumno(id), r = st.registros.get(id), avisado = r && r.si === sel[id] && r.estado === 'Por confirmar', dentro = r && (r.estado === 'Dentro' || r.estado === 'Entregado');
       return `<section class="card" aria-label="${esc(a.nombre)}"><h2>${esc(a.nombre)}</h2><p class="muted">${esc(NOMBRE_GRUPO[a.grupo])} · ${a.edad} años</p>
 ${dentro ? '' : `<label for="fam-s-${id}">¿A qué servicio?</label><select id="fam-s-${id}" data-fam-serv="${id}">${SERVICIOS.map(([n, h], si) => `<option value="${si}"${sel[id] === si ? ' selected' : ''}>${SIGLA[si]} · ${esc(h.split(' a ')[0])}</option>`).join('')}</select>${avisado ? `<div class="ka-acciones"><span class="badge">Por confirmar · ${SIGLA[r.si]} servicio</span><button class="button" type="button" data-fam-no="${id}">Ya no viene</button></div>` : `<button class="button primary" type="button" data-fam-avisa="${id}">Avisar que viene hoy</button><p class="muted">Avisar ayuda a preparar la clase. La entrada se confirma en la puerta.</p>`}`}
-${r ? famEstado(id) : ''}${dentro && r.codigo ? `<div class="ka-codigo"><span>Código de recogida</span><strong>${esc(r.estado === 'Entregado' ? '····' : r.codigo)}</strong><small>${r.estado === 'Entregado' ? 'Ya se usó.' : 'Muéstralo al recoger. Quien recoja debe estar autorizado.'}</small></div><p class="muted">Pueden recoger hoy: ${AUTORIZADOS.map(x => esc(x[0])).join(' · ')}</p>` : ''}</section>`;
+${r ? famEstado(id) : ''}${dentro && r.codigo ? `<div class="ka-codigo"><span>Código de recogida</span><strong>${esc(r.estado === 'Entregado' ? '····' : r.codigo)}</strong><small>${r.estado === 'Entregado' ? 'Ya se usó.' : 'Muéstralo al recoger. Quien recoja debe estar autorizado.'}</small></div><p class="muted">Pueden recoger hoy: ${AUTORIZADOS.map(x => esc(x[0])).join(' · ')}</p><button class="button" type="button" data-fam-aut="1">Administrar autorizaciones</button>` : ''}</section>${r?.estado === 'Entregado' && r.entrega ? opinionCard(id, r) : ''}`;
     }).join('');
     const avisados = HIJOS.filter(id => st.registros.get(id)?.estado === 'Por confirmar');
-    $('fam-qr').innerHTML = avisados.length ? `<div class="ka-qr" aria-hidden="true"></div><p><strong>${esc(qr)}</strong> · código opaco generado en el servidor</p><p>${avisados.map(id => esc(alumno(id).nombre)).join(' y ')} · los avisos de hoy</p><p class="muted">Este código no contiene datos personales. Solo funciona hoy y caduca a los 5 minutos. Sube el brillo de la pantalla si no lo leen.</p><button class="button" type="button" id="fam-renueva">Renovar código</button>` : '<p class="muted">Avisa que viene a tu hijo para generar el QR. Un solo QR familiar da entrada a todos los hijos con aviso; recepción confirma cada niño.</p>';
+    $('fam-qr').innerHTML = avisados.length ? `<p><strong>Muéstralo en la puerta</strong></p><div class="ka-qr" aria-hidden="true"></div><p><strong>${esc(qr)}</strong> · código opaco generado en el servidor</p><p class="badge">Se renueva en <span id="fam-qr-tiempo">${restante()}</span></p><p>${avisados.map(id => esc(alumno(id).nombre)).join(' y ')} · los avisos de hoy</p><p class="muted">Este código no contiene datos personales. Solo funciona hoy y caduca a los 5 minutos. Sube el brillo de la pantalla si no lo leen.</p><button class="button" type="button" id="fam-renueva">Renovar código</button>` : '<p class="muted">Avisa que viene a tu hijo para generar el QR. Un solo QR familiar da entrada a todos los hijos con aviso; recepción confirma cada niño.</p>';
   }
   $('familia').addEventListener('click', e => {
     const b = e.target.closest('button'); if (!b) return;
     if (b.dataset.famAvisa) { avisar(b.dataset.famAvisa, sel[b.dataset.famAvisa]); pintaTodo(); }
     if (b.dataset.famNo) { cancelaAviso(b.dataset.famNo); pintaTodo(); }
-    if (b.id === 'fam-renueva') { qr = `${codigo()}-${codigo()}`; pintaFamilia(); }
+    if (b.id === 'fam-renueva') { renuevaQr(); pintaFamilia(); }
+    if (b.dataset.famOpNo) { opiniones[b.dataset.famOpNo] = { omitida: true }; pintaFamilia(); }
+    if (b.dataset.famVolver) { opiniones[b.dataset.famVolver].visto = true; pintaFamilia(); $('fam-hijos').querySelector('h2')?.focus?.(); }
+    if (b.dataset.famAut) modal('Quién puede recoger', `<p class="muted">Adultos autorizados para recoger a tus hijos. No mostramos teléfonos en esta lista.</p><ul class="ka-lista">${AUTORIZADOS.map(([n, d]) => `<li><div><strong>${esc(n)}</strong><small>${esc(d)}</small></div></li>`).join('')}</ul><p>Agregar o quitar a un adulto se confirma con coordinación en persona: así nadie cambia quién recoge solo desde un celular.</p><p class="form-status" role="status" id="fam-aut-msg"></p><div class="ka-acciones"><button class="button primary" type="button" id="fam-aut-pide">Pedir un cambio a coordinación</button><button class="button" type="button" data-cerrar="1">Cerrar</button></div>`);
+  });
+  dialogo.addEventListener('click', e => { if (e.target.id === 'fam-aut-pide') $('fam-aut-msg').textContent = 'Solicitud enviada a coordinación (ejemplo). Te atenderán en recepción el próximo domingo.'; });
+  $('familia').addEventListener('submit', e => {
+    const f = e.target.closest('[data-fam-opinion]'); if (!f) return;
+    e.preventDefault();
+    const valor = f.elements.valor.value;
+    if (!VALORES.includes(valor)) { f.querySelector('[data-op-msg]').textContent = 'Elige cómo les fue hoy.'; f.querySelector('[name=valor]').focus(); return; }
+    opiniones[f.dataset.famOpinion] = { valor, bien: [...f.querySelectorAll('[name=bien]:checked')].map(x => x.value).filter(v => DESTACA.includes(v)), texto: f.elements.texto.value.trim().slice(0, 500) };
+    pintaFamilia();
+    $('fam-hijos').querySelector('.ka-opinion h2')?.setAttribute('tabindex', '-1');
+    $('fam-hijos').querySelector('.ka-opinion h2')?.focus();
   });
   $('familia').addEventListener('change', e => { if (e.target.dataset.famServ) sel[e.target.dataset.famServ] = Number(e.target.value); });
 
