@@ -10,6 +10,8 @@ El sistema vigente de Kids **sigue siendo la fuente de verdad** hasta un corte a
 
 ## Fases
 
+> **Actualización 28 oct 2026:** la [propuesta de arquitectura de producción](arquitectura-produccion-v01.md) agrega dos fases: **Infraestructura** (Cloud Run, Cloud SQL, cola de correo), después de Acceso, y **Libros y pagos** (Mercado Pago Checkout Pro), después de Operación Kids. La numeración vigente está en su sección 8.
+
 Cada fase es un PR con pruebas automatizadas, datos ficticios y el control de seguridad aprobado.
 
 | Fase | Contenido | Depende del abogado |
