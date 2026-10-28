@@ -39,6 +39,7 @@ Una persona puede tener varios perfiles (p. ej., familia y voluntario). El selec
    - Fecha de nacimiento. Si es menor de 18 → «Para crear tu cuenta, tu mamá, papá o tutor debe solicitarla a administración de Shalom» (sección 4.6) y no se crea la cuenta.
    - Casilla «Usar mi foto de Google», **sin marcar**, con vista previa.
    - Aviso de privacidad: aceptación obligatoria y separada.
+   - **Consentimiento expreso de dato sensible**, casilla propia, sin premarcar y obligatoria: «Entiendo que tener una cuenta en Shalom indica que participo en una comunidad religiosa, y autorizo que se trate ese dato para darme acceso a la app» `[redacción final por el abogado]`. Se guarda fecha, versión del texto y medio (casilla en la app).
    - Avisos optativos (Generales, Jóvenes, Kids…): desactivados por defecto, como en Preferencias.
 5. Entra a Inicio como **Congregante**.
 
@@ -60,7 +61,7 @@ Una persona puede tener varios perfiles (p. ej., familia y voluntario). El selec
 
 ### 4.6 Adolescentes (13 a 17 años) con consentimiento del tutor
 1. El tutor **solicita** la cuenta: desde **Mi familia** («Solicitar cuenta para [nombre]») o en persona con administración.
-2. Administración verifica en el registro familiar que esa persona es tutor del adolescente. Shalom no confía en lo que el adolescente diga sobre quién es su tutor.
+2. Administración **acredita** que esa persona ejerce la patria potestad o la tutela: revisa en persona un documento (acta de nacimiento del adolescente o resolución de tutela) junto con la identificación del adulto. **No se guarda copia del documento**; solo una constancia: tipo de documento, fecha, quién lo revisó y resultado. Shalom no confía en lo que el adolescente diga sobre quién es su tutor.
 3. El tutor recibe en su cuenta la solicitud de consentimiento. Ve qué podrá hacer el adolescente y qué datos se guardan, y acepta **él mismo** (administración no puede aceptar por él):
    - Cuenta del adolescente: obligatorio para continuar.
    - Foto de Google del adolescente: casilla aparte, sin marcar.
@@ -68,7 +69,7 @@ Una persona puede tener varios perfiles (p. ej., familia y voluntario). El selec
 5. **Qué puede hacer un Joven:** ver Inicio, Eventos y Avisos (incluidos los de Jóvenes); inscribirse a eventos abiertos a su edad (el tutor recibe aviso); usar Pide y recoge; enviar Tu opinión.
 6. **Qué no puede hacer:** aportaciones, perfiles de equipo con acceso a datos de otras personas (Kids, caja, administración) ni ver datos de otros integrantes de su familia.
 7. **El tutor puede retirar el consentimiento** en cualquier momento desde Mi familia: la cuenta queda en pausa y la foto se borra. Administración también puede suspenderla.
-8. **Al cumplir 18:** administración la pasa a Congregante, el tutor deja de administrarla y se pide al joven que revise su privacidad.
+8. **Al cumplir 18:** el joven debe dar **su propio consentimiento** (aviso y dato sensible) en su siguiente ingreso; hasta entonces la cuenta queda en pausa. Al aceptarlo, administración la pasa a Congregante y el tutor deja de administrarla.
 9. Se guarda evidencia del consentimiento: tutor, fecha, versión del aviso y opciones elegidas.
 
 ### 4.7 Errores que hay que diseñar
@@ -90,10 +91,15 @@ Inicio cancelado · correo no verificado · cuenta de Google ya vinculada a otra
 | Nombre visible | Mostrarlo en la app | Editable por la persona |
 | Foto (copia) | Mostrarla si la persona lo aceptó | Se borra al desactivarla |
 | Fecha de nacimiento | Saber si necesita consentimiento del tutor y cuándo cumple 18 | Solo visible para la persona y administración |
-| Aceptación del aviso de privacidad | Evidencia de consentimiento | Fecha y versión del aviso |
+| Aceptación del aviso de privacidad y consentimiento expreso de dato sensible | Evidencia de consentimiento | Fecha, versión del texto y medio |
+| Constancia de acreditación del tutor (adolescentes) | Evidencia de que consintió quien ejerce la patria potestad | Tipo de documento, fecha y quién revisó; **sin copia del documento** |
 | Consentimiento del tutor (adolescentes) | Evidencia de autorización | Tutor, fecha, versión y opciones; se conserva aunque se retire |
 
 No se guardan tokens de Google: el inicio de sesión no necesita acceso posterior a su cuenta. Del enlace por correo solo se guarda su verificador, nunca el enlace.
+
+## 6.1 Qué debe decir el aviso de privacidad sobre cuentas
+
+Además de lo general: que tener cuenta revela participación religiosa (dato sensible); que al usar «Continuar con Google», Google sabe que la persona usa Shalom, y que existe el enlace por correo como alternativa equivalente; el tratamiento de datos de adolescentes con consentimiento de su tutor; la foto opcional; los encargados (hosting y correo); y cómo ejercer derechos ARCO y revocar el consentimiento. Ver [triaje](legal/triage-cuentas-google-v01.md) y [evaluación de impacto](legal/pia-cuentas-google-v01.md).
 
 ## 7. Requisitos técnicos (resumen)
 
@@ -114,7 +120,7 @@ No se guardan tokens de Google: el inicio de sesión no necesita acceso posterio
 
 ## 9. Criterios de aceptación
 
-- Una persona nueva entra con Google y queda como Congregante, sin ver datos de otras personas.
+- Una persona nueva entra con Google y queda como Congregante, sin ver datos de otras personas. Sin el consentimiento expreso de dato sensible no se crea la cuenta.
 - Una persona con invitación queda vinculada a su registro existente; con el mismo correo pero **sin** invitación, no se vincula sola.
 - La foto solo aparece si se marcó la casilla; al desactivarla desaparece en la app y se borra la copia.
 - Ningún perfil con permisos se obtiene desde Google; administración necesita verificación en dos pasos para entrar.
