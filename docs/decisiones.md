@@ -21,3 +21,7 @@ El sistema vigente sigue siendo fuente de verdad hasta un corte aprobado, concil
 ## 2026-10-23 · Datos del usuario y cifrado
 
 Estado: propuesta inicial. Cifrado administrado en servidor para datos personales, con protección de campo prioritaria en Kids, contactos y finanzas, llaves separadas y acceso mínimo. Contraseñas con hash adaptativo; códigos y tokens con verificador y límites propios. No persistir datos reales en almacenamiento del navegador por defecto. Cifrado extremo a extremo o modo sin conexión requiere una decisión separada. Ver [matriz de datos](cifrado-datos-v07.md). No se implementa criptografía ni se cambia el sistema vigente en el prototipo.
+
+## 2026-10-28 · Cuentas con Google y foto de perfil
+
+Estado: aceptado como definición funcional; sin implementación. Google (OpenID Connect) o enlace por correo sin contraseña. Google identifica y Shalom autoriza: perfiles con permisos solo por invitación, sin vincular por coincidencia de correo. Cuenta propia desde 18 años; de 13 a 17 con consentimiento del tutor verificado; menores de 13 sin cuenta. Foto de Google opcional, sin premarcar, copia reducida visible solo para la persona. Verificación en dos pasos obligatoria para administración (Workspace o propia). Pendientes: confirmar Workspace y revisión legal del consentimiento de menores. Ver [definición](cuentas-google-v01.md).
