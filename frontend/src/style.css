@@ -56,6 +56,43 @@ input, select { background: white; color: #2d2d2d; width: 100%; }
 .shalom-dashboard-card h2 { font-size: 1.5rem; font-weight: 700; }
 .shalom-dashboard-card button { justify-self: start; }
 .shalom-mobile-nav { display: none; }
+.shalom-panel { max-width: 640px; display: grid; gap: 16px; }
+.shalom-panel h2, .shalom-admin h2 { font-size: 1.375rem; font-weight: 700; margin-top: 12px; }
+.shalom-form { display: grid; gap: 20px; max-width: 560px; }
+.shalom-form > button, .shalom-panel > button { justify-self: start; }
+.shalom-alert { border: 2px solid #9a2b20; border-radius: 12px; padding: 14px 16px; color: #7a1f16; background: #fff; }
+.shalom-live:empty { display: none; }
+.shalom-notice, .shalom-warning { border: 2px solid #8a5a12; border-radius: 12px; padding: 14px 16px; background: #fffaf0; }
+.shalom-warning { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; justify-content: space-between; margin-bottom: 20px; }
+button.shalom-secondary { background: #fff; color: #5e3821; border-color: #82552f; }
+.shalom-details { border-top: 1px solid #d3c8b9; padding-top: 16px; }
+.shalom-details summary { cursor: pointer; font-weight: 600; min-height: 48px; display: flex; align-items: center; }
+.shalom-details[open] { display: grid; gap: 12px; }
+.shalom-consent { border: 1px solid #d4c7b8; border-radius: 16px; padding: 16px; display: grid; gap: 12px; background: #fff; min-width: 0; }
+.shalom-consent legend { font-weight: 700; padding: 0 6px; }
+.shalom-version { font-weight: 400; font-size: .875rem; color: #5f5349; }
+.shalom-consent-text { max-height: 14rem; overflow-y: auto; white-space: pre-line; font-size: 1rem; border: 1px solid #e3d9cc; border-radius: 10px; padding: 12px; background: #faf7f2; }
+.shalom-check { display: flex; gap: 12px; align-items: flex-start; font-size: 1rem; }
+.shalom-check input { width: 24px; height: 24px; min-height: 24px; flex: none; margin-top: 2px; accent-color: #82552f; }
+.shalom-steps { display: grid; gap: 12px; padding-left: 1.25rem; }
+.shalom-secret { font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 1.25rem; letter-spacing: .08em; background: #fff; border: 1px dashed #82552f; border-radius: 10px; padding: 12px; overflow-wrap: anywhere; }
+.shalom-facts { display: grid; gap: 12px; }
+.shalom-facts dt { font-weight: 650; }
+.shalom-confirm { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; border: 1px solid #d4c7b8; border-radius: 12px; padding: 12px; background: #fff; }
+.shalom-confirm p { flex-basis: 100%; margin: 0; }
+.shalom-admin { display: grid; gap: 16px; }
+.shalom-list { display: grid; gap: 12px; }
+.shalom-list > li { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; justify-content: space-between; border: 1px solid #d4c7b8; border-radius: 16px; padding: 16px; background: #fff; }
+.shalom-account { align-items: flex-end; }
+.shalom-account > div:first-child { flex: 1 1 260px; min-width: 0; }
+.shalom-chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
+.shalom-chips > li { display: flex; gap: 6px; align-items: center; border: 1px solid #c8b5a2; border-radius: 99px; padding: 2px 4px 2px 12px; font-size: .9375rem; background: #faf7f2; }
+button.shalom-chip-action { min-height: 40px; padding: 4px 10px; font-size: .875rem; background: transparent; color: #5e3821; border: 0; text-decoration: underline; }
+.shalom-inline-form { display: flex; flex-wrap: wrap; gap: 12px; align-items: flex-end; }
+.shalom-inline-form .shalom-field { min-width: 200px; }
+.shalom-roles { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 10px; border: 0; padding: 0; margin: 0; min-width: 0; }
+.shalom-roles legend { font-weight: 650; margin-bottom: 8px; font-size: 1rem; }
+.shalom-roles .shalom-field-hint { grid-column: 1 / -1; }
 .shalom-skip { position: fixed; z-index: 50; top: 8px; left: 8px; transform: translateY(-180%); background: white; padding: 12px; color: var(--cobre-texto); border-radius: 8px; }
 .shalom-skip:focus { transform: translateY(0); }
 @media (max-width: 860px) {

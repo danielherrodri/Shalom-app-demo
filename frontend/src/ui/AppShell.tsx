@@ -1,10 +1,16 @@
 import type { ReactNode } from 'react';
 import logo from '../../../assets/shalom-logo.png';
 
-export type ShalomArea = 'home' | 'kids';
+export type ShalomArea = 'home' | 'kids' | 'admin' | 'security';
+
+const LABELS: Record<ShalomArea, string> = { home: 'Inicio', kids: 'Mi clase de hoy', admin: 'Administración', security: 'Mi cuenta' };
+// The phone bar fits four short labels at 360 px; the full names stay in the sidebar and title.
+const SHORT: Record<ShalomArea, string> = { home: 'Inicio', kids: 'Mi clase', admin: 'Admin', security: 'Cuenta' };
 
 type AppShellProps = {
   activeArea: ShalomArea;
+  // Areas the signed-in profiles may open; the server still checks every request.
+  areas: ShalomArea[];
   profileName?: string;
   busy: boolean;
   onNavigate: (area: ShalomArea) => void;
@@ -12,12 +18,9 @@ type AppShellProps = {
   children: ReactNode;
 };
 
-export function AppShell({ activeArea, profileName, busy, onNavigate, onLogout, children }: AppShellProps) {
-  // Esta base solo integra asistencia Kids: no simular permisos para otras áreas.
-  const links: { id: ShalomArea; label: string }[] = [
-    { id: 'home', label: 'Inicio' },
-    ...(profileName ? [{ id: 'kids' as const, label: 'Mi clase de hoy' }] : []),
-  ];
+export function AppShell({ activeArea, areas, profileName, busy, onNavigate, onLogout, children }: AppShellProps) {
+  // No navigation beyond Inicio before authentication.
+  const links = (profileName ? areas : ['home' as const]).map(id => ({ id, label: LABELS[id], short: SHORT[id] }));
   const navigation = (mobile: boolean) => links.map(link => (
     <button
       key={link.id}
@@ -26,7 +29,7 @@ export function AppShell({ activeArea, profileName, busy, onNavigate, onLogout, 
       aria-current={activeArea === link.id ? 'page' : undefined}
       onClick={() => onNavigate(link.id)}
     >
-      {link.label}
+      {mobile ? link.short : link.label}
     </button>
   ));
   return (
@@ -39,7 +42,7 @@ export function AppShell({ activeArea, profileName, busy, onNavigate, onLogout, 
         </div>
         <p className="shalom-nav-heading">TU ESPACIO</p>
         <nav aria-label="Secciones de Shalom">{navigation(false)}</nav>
-        <p className="shalom-sidebar-note">Base de desarrollo · Solo datos ficticios</p>
+        <p className="shalom-sidebar-note">Versión en desarrollo · Solo datos ficticios</p>
       </aside>
       <div className="shalom-workspace">
         <header className="shalom-topbar">
@@ -47,7 +50,7 @@ export function AppShell({ activeArea, profileName, busy, onNavigate, onLogout, 
             <img src={logo} alt="Shalom" />
             <span>UNA CASA PARA TODOS</span>
           </div>
-          <span className="shalom-topbar-title">Shalom <span aria-hidden="true">/</span> {activeArea === 'kids' ? 'Mi clase de hoy' : 'Inicio'}</span>
+          <span className="shalom-topbar-title">Shalom <span aria-hidden="true">/</span> {LABELS[activeArea]}</span>
           {profileName ? (
             <div className="shalom-session">
               <span className="shalom-session-name">{profileName}</span>

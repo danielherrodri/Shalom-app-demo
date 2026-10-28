@@ -1,6 +1,6 @@
 # Plan de la versión 1 · Administración, correos y Shalom Kids
 
-**Fecha:** 28 de octubre de 2026 · **Estado:** alcance aceptado; fases 1 y 2 en código (backend).
+**Fecha:** 28 de octubre de 2026 · **Estado:** alcance aceptado; fases 1 y 2 en código, con su interfaz React.
 
 ## Alcance
 
@@ -58,3 +58,11 @@ Antes de la Fase 7: aviso publicado, persona de datos personales designada y con
 - **Sesiones:** dispositivo personal 30 minutos de inactividad y 12 horas absolutas; el acceso local de desarrollo (equipo compartido de Kids) conserva 5 minutos y 8 horas. `auth/logout-everywhere/` cierra todas las sesiones de la cuenta; las sesiones sin versión vigente se cierran.
 - **Google OpenID Connect:** apagado (`GOOGLE_OIDC_ENABLED = False`; `auth/providers/` lo informa) hasta tener el proyecto de Google Cloud y sus credenciales.
 - **Pendiente para producción:** el límite por origen usa la caché local del proceso y la IP que recibe Django; con varias instancias detrás de Firebase Hosting y Cloud Run hace falta una caché compartida y tomar la IP del encabezado que fije el balanceador. La cola de correo con Cloud Scheduler es de la fase de Infraestructura.
+
+## Interfaz de las fases 1 y 2 (Fase 6, en curso)
+
+- `frontend/` (React): «Entrar a Shalom» con enlace por correo, `/entrar#…` y `/invitacion#…` (el token sale de la barra de direcciones y del historial al abrir la página), «Completa tu perfil» con ambos consentimientos sin premarcar, verificación en dos pasos (alta con clave de configuración y código en cada sesión nueva), «Mi cuenta» con cierre en todos los dispositivos, Administración (perfiles, confirmaciones de otra persona, invitaciones y reinicio de la verificación) y la asistencia Kids existente.
+- Los perfiles privilegiados no ven ninguna sección hasta verificar el segundo factor. La interfaz solo oculta; el servidor decide cada permiso.
+- Desarrollo: `python backend/manage.py runserver` y `npm run dev --prefix frontend` (Vite reenvía `/api` conservando el host para la comprobación de origen de CSRF).
+- Prueba de extremo a extremo con Django, PostgreSQL y Chromium: `node tests/acceso-react.cjs` con `PGDATABASE` terminada en `_e2e` (la vacía). Recorre menor de edad, enlace usado, alta adulta, cierre en todos los dispositivos, alta del segundo factor, asignación, invitación y confirmación por una segunda persona, con axe en cada pantalla. Corre en CI (`access-e2e`).
+- Pendiente: código QR para dar de alta el segundo factor desde computadora (hoy se escribe la clave o se abre el enlace en el celular); `CSRF_TRUSTED_ORIGINS` con el dominio público al desplegar detrás de Firebase Hosting.
