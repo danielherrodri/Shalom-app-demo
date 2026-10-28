@@ -90,7 +90,7 @@ Inicio cancelado · correo no verificado · cuenta de Google ya vinculada a otra
 | Correo verificado | Avisos de cuenta e invitaciones | Puede cambiar; no se usa como identificador |
 | Nombre visible | Mostrarlo en la app | Editable por la persona |
 | Foto (copia) | Mostrarla si la persona lo aceptó | Se borra al desactivarla |
-| Fecha de nacimiento | Saber si necesita consentimiento del tutor y cuándo cumple 18 | Solo visible para la persona y administración |
+| Fecha de nacimiento | Saber si necesita consentimiento del tutor y cuándo cumple 18 | **Propuesta de minimización:** se pide al registrarse; en adultos se descarta y solo se guarda «mayor de edad declarado» con su fecha; en adolescentes se guarda hasta los 18 y luego se borra. Pendiente de confirmar con el abogado. Solo visible para la persona y administración |
 | Aceptación del aviso de privacidad y consentimiento expreso de dato sensible | Evidencia de consentimiento | Fecha, versión del texto y medio |
 | Constancia de acreditación del tutor (adolescentes) | Evidencia de que consintió quien ejerce la patria potestad | Tipo de documento, fecha y quién revisó; **sin copia del documento** |
 | Consentimiento del tutor (adolescentes) | Evidencia de autorización | Tutor, fecha, versión y opciones; se conserva aunque se retire |

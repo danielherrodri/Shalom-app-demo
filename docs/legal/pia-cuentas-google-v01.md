@@ -7,7 +7,7 @@ NOTAS DE INVESTIGACIÓN — NO ES ASESORÍA LEGAL — REVISAR CON UN ABOGADO ANT
 
 **Contexto previo:** el [triaje del 28 oct 2026](triage-cuentas-google-v01.md) concluyó que se requiere evaluación por datos sensibles (creencias religiosas), menores e identidad. Esta evaluación parte de ese resultado y no baja su nivel de riesgo. No hay evaluaciones anteriores sobre esta actividad.
 
-**Fuentes legales:** no hay herramienta de investigación legal conectada. Toda referencia a la ley proviene del conocimiento del modelo y está marcada `[model knowledge — verify]`. **Ninguna cita ni plazo debe usarse sin que el abogado lo confirme contra el texto vigente de la LFPDPPP 2025**, ley que sustituyó a la de 2010; además, el INAI se extinguió.
+**Fuentes legales:** citas tomadas de la [investigación del 28 oct 2026](investigacion-lfpdppp-2025.md), hecha con búsqueda web en ChatGPT sobre fuentes oficiales y marcada `[ChatGPT búsqueda web — verificar]`. Lo que no cubre esa investigación sigue marcado `[model knowledge — verify]`. **El abogado debe confirmar todas las citas.** Marco: LFPDPPP publicada el 20 mar 2025 (última reforma, 14 nov 2025); reglamento de 2011 con referencias desfasadas; autoridad: Secretaría Anticorrupción y Buen Gobierno; plazos en días hábiles.
 
 ---
 
@@ -30,7 +30,7 @@ Shalom permitirá entrar con Google o con un enlace por correo, con foto opciona
 | Emisor + identificador de Google (`sub`) | Sí | Si entra con Google |
 | Correo verificado | Sí | Sí |
 | Nombre visible | Sí | Sí |
-| Fecha de nacimiento | Sí | Sí |
+| Fecha de nacimiento | Sí | Se pide al registrarse. **Propuesta de minimización:** en adultos se descarta y solo se guarda «mayor de edad declarado» con su fecha; en adolescentes se guarda hasta que cumplen 18 y luego se borra (pregunta 12 para el abogado) |
 | Foto (copia de 256 × 256) | Sí | No; opt-in |
 | Perfiles asignados (revelan participación religiosa y función) | Sí | Sí |
 | Consentimientos: aviso, dato sensible, foto y, en adolescentes, constancia de acreditación del tutor | Sí | Sí |
@@ -39,7 +39,7 @@ Shalom permitirá entrar con Google o con un enlace por correo, con foto opciona
 
 **Titulares:** adultos de la comunidad y adolescentes de 13 a 17 años. Los menores de 13 no tienen cuenta.
 **Finalidad primaria:** identificar a la persona y darle acceso según su perfil.
-**Finalidades secundarias:** ninguna. Si después se agregan (estadísticas, mercadotecnia), requieren aviso y opción de negarse `[model knowledge — verify]`.
+**Finalidades secundarias:** ninguna. Si después se agregan (estadísticas, mercadotecnia), requieren aviso y opción de negarse (Ley, art. 15, frs. III–IV) `[ChatGPT búsqueda web — verificar]`.
 
 ---
 
@@ -47,18 +47,18 @@ Shalom permitirá entrar con Google o con un enlace por correo, con foto opciona
 
 | Finalidad / dato | Base | Notas |
 |---|---|---|
-| Acceso a la cuenta (datos de identificación) | Consentimiento mediante el aviso de privacidad | Consentimiento tácito suficiente para datos no sensibles si el aviso se puso a disposición `[model knowledge — verify]` |
-| Participación religiosa (dato sensible) | **Consentimiento expreso y por escrito** (vale el medio electrónico) | Casilla propia, sin premarcar y obligatoria en «Completa tu perfil»; se guarda evidencia `[model knowledge — verify]` |
-| Datos de adolescentes | Consentimiento de quien ejerce la patria potestad o la tutela | Se acredita en persona y se guarda constancia, no copia del documento `[model knowledge — verify: régimen de menores en la LFPDPPP 2025 y su reglamento]` |
+| Acceso a la cuenta (datos de identificación) | Consentimiento mediante el aviso de privacidad | Aviso integral y simplificado con los elementos del art. 15 `[ChatGPT búsqueda web — verificar]` |
+| Participación religiosa (dato sensible) | **Consentimiento expreso y por escrito** (vale el medio electrónico) | Las creencias religiosas son dato sensible (Ley, art. 2, fr. VI; arts. 7–9) `[ChatGPT búsqueda web — verificar]`. Casilla propia, sin premarcar y obligatoria en «Completa tu perfil», **separada de la autenticación**; evidencia: versión, fecha, cuenta, finalidad y mecanismo. Que la casilla baste: **NO VERIFICADO** (pregunta 1) |
+| Datos de adolescentes | Consentimiento de quien ejerce la patria potestad o la tutela | La ley no fija umbrales de edad; el reglamento (art. 89) remite a la representación del Código Civil Federal (arts. 412, 414, 424 y 425) `[ChatGPT búsqueda web — verificar]`. Se acredita en persona y se guarda constancia sin copia; su suficiencia: **NO VERIFICADO** (preguntas 3–5) |
 | Foto | Consentimiento (opt-in) | En adolescentes, también del tutor |
-| Verificación en dos pasos y bitácora | Necesarias para la relación y deber de seguridad | Medidas de seguridad exigidas al responsable `[model knowledge — verify]` |
+| Verificación en dos pasos y bitácora | Necesarias para la relación y deber de seguridad | Deber de seguridad (Ley, arts. 18–20) `[ChatGPT búsqueda web — verificar]`; la ley no exige expresamente la verificación en dos pasos |
 
 ---
 
 ## 3. Flujo de datos
 
 - **Recolección:** el inicio de sesión de Google (OpenID Connect con `openid`, `email`, `profile`) o el enlace por correo, más «Completa tu perfil». En adolescentes, además, la acreditación presencial del tutor y su consentimiento desde su cuenta.
-- **Almacenamiento:** base de datos PostgreSQL de Shalom, cifrada en reposo; la foto en almacenamiento cifrado. Región: `[PENDIENTE — confirmar hosting]`. Si queda fuera de México, es transferencia o remisión internacional y debe decirse en el aviso `[model knowledge — verify]`.
+- **Almacenamiento:** base de datos PostgreSQL de Shalom, cifrada en reposo; la foto en almacenamiento cifrado. Región: `[PENDIENTE — confirmar hosting]`. Si queda fuera de México y el proveedor trata por cuenta de Shalom, es **remisión internacional, no transferencia**, y no requiere consentimiento adicional (Ley, art. 2, frs. XII y XX; Reg., arts. 49–55) `[ChatGPT búsqueda web — verificar]`.
 - **Acceso:**
   - La persona ve sus propios datos.
   - Administración ve fecha de nacimiento, perfiles y consentimientos.
@@ -115,7 +115,7 @@ No existe aviso real (`aviso-privacidad-DEMO.md` es de demostración). **Condici
 | Oposición | Sí | Por solicitud a la persona de datos personales |
 | Revocación | Sí | Foto: interruptor. Cuenta: eliminar. Adolescentes: el tutor retira el consentimiento desde Mi familia |
 
-Plazos de respuesta: `[model knowledge — verify contra la LFPDPPP 2025]`.
+Plazos: **20 días hábiles** para responder y **15 días hábiles** para ejecutar, cada uno ampliable una vez (Ley, art. 31) `[ChatGPT búsqueda web — verificar]`. Vulneraciones que afecten significativamente: aviso inmediato a los titulares (Ley, art. 29); el aviso a la Secretaría: **NO VERIFICADO**.
 
 ---
 
@@ -138,10 +138,7 @@ Plazos de respuesta: `[model knowledge — verify contra la LFPDPPP 2025]`.
 
 ## Siguientes pasos
 
-1. **Llevar al abogado** este documento, el [triaje](triage-cuentas-google-v01.md) y la [definición](../cuentas-google-v01.md), con tres preguntas:
-   - ¿Qué artículos y plazos de la LFPDPPP 2025 y su reglamento aplican, y cuál es la autoridad competente hoy?
-   - ¿Qué forma exacta debe tener el consentimiento expreso para el dato sensible y para menores?
-   - ¿Es aceptable el riesgo residual de verificación de edad?
+1. **Llevar al abogado** este documento, el [triaje](triage-cuentas-google-v01.md), la [definición](../cuentas-google-v01.md), la [investigación](investigacion-lfpdppp-2025.md) con sus 12 preguntas y los [borradores de textos](textos-cuentas-borrador.md). Prioridades: el consentimiento electrónico del dato sensible y la representación de adolescentes; además, si es aceptable el riesgo residual de verificación de edad.
 2. Que la iglesia complete los campos `[PENDIENTE]` del perfil de privacidad.
 3. Opcional: conectar una herramienta de investigación legal y repetir la evaluación con citas verificadas.
 4. Después del visto bueno legal, implementar en Django con las pruebas de la sección 7.

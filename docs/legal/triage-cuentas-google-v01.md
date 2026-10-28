@@ -4,7 +4,7 @@ NOTAS DE INVESTIGACIÓN — NO ES ASESORÍA LEGAL — REVISAR CON UN ABOGADO ANT
 
 **Fecha:** 28 oct 2026 · **Herramienta:** privacy-legal `use-case-triage` con perfil genérico (`docs/legal/perfil-privacidad.md`, campos `[PENDIENTE]`) · **Actividad revisada:** [cuentas-google-v01.md](../cuentas-google-v01.md)
 
-> Las referencias a la ley mexicana son orientativas y deben verificarse con un abogado. La LFPDPPP se reemplazó en 2025 y el INAI se extinguió; los artículos, plazos y la autoridad competente citados aquí pueden no coincidir con el texto vigente.
+> Las referencias a la ley quedaron actualizadas en la [investigación del 28 oct 2026](investigacion-lfpdppp-2025.md) `[ChatGPT búsqueda web — verificar]`: LFPDPPP del 20 mar 2025, autoridad Secretaría Anticorrupción y Buen Gobierno, plazos ARCO de 20 + 15 días hábiles (art. 31). Las debe confirmar el abogado.
 
 ## Conclusión
 
@@ -37,7 +37,7 @@ NOTAS DE INVESTIGACIÓN — NO ES ASESORÍA LEGAL — REVISAR CON UN ABOGADO ANT
 1. **Creencias religiosas como dato sensible (mayor riesgo).** El simple hecho de tener cuenta en Shalom, sus perfiles (miembro, voluntario, Joven) y su participación revelan afiliación religiosa.
    - Para datos sensibles, la ley exige **consentimiento expreso y por escrito**, que puede ser electrónico.
    - La casilla «Acepto el aviso» de «Completa tu perfil» probablemente **no basta** si no identifica expresamente ese dato sensible y su finalidad.
-   - `[verificar artículo aplicable de la LFPDPPP 2025]`
+   - Ley, art. 2, fr. VI y arts. 7–9 `[ChatGPT búsqueda web — verificar]`.
 2. **Adolescentes.**
    - El consentimiento lo debe dar quien ejerce la patria potestad o la tutela. La definición ya lo pide al tutor verificado por administración, lo cual es positivo.
    - Falta definir cómo se **acredita** esa relación: ¿qué documento revisa administración y qué se guarda como evidencia?

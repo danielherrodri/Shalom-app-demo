@@ -10,7 +10,7 @@ Shalom es una iglesia en México que opera una app para su comunidad (eventos, S
 
 **Practice setting:** Interno de la iglesia `[DEFAULT — confirmar]`.
 
-**Regulatory footprint:** México — Ley Federal de Protección de Datos Personales en Posesión de los Particulares (LFPDPPP, nueva ley publicada en el DOF el 20 mar 2025) y su reglamento `[verificar vigencia del reglamento y autoridad competente tras la extinción del INAI]`. No aplica GDPR salvo que haya titulares en la UE `[PENDIENTE — confirmar]`. Sin regímenes sectoriales (no es institución financiera ni de salud).
+**Regulatory footprint:** México — Ley Federal de Protección de Datos Personales en Posesión de los Particulares (LFPDPPP, publicada en el DOF el 20 mar 2025, vigente desde el 21 mar 2025, última reforma 14 nov 2025) y su reglamento de 2011, formalmente vigente pero con referencias desfasadas. Autoridad: Secretaría Anticorrupción y Buen Gobierno. Plazos en días hábiles. Sin exención para iglesias. Ver [investigación](investigacion-lfpdppp-2025.md) `[ChatGPT búsqueda web — verificar]`. No aplica GDPR salvo que haya titulares en la UE `[PENDIENTE — confirmar]`. Sin regímenes sectoriales (no es institución financiera ni de salud).
 
 **Open regulatory matters:** ninguno conocido `[PENDIENTE — confirmar]`.
 
@@ -75,7 +75,7 @@ Que el proveedor use datos de la comunidad (sobre todo de menores) para sus prop
 Derechos ARCO (acceso, rectificación, cancelación, oposición) más revocación del consentimiento.
 **Volume:** `[PENDIENTE]` · **Handler:** `[PENDIENTE — persona de datos personales]`
 **Systems to check:** base de datos de la app, proveedor de correo, respaldos, pagos `[PENDIENTE — completar al lanzar]`.
-**Response SLA:** `[verificar plazos de la LFPDPPP 2025 antes de comprometerlos]`.
+**Response SLA:** 20 días hábiles para responder y 15 para ejecutar, ampliables una vez (Ley, art. 31) `[ChatGPT búsqueda web — verificar]`.
 
 ---
 
