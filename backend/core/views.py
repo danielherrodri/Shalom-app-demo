@@ -12,6 +12,7 @@ from django.views.decorators.http import require_GET, require_POST
 from rest_framework import generics, serializers
 from rest_framework.response import Response
 from rest_framework.exceptions import ValidationError
+from .admin_api import roles_of
 from .models import Group, Person, Meeting, Enrollment, Assignment, Attendance, AuditEvent
 
 
@@ -57,7 +58,7 @@ def logout_view(request):
 def me(request):
     if not request.user.is_authenticated:
         return JsonResponse({'detail': 'Inicia sesión.'}, status=401)
-    return JsonResponse({'username': request.user.username, 'activeAt': request.session['active_at'], 'startedAt': request.session['started_at'], 'idleSeconds': request.session['idle_limit'], 'absoluteSeconds': request.session['absolute_limit']})
+    return JsonResponse({'username': request.user.username, 'roles': roles_of(request.user), 'activeAt': request.session['active_at'], 'startedAt': request.session['started_at'], 'idleSeconds': request.session['idle_limit'], 'absoluteSeconds': request.session['absolute_limit']})
 
 
 @require_POST
