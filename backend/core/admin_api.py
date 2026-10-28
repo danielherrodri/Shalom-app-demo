@@ -33,6 +33,11 @@ def roles_of(user):
     return sorted(effective_grants().filter(user=user).values_list('role', flat=True))
 
 
+def display_name(user):
+    profile = getattr(user, 'profile', None)
+    return profile.display_name if profile else user.username
+
+
 def audit(actor, action, target):
     AuditEvent.objects.create(actor=actor, action=action, target_id=target.id)
 
@@ -65,10 +70,10 @@ def assignable(role):
 class AccountList(generics.ListAPIView):
     permission_classes = [IsAdministrator]
     def get_queryset(self):
-        return User.objects.filter(is_active=True).order_by('username', 'id')
+        return User.objects.filter(is_active=True).select_related('profile').order_by('username', 'id')
     def list(self, request, *args, **kwargs):
         page = self.paginate_queryset(self.get_queryset())
-        return self.get_paginated_response([{'id': str(u.id), 'username': u.username, 'roles': roles_of(u)} for u in page])
+        return self.get_paginated_response([{'id': str(u.id), 'username': u.username, 'displayName': display_name(u), 'roles': roles_of(u)} for u in page])
 
 
 class GrantInput(Strict):

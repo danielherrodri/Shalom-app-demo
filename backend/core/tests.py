@@ -200,6 +200,13 @@ class AdministrationTests(TestCase):
         self.sign_in(self.admin)
         self.assertEqual(self.client.get('/api/v1/admin/accounts/').status_code, 403)
 
+    def test_account_list_shows_display_name_only(self):
+        from .models import AccountProfile
+        AccountProfile.objects.create(user=self.member, display_name='Nombre de ejemplo', adult_declared_at=timezone.now())
+        self.sign_in(self.admin)
+        rows = {row['username']: row for row in self.client.get('/api/v1/admin/accounts/').json()['results']}
+        self.assertEqual(rows[self.member.username], {'id': str(self.member.id), 'username': self.member.username, 'displayName': 'Nombre de ejemplo', 'roles': []})
+
     def test_admin_cannot_grant_to_self(self):
         self.sign_in(self.admin)
         self.assertEqual(self.grant(self.admin, 'finanzas').status_code, 400)
@@ -623,4 +630,4 @@ class AccessTests(TestCase):
         self.assertEqual((me['idleSeconds'], me['absoluteSeconds']), (300, 8 * 3600))
 
     def test_google_is_off(self):
-        self.assertEqual(self.client.get('/api/v1/auth/providers/').json(), {'emailLink': True, 'google': False})
+        self.assertEqual(self.client.get('/api/v1/auth/providers/').json(), {'emailLink': True, 'google': False, 'localPassword': True})

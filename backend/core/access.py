@@ -20,7 +20,7 @@ from django.views.decorators.http import require_GET, require_POST
 from rest_framework import generics, serializers
 from rest_framework.response import Response
 from rest_framework.exceptions import ValidationError, Throttled
-from .admin_api import IsAdministrator, Strict, audit, effective_grants, roles_of, verifier
+from .admin_api import IsAdministrator, Strict, audit, display_name, effective_grants, roles_of, verifier
 from .crypto import seal, unseal
 from .emails import LOGIN_LINK, send_after_commit
 from .models import (User, PRIVILEGED_ROLES, EmailIdentity, AccountProfile, LoginLink, ConsentKind,
@@ -292,9 +292,9 @@ class MfaReset(generics.GenericAPIView):
 
 def account_summary(request):
     user = request.user
-    profile = AccountProfile.objects.filter(user=user).first()
     return {
-        'displayName': profile.display_name if profile else user.username,
+        'id': str(user.id),
+        'displayName': display_name(user),
         'roles': roles_of(user),
         'mfaPending': needs_mfa(user) and not request.session.get('mfa_verified_at'),
         'mfaEnrolled': TotpDevice.objects.filter(user=user, confirmed_at__isnull=False).exists(),
@@ -305,4 +305,4 @@ def account_summary(request):
 @never_cache
 def providers(request):
     # Google OpenID Connect stays off until the church's Google Cloud project and credentials exist.
-    return JsonResponse({'emailLink': True, 'google': settings.GOOGLE_OIDC_ENABLED})
+    return JsonResponse({'emailLink': True, 'google': settings.GOOGLE_OIDC_ENABLED, 'localPassword': settings.LOCAL_PASSWORD_LOGIN})
