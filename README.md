@@ -53,6 +53,7 @@ Pruebas: `npx playwright install chromium`, `npm test`, `npm run test:processing
 - [Auditoría visual](docs/auditoria-diseno-v06.md)
 - [Recorridos, especificación y roadmap de producción](docs/comunicaciones-v06.md)
 - [Borrador de aviso de privacidad](docs/aviso-privacidad-DEMO.md)
+- [Borrador de aviso de privacidad de producción (México, para revisión legal)](docs/aviso-privacidad-produccion-BORRADOR-v01.md)
 - [Plantillas de correo y compatibilidad](docs/plantillas-correo-v06.md)
 - [Arquitectura y releases v0.7](docs/pipelines-releases-v07.md)
 - [Registro de decisiones](docs/decisiones.md)
