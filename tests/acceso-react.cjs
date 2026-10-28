@@ -16,8 +16,7 @@ const root = path.resolve(__dirname, "..");
 const python = process.env.PYTHON || path.join(root, ".venv/bin/python");
 const shots = process.env.SHALOM_SHOTS || "";
 if (!/_e2e$/.test(process.env.PGDATABASE || "")) throw new Error("PGDATABASE debe terminar en _e2e: esta prueba vacía la base.");
-// PYTHONUNBUFFERED: runserver writes its ready line to a pipe, which Python would otherwise buffer.
-const env = { ...process.env, PYTHONUNBUFFERED: "1", SHALOM_ENV: "development", SHALOM_E2E_PASSWORD: crypto.randomBytes(18).toString("base64url") };
+const env = { ...process.env, SHALOM_ENV: "development", SHALOM_E2E_PASSWORD: crypto.randomBytes(18).toString("base64url") };
 const manage = (...args) => execFileSync(python, [path.join(root, "backend/manage.py"), ...args], { env, stdio: ["ignore", "pipe", "inherit"] }).toString();
 
 // Fixtures are synthetic; link tokens are created here because emails stay in the server's memory.
@@ -50,14 +49,17 @@ function totp(secret) {
   return String((mac.readUInt32BE(offset) & 0x7fffffff) % 1e6).padStart(6, "0");
 }
 
-function start(command, args, options, ready) {
-  const child = spawn(command, args, { ...options, stdio: ["ignore", "pipe", "pipe"] });
-  return new Promise((resolve, reject) => {
-    const timer = setTimeout(() => { child.kill(); reject(new Error(command + " no arrancó")); }, 30000);
-    const watch = data => { if (ready.test(data.toString())) { clearTimeout(timer); resolve(child); } };
-    child.stdout.on("data", watch); child.stderr.on("data", watch);
-    child.on("exit", code => reject(new Error(command + " terminó con " + code)));
-  });
+// Ready means answering HTTP: console output differs between terminals and CI (colors, buffering).
+async function start(command, args, options, url) {
+  const child = spawn(command, args, { ...options, stdio: ["ignore", "ignore", "inherit"] });
+  let exited = null;
+  child.on("exit", code => { exited = code; });
+  for (const deadline = Date.now() + 30000; Date.now() < deadline;) {
+    if (exited !== null) throw new Error(command + " terminó con " + exited);
+    try { await fetch(url); return child; } catch { await new Promise(r => setTimeout(r, 300)); }
+  }
+  child.kill();
+  throw new Error(command + " no arrancó");
 }
 
 async function axe(page, label) {
@@ -70,8 +72,8 @@ async function axe(page, label) {
   manage("migrate", "--noinput");
   manage("flush", "--noinput");
   manage("shell", "-c", seed);
-  const django = await start(python, [path.join(root, "backend/manage.py"), "runserver", "127.0.0.1:8000", "--noreload"], { env }, /Quit the server|Starting development server/);
-  const vite = await start(path.join(root, "frontend/node_modules/.bin/vite"), ["--host", "127.0.0.1", "--port", "5173"], { cwd: path.join(root, "frontend"), env }, /Local:/);
+  const django = await start(python, [path.join(root, "backend/manage.py"), "runserver", "127.0.0.1:8000", "--noreload"], { env }, "http://127.0.0.1:8000/api/v1/auth/providers/");
+  const vite = await start(path.join(root, "frontend/node_modules/.bin/vite"), ["--host", "127.0.0.1", "--port", "5173"], { cwd: path.join(root, "frontend"), env }, "http://127.0.0.1:5173/");
   const browser = await chromium.launch();
   let passed = 0;
   let page;
