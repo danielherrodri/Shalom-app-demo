@@ -16,7 +16,8 @@ const root = path.resolve(__dirname, "..");
 const python = process.env.PYTHON || path.join(root, ".venv/bin/python");
 const shots = process.env.SHALOM_SHOTS || "";
 if (!/_e2e$/.test(process.env.PGDATABASE || "")) throw new Error("PGDATABASE debe terminar en _e2e: esta prueba vacía la base.");
-const env = { ...process.env, SHALOM_ENV: "development", SHALOM_E2E_PASSWORD: crypto.randomBytes(18).toString("base64url") };
+// PYTHONUNBUFFERED: runserver writes its ready line to a pipe, which Python would otherwise buffer.
+const env = { ...process.env, PYTHONUNBUFFERED: "1", SHALOM_ENV: "development", SHALOM_E2E_PASSWORD: crypto.randomBytes(18).toString("base64url") };
 const manage = (...args) => execFileSync(python, [path.join(root, "backend/manage.py"), ...args], { env, stdio: ["ignore", "pipe", "inherit"] }).toString();
 
 // Fixtures are synthetic; link tokens are created here because emails stay in the server's memory.
@@ -52,7 +53,7 @@ function totp(secret) {
 function start(command, args, options, ready) {
   const child = spawn(command, args, { ...options, stdio: ["ignore", "pipe", "pipe"] });
   return new Promise((resolve, reject) => {
-    const timer = setTimeout(() => reject(new Error(command + " no arrancó")), 30000);
+    const timer = setTimeout(() => { child.kill(); reject(new Error(command + " no arrancó")); }, 30000);
     const watch = data => { if (ready.test(data.toString())) { clearTimeout(timer); resolve(child); } };
     child.stdout.on("data", watch); child.stderr.on("data", watch);
     child.on("exit", code => reject(new Error(command + " terminó con " + code)));
