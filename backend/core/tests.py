@@ -480,7 +480,10 @@ class AccessTests(TestCase):
         user = self.sign_up()
         self.assertEqual(set(ConsentRecord.objects.filter(user=user).values_list('text__kind', flat=True)), {'aviso', 'dato_sensible'})
         profile = AccountProfile.objects.get(user=user)
-        self.assertNotIn('1990', str(AccountProfile.objects.values().get()))
+        # The random UUID key may contain these digits; only the other columns must not.
+        stored = AccountProfile.objects.values().get()
+        stored.pop('user_id')
+        self.assertNotIn('1990', str(stored))
         self.assertEqual(profile.display_name, 'Persona de ejemplo')
         me = self.client.get('/api/v1/auth/me/').json()
         self.assertEqual((me['displayName'], me['roles'], me['mfaPending']), ('Persona de ejemplo', [], False))

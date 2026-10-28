@@ -34,9 +34,10 @@ Pero se combinan **tres categorías de alto riesgo**: menores, salud (dato sensi
 **Qué:** operar el ministerio infantil. Incluye inscripción de familias, grupos por edad, reservas, entrada y salida con gafete, atención de alergias durante la clase, seguimiento de incidencias, avisos a tutores, rol de docentes y venta de libros.
 
 **Titulares:**
-- niñas y niños del ministerio `[PENDIENTE — rango de edad de Kids]`;
+- niñas y niños del ministerio, de 4 a 12 años, en dos grupos: de 4 a 6 y de 7 a 12 (confirmado por coordinación);
 - madres, padres y tutores, con cuenta;
 - personas autorizadas para recoger, que pueden no tener cuenta;
+- docentes y voluntarios, todos adultos (de 23 a 65 años, según coordinación);
 - docentes y voluntarios;
 - visitantes de una sola vez.
 
@@ -157,11 +158,11 @@ No existe aviso real. **Condición bloqueante:** el aviso integral (ver la [eval
 
 | # | Riesgo | Probabilidad | Impacto | Mitigación | Estado | Responsable |
 |---|---|---|---|---|---|---|
-| 1 | **Se entrega un niño a un adulto no autorizado:** un QR copiado, un autorizado ya vencido o un tutor con restricción judicial | M | **Muy alto** (seguridad física) | El QR del niño **no basta**: la salida exige el código de recogida del adulto o que esté en la lista de autorizados, con identificación. Los cambios de autorizados solo en persona. Vigencias. Registro de quién entregó y cómo verificó. Si no coincide, no se entrega y se abre una incidencia. Restricciones de custodia visibles en Recepción (pregunta K4) | Diseñada | Coordinación + desarrollo |
+| 1 | **Se entrega un niño a un adulto no autorizado:** un QR copiado, un autorizado ya vencido o un tutor con restricción judicial | M | **Muy alto** (seguridad física) | El QR del niño **no basta**: la salida exige el código de recogida del adulto o que esté en la lista de autorizados, con identificación. Los cambios de autorizados solo en persona. Vigencias. Registro de quién entregó y cómo verificó. Si no coincide, el niño se queda con el docente y se pide la aprobación del tutor por la app (sección 5.1); sin ella no se entrega y se abre una incidencia. Restricciones de custodia visibles en Recepción (pregunta K4) | Diseñada | Coordinación + desarrollo |
 | 2 | **El detalle de salud llega a quien no atiende al niño:** docente de otro grupo, Recepción, administración general, exportaciones o correos | M | A | Cifrado de campo; acceso por grupo y por día; Recepción solo ve el indicador; lecturas en la bitácora; excluido de exportaciones, correos y listas impresas | Diseñada | Desarrollo |
 | 3 | **Consentimiento inválido para la salud:** una casilla general, o dado por quien no ejerce la patria potestad | M | A | Casilla propia y separada; tutor acreditado en persona; evidencia con versión y fecha; texto revisado por el abogado | Diseñada (falta el texto) | Producto + abogado |
 | 4 | **Sin datos de salud no hay atención:** el tutor no da el consentimiento y un docente desconoce una alergia | M | Muy alto | Pregunta K2/K3: ¿puede la inscripción exigir declarar alergias? Propuesta: sin la declaración (aunque sea «ninguna»), no se confirma la inscripción | **Abierto** | Abogado + coordinación |
-| 5 | **Disputas de custodia:** dos tutores en desacuerdo, uno revoca o hay una orden judicial | M | A | Procedimiento escrito: quién consiente, cómo se registra una restricción y quién decide. Una orden judicial se registra en persona y bloquea la salida a esa persona | **Abierto** (pregunta K4) | Coordinación + abogado |
+| 5 | **Disputas de custodia:** dos tutores en desacuerdo, uno revoca o hay una orden judicial | M | A | Procedimiento escrito: quién consiente, cómo se registra una restricción y quién decide. Una orden judicial se registra en persona y bloquea la salida a esa persona | **Borrador de coordinación** (sección 5.1); falta el abogado (pregunta K4) | Coordinación + abogado |
 | 6 | **Los avisos de entrada y salida revelan ubicación y horario** de un niño a un correo comprometido o a un ex tutor | M | M | Contenido mínimo; solo tutores vigentes; se revoca al cambiar la custodia; se pueden desactivar | Diseñada | Desarrollo |
 | 7 | **Las fotos se usan más allá de lo autorizado** (redes sociales) | M | M | Finalidades separadas, sin premarcar y revocables; ninguna foto de niños en correos; reconocimiento facial prohibido | Diseñada | Coordinación |
 | 8 | **El QR o el código se filtran** (foto del gafete) | M | M | Código opaco sin datos; solo se guarda el verificador; revocable; el QR solo no libera al niño (riesgo 1); límite de intentos en el código de recogida | Diseñada | Desarrollo |
@@ -171,10 +172,19 @@ No existe aviso real. **Condición bloqueante:** el aviso integral (ver la [eval
 | 12 | **Se conserva de más la asistencia histórica** de menores | A sin control | M | Purga automática: asistencia nominal a 24 meses; después, solo conteos | Diseñada | Desarrollo |
 | 13 | **Una cuenta de coordinación comprometida** expone todo Kids | B | A | Verificación en dos pasos (implementada); bitácora; sesiones con caducidad; recuperación en persona | Implementada (Fase 2) | Desarrollo |
 | 14 | **Datos de pago** | B | M | Checkout Pro: Shalom no ve tarjetas; el webhook se verifica con firma y consulta a la API; el precio lo fija el servidor | Diseñada | Desarrollo |
+| 15 | **Se aprueba por la app una recogida que el tutor no autorizó:** cuenta del tutor comprometida, teléfono prestado o aprobación por error | M | **Muy alto** (seguridad física) | La aprobación es de un solo uso, para ese niño, esa persona y ese día; muestra al tutor el nombre y la relación que declara la persona, y que Recepción revisó su identificación (sin foto, como en el resto del lanzamiento); exige una sesión reciente del tutor (propuesta: volver a entrar con su correo o con su verificación en dos pasos); se avisa al otro tutor; nunca levanta una restricción judicial; queda en la bitácora. Si el tutor no responde, el niño no se entrega | Propuesta (pregunta K14) | Desarrollo + coordinación |
+
+### 5.1 Procedimiento de custodia y recogida (borrador de coordinación)
+
+Respuestas de coordinación, para que el abogado las revise con K4, K5 y K14:
+
+1. **Cambiar quién recoge:** el tutor lo pide **en persona** en la mesa de coordinación, con identificación. No se aceptan cambios por mensaje ni por teléfono.
+2. **Restringir a un tutor o resolver un desacuerdo entre tutores:** se presentan **ambos padres en persona**. Si no es posible (por ejemplo, hay una orden judicial o uno no acude), decide el abogado (pregunta K4).
+3. **Llega alguien que no está en la lista:** el niño se queda con su docente. Recepción revisa la identificación de la persona y pide la aprobación del tutor registrado **por la app**. Solo si el tutor acepta se entrega al niño, con las salvaguardas del riesgo 15.
 
 **Riesgo residual tras las mitigaciones:** medio. Quedan abiertos tres puntos, todos de criterio legal u operativo y no de tecnología:
 - qué hacer si el tutor no da los datos de salud (riesgo 4);
-- el procedimiento de custodia (riesgo 5);
+- el procedimiento de custodia (riesgo 5), ya con borrador de coordinación pero pendiente del abogado;
 - los deberes ante sospecha de maltrato (riesgo 11).
 
 ---
@@ -202,7 +212,7 @@ Plazos: **20 días hábiles** para responder y **15 días hábiles** para ejecut
 - [ ] Respuestas del abogado a las preguntas K1–K4 (salud, emergencia, custodia).
 - [ ] Texto del consentimiento expreso de salud, separado del religioso y del de imagen. Responsable: abogado + producto.
 - [x] Quién ve el detalle de alergias: confirmado, el docente del grupo el día de su clase (y coordinación).
-- [ ] Rango de edad de Kids, confirmado por coordinación.
+- [x] Rango de edad de Kids: de 4 a 6 y de 7 a 12 años; docentes de 23 a 65 años (confirmado por coordinación).
 
 **Condiciones antes del piloto (Fase 7):**
 - [ ] Aviso de privacidad con el apartado de Kids (sección 4), revisado por el abogado.
@@ -213,6 +223,8 @@ Plazos: **20 días hábiles** para responder y **15 días hábiles** para ejecut
 - [ ] Persona o departamento de datos personales designado.
 - [ ] Plan de migración: script validado, ejecución por la iglesia, conciliación y retiro de las hojas.
 - [ ] **Pruebas automatizadas** (las escribe desarrollo en las fases 3 y 4):
+  - una aprobación por la app sirve una sola vez, solo para ese niño y esa persona, y nunca contra una restricción judicial;
+  - sin respuesta del tutor no se registra la salida;
   - un docente de otro grupo, o de otro día, no ve la salud;
   - Recepción no ve el detalle;
   - el QR solo no registra la salida;
@@ -243,11 +255,12 @@ Complementan las 12 de la [investigación](investigacion-lfpdppp-2025.md).
 11. **K11 · Migración:** ¿pasar los datos del sistema vigente al nuevo, con el mismo responsable y la misma finalidad, requiere un nuevo consentimiento o solo un aviso?
 12. **K12 · Visitantes:** ¿qué aviso y consentimiento mínimo aplican a un niño que asiste una sola vez?
 13. **K13 · Maltrato e incidencias:** ¿qué deberes tiene la iglesia de avisar a las autoridades o a los tutores ante una sospecha de maltrato, y cómo se documenta sin exponer al niño?
+14. **K14 · Aprobación de recogida por la app:** ¿es válido que el tutor registrado autorice desde la app, en el momento, a una persona que no está en la lista? ¿Basta que acepte uno de los dos tutores? ¿Qué datos de la identificación de esa persona se pueden mostrar al tutor y cuáles se conservan?
 
 ---
 
 ## Siguientes pasos
 
-1. **Llevar al abogado** este documento junto con la [evaluación de cuentas](pia-cuentas-google-v01.md), la [investigación](investigacion-lfpdppp-2025.md) y la [arquitectura](../arquitectura-produccion-v01.md). Prioridades: K1–K4 y K13.
-2. **Coordinación Kids** confirma el rango de edad y redacta el borrador del procedimiento de custodia y autorizados. (Quién ve las alergias ya está confirmado: el docente del grupo el día de su clase.)
+1. **Llevar al abogado** este documento junto con la [evaluación de cuentas](pia-cuentas-google-v01.md), la [investigación](investigacion-lfpdppp-2025.md) y la [arquitectura](../arquitectura-produccion-v01.md). Prioridades: K1–K4, K13 y K14.
+2. **Coordinación Kids** ya confirmó el rango de edad, quién ve las alergias y el borrador del procedimiento de custodia (sección 5.1). Falta llevarlo al abogado.
 3. Con las respuestas, ajustar esta evaluación (v0.2) y diseñar los modelos de la Fase 3 con las pruebas de la sección 7.
