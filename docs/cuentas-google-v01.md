@@ -8,23 +8,23 @@ Que cualquier persona de la iglesia entre a Shalom con su cuenta de Google (o co
 
 ## 2. Principios
 
-1. **Google identifica; Shalom autoriza.** Los perfiles (voluntario, docente, coordinación, administración, caja) se asignan dentro de Shalom por administración. Nada de Google concede permisos.
-2. **No se vincula por coincidencia de correo.** Si la persona ya existe en Shalom (familia de Kids, voluntario), se vincula con una invitación de un solo uso o con coordinación en persona.
+1. **Google identifica; Shalom autoriza.** **Administración asigna todos los perfiles** (joven, familia, voluntario, docente, coordinación, caja, administración) y envía las invitaciones. Coordinación, docentes y tutores pueden *solicitarlos*, pero no asignarlos. Nada de Google concede permisos.
+2. **No se vincula por coincidencia de correo.** Si la persona ya existe en Shalom (familia de Kids, voluntario), se vincula con una invitación de un solo uso que envía administración, o en persona con administración.
 3. **Pedir lo mínimo a Google:** `openid`, `email` y `profile`. Nunca contactos, Drive, Gmail ni Calendar en el inicio de sesión. (La conexión de Calendar de acompañantes es una autorización aparte; ver [acompañamiento](acompanamiento-google-calendar-v01.md).)
 4. **La foto es opcional y sin premarcar.** Sin foto se muestra la inicial, como hoy.
 5. **Menores de 13 no tienen cuenta.** Sus fotos siguen el consentimiento de imagen de Kids, separado de la cuenta del adulto.
-6. **Adolescentes de 13 a 17 solo con consentimiento de su madre, padre o tutor**, otorgado desde la cuenta verificada del tutor (sección 4.6).
+6. **Adolescentes de 13 a 17 solo con consentimiento de su madre, padre o tutor**, otorgado por el tutor desde su propia cuenta verificada; administración asigna el perfil Joven (sección 4.6).
 
 ## 3. Perfiles
 
 | Perfil | Cómo se obtiene | Verificación en dos pasos |
 |---|---|---|
 | Congregante (por defecto, 18 años o más) | Al entrar por primera vez con Google o enlace por correo | Opcional |
-| Joven (13 a 17 años) | Invitación de su tutor verificado (sección 4.6) | Opcional |
-| Familia / tutor | Coordinación Kids lo vincula a sus hijos (invitación o en recepción) | Opcional |
-| Voluntario · Caja · Preparación | Administración lo asigna al equipo y turno | Opcional |
-| Docente | Coordinación Kids lo asigna a su grupo | Recomendada |
-| Coordinación Kids · Administración · Finanzas | Administración, con segunda persona que confirma | **Obligatoria** |
+| Joven (13 a 17 años) | Administración, después del consentimiento del tutor (sección 4.6) | Opcional |
+| Familia / tutor | Administración lo vincula a sus hijos (a solicitud de coordinación Kids o en persona) | Opcional |
+| Voluntario · Caja · Preparación | Administración, al equipo y turno | Opcional |
+| Docente | Administración, a su grupo (a solicitud de coordinación Kids) | Recomendada |
+| Coordinación Kids · Administración · Finanzas | Administración, con una segunda persona de administración que confirma | **Obligatoria** |
 
 Una persona puede tener varios perfiles (p. ej., familia y voluntario). El selector «Sesión de ejemplo» de la demo desaparece en producción: el servidor entrega los perfiles reales.
 
@@ -36,17 +36,17 @@ Una persona puede tener varios perfiles (p. ej., familia y voluntario). El selec
 3. Shalom recibe la identidad verificada. Si el correo no está verificado por Google → no se crea la cuenta.
 4. Pantalla **Completa tu perfil** (una sola vez):
    - Nombre visible, prellenado con el de Google y editable.
-   - Fecha de nacimiento. Si es menor de 18 → «Para crear tu cuenta necesitas que tu mamá, papá o tutor te invite desde Shalom» (sección 4.6) y no se crea la cuenta.
+   - Fecha de nacimiento. Si es menor de 18 → «Para crear tu cuenta, tu mamá, papá o tutor debe solicitarla a administración de Shalom» (sección 4.6) y no se crea la cuenta.
    - Casilla «Usar mi foto de Google», **sin marcar**, con vista previa.
    - Aviso de privacidad: aceptación obligatoria y separada.
    - Avisos optativos (Generales, Jóvenes, Kids…): desactivados por defecto, como en Preferencias.
 5. Entra a Inicio como **Congregante**.
 
 ### 4.2 Persona que ya existe en Shalom
-1. Coordinación o administración envía una **invitación** a [correo] (enlace de un solo uso, vence en 7 días).
+1. Administración envía una **invitación** a [correo] (enlace de un solo uso, vence en 7 días).
 2. Al abrirla, la persona entra con Google; la cuenta de Google queda vinculada al registro existente y conserva sus perfiles.
-3. Invitación vencida o ya usada → «Esta invitación ya no es válida. Pide una nueva a coordinación». El mensaje no revela si la cuenta existe.
-4. Alternativa presencial: en recepción de Kids, coordinación muestra un código QR de vinculación de un solo uso.
+3. Invitación vencida o ya usada → «Esta invitación ya no es válida. Pide una nueva a administración». El mensaje no revela si la cuenta existe.
+4. Alternativa presencial: administración muestra un código QR de vinculación de un solo uso.
 
 ### 4.3 Ingresos siguientes
 - Entra directo. Si activó la foto, se actualiza cuando cambia en Google; el nombre visible **no** se sobrescribe.
@@ -59,19 +59,20 @@ Una persona puede tener varios perfiles (p. ej., familia y voluntario). El selec
 - **Eliminar mi cuenta**: solicitud que revisa administración, porque puede haber asistencia de Kids, aportaciones o inscripciones que deben conservarse por obligación.
 
 ### 4.6 Adolescentes (13 a 17 años) con consentimiento del tutor
-1. El tutor debe tener cuenta y estar **vinculado y verificado por coordinación** como familia del adolescente. Shalom no confía en lo que el adolescente diga sobre quién es su tutor.
-2. Desde **Mi familia**, el tutor toca **Invitar a [nombre] a Shalom**. Ve qué podrá hacer el adolescente y qué datos se guardan, y acepta el consentimiento:
+1. El tutor **solicita** la cuenta: desde **Mi familia** («Solicitar cuenta para [nombre]») o en persona con administración.
+2. Administración verifica en el registro familiar que esa persona es tutor del adolescente. Shalom no confía en lo que el adolescente diga sobre quién es su tutor.
+3. El tutor recibe en su cuenta la solicitud de consentimiento. Ve qué podrá hacer el adolescente y qué datos se guardan, y acepta **él mismo** (administración no puede aceptar por él):
    - Cuenta del adolescente: obligatorio para continuar.
    - Foto de Google del adolescente: casilla aparte, sin marcar.
-3. El adolescente abre la invitación (un solo uso, 7 días), entra con Google o con enlace por correo y completa su perfil. Su cuenta queda ligada a su registro familiar.
-4. **Qué puede hacer un Joven:** ver Inicio, Eventos y Avisos (incluidos los de Jóvenes); inscribirse a eventos abiertos a su edad (el tutor recibe aviso); usar Pide y recoge; enviar Tu opinión.
-5. **Qué no puede hacer:** aportaciones, perfiles de equipo con acceso a datos de otras personas (Kids, caja, administración) ni ver datos de otros integrantes de su familia.
-6. **El tutor puede retirar el consentimiento** en cualquier momento desde Mi familia: la cuenta queda suspendida y la foto se borra.
-7. **Al cumplir 18:** la cuenta pasa a Congregante, el tutor deja de administrarla y se pide al joven que revise su privacidad.
-8. Se guarda evidencia del consentimiento: tutor, fecha, versión del aviso y opciones elegidas.
+4. Con el consentimiento registrado, administración **asigna el perfil Joven** y envía la invitación al adolescente (un solo uso, 7 días). El adolescente entra con Google o con enlace por correo y completa su perfil; su cuenta queda ligada a su registro familiar.
+5. **Qué puede hacer un Joven:** ver Inicio, Eventos y Avisos (incluidos los de Jóvenes); inscribirse a eventos abiertos a su edad (el tutor recibe aviso); usar Pide y recoge; enviar Tu opinión.
+6. **Qué no puede hacer:** aportaciones, perfiles de equipo con acceso a datos de otras personas (Kids, caja, administración) ni ver datos de otros integrantes de su familia.
+7. **El tutor puede retirar el consentimiento** en cualquier momento desde Mi familia: la cuenta queda en pausa y la foto se borra. Administración también puede suspenderla.
+8. **Al cumplir 18:** administración la pasa a Congregante, el tutor deja de administrarla y se pide al joven que revise su privacidad.
+9. Se guarda evidencia del consentimiento: tutor, fecha, versión del aviso y opciones elegidas.
 
 ### 4.7 Errores que hay que diseñar
-Inicio cancelado · correo no verificado · cuenta de Google ya vinculada a otra persona · invitación vencida · cuenta suspendida («Tu acceso está en revisión; contacta a [correo]») · Google no responde («No pudimos conectar con Google. Intenta de nuevo») · enlace por correo vencido o ya usado · menor de 18 sin invitación · consentimiento del tutor retirado («Tu cuenta está en pausa. Habla con tu mamá, papá o tutor»).
+Inicio cancelado · correo no verificado · cuenta de Google ya vinculada a otra persona · invitación vencida · cuenta suspendida («Tu acceso está en revisión; contacta a [correo]») · Google no responde («No pudimos conectar con Google. Intenta de nuevo») · enlace por correo vencido o ya usado · menor de 18 sin cuenta solicitada por su tutor · consentimiento del tutor retirado («Tu cuenta está en pausa. Habla con tu mamá, papá o tutor»).
 
 ## 5. Foto de perfil
 
@@ -110,7 +111,6 @@ No se guardan tokens de Google: el inicio de sesión no necesita acceso posterio
 3. Proveedor de correo para enlaces de acceso e invitaciones (dominio verificado).
 4. Credenciales de cliente web por entorno (pruebas y producción), entregadas al gestor de secretos, no por chat ni correo.
 5. Definir quién administra los perfiles al inicio (al menos dos personas).
-6. Confirmar si la iglesia tiene **Google Workspace** para las cuentas del equipo (decisión D5).
 
 ## 9. Criterios de aceptación
 
@@ -119,7 +119,8 @@ No se guardan tokens de Google: el inicio de sesión no necesita acceso posterio
 - La foto solo aparece si se marcó la casilla; al desactivarla desaparece en la app y se borra la copia.
 - Ningún perfil con permisos se obtiene desde Google; administración necesita verificación en dos pasos para entrar.
 - Cancelar en Google, correo no verificado o invitación vencida muestran su mensaje sin revelar si una cuenta existe.
-- Quien declara menos de 18 años sin invitación de un tutor no obtiene cuenta.
+- Quien declara menos de 18 años no obtiene cuenta hasta que su tutor da el consentimiento y administración asigna el perfil Joven.
+- Solo administración puede asignar o quitar perfiles; coordinación, docentes y tutores solo pueden solicitarlos.
 - Un adolescente invitado solo ve lo permitido para Joven; si el tutor retira el consentimiento, la cuenta queda en pausa y su foto se borra.
 - El enlace por correo funciona una sola vez y vence a los 15 minutos.
 - Pruebas automatizadas del flujo con un proveedor simulado y datos ficticios; sin cuentas reales en pruebas.
@@ -129,9 +130,9 @@ No se guardan tokens de Google: el inicio de sesión no necesita acceso posterio
 | # | Pregunta | Decisión |
 |---|---|---|
 | D1 | ¿Solo Google o también otra forma de entrar? | Google + enlace por correo, sin contraseña |
-| D2 | ¿Quién puede crear cuenta? | Cualquier persona de 18 años o más, como Congregante; los perfiles con permisos siempre por invitación |
+| D2 | ¿Quién puede crear cuenta? ¿Quién asigna perfiles? | Cualquier persona de 18 años o más, como Congregante. **Administración asigna todos los perfiles** y envía las invitaciones; los demás solo los solicitan |
 | D3 | ¿Edad mínima para tener cuenta? | 18 años por cuenta propia; **de 13 a 17 con consentimiento de su madre, padre o tutor** desde el lanzamiento (sección 4.6); menores de 13, sin cuenta |
 | D4 | ¿Otras personas ven la foto? | Solo la propia persona. La foto para recoger en Kids queda para una fase posterior, con consentimiento aparte |
-| D5 | ¿Cómo se exige verificación en dos pasos a administración? | Google Workspace de la iglesia para las cuentas del equipo; si no lo hay, verificación propia de Shalom para administración. Pendiente confirmar si existe Workspace |
+| D5 | ¿Cómo se exige verificación en dos pasos a administración? | La iglesia **no tiene Google Workspace**: Shalom exige su propia verificación en dos pasos (app de autenticación con códigos TOTP o llave de acceso) a administración, coordinación Kids y finanzas, además de entrar con Google o enlace por correo. Recuperación solo en persona con otra persona de administración |
 
-**Pendientes:** confirmar Google Workspace (D5) y la revisión legal del consentimiento de adolescentes antes de abrir el registro.
+**Pendiente:** revisión legal del consentimiento de adolescentes y del aviso de privacidad antes de abrir el registro.
