@@ -43,3 +43,15 @@ def send_after_commit(kind, recipient, template, **values):
             OutboundEmail.objects.filter(pk=record.pk).update(sent_at=timezone.now())
     transaction.on_commit(deliver)
     return record
+
+
+LOGIN_LINK = ('Tu enlace para entrar a Shalom', """¡Hola!
+
+Usa este enlace para entrar a Shalom: {link}
+
+Es de un solo uso y vence en 15 minutos.
+
+Si no lo pediste, puedes ignorar este mensaje: nadie puede entrar sin abrirlo.
+
+Equipo de Shalom
+""")

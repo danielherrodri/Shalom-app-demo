@@ -29,3 +29,7 @@ Estado: aceptado como definición funcional; sin implementación. Google (OpenID
 ## 2026-10-28 · Alcance de la versión 1: administración, correos y Shalom Kids
 
 Estado: aceptado. La primera versión real incluye administración de cuentas y perfiles, correos, asistencia y todo Shalom Kids; los demás módulos quedan para después. Se construye por fases (administración → acceso → datos Kids → operación → coordinación → interfaz → piloto y corte), con evaluación de impacto de Kids y revisión del abogado antes de tratar datos de salud de menores. El sistema vigente sigue siendo la fuente de verdad hasta el corte. Fase 1 implementada en el backend: perfiles asignados solo por administración, confirmación de una segunda persona para perfiles privilegiados, invitaciones con verificador y registro de correos sin cuerpo. Ver [plan](plan-v1-kids.md).
+
+## 2026-10-28 · Fase 2 · Acceso
+
+Estado: implementado en el backend, sin interfaz. Enlace por correo de un solo uso (15 min) como único acceso fuera de desarrollo; Google OpenID Connect apagado hasta tener credenciales. Registro con consentimientos versionados e inmutables; de la fecha de nacimiento solo se conserva la declaración de mayoría de edad. TOTP con secreto cifrado, anti-reuso y bloqueo; las rutas de administración exigen la verificación en la sesión. Reinicio de MFA solo por otra persona de administración. «Cerrar sesión en todos los dispositivos» por versión de sesión. Los textos legales siguen pendientes de revisión del abogado. Ver [plan](plan-v1-kids.md).

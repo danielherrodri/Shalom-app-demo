@@ -14,7 +14,9 @@ class SessionDeadlineMiddleware:
             touched = request.session.get('active_at', 0)
             idle = request.session.get('idle_limit', 300)
             absolute = request.session.get('absolute_limit', 8 * 3600)
-            if now - started >= absolute or now - touched >= idle:
+            # "Cerrar sesión en todos los dispositivos" bumps the account's version; older sessions end here.
+            revoked = request.session.get('session_version') != request.user.session_version
+            if revoked or now - started >= absolute or now - touched >= idle:
                 logout(request)
                 return JsonResponse({'detail': 'La sesión venció. Inicia sesión de nuevo.'}, status=401)
             # Background polling must not keep the session alive.

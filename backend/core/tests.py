@@ -312,3 +312,315 @@ class AdministrationTests(TestCase):
         from django.core.management.base import CommandError
         with self.assertRaises(CommandError):
             call_command('bootstrap_admin', self.member.username)
+
+
+class AccessTests(TestCase):
+    """Phase 2: email links, profile completion, consents, TOTP and session revocation."""
+    @classmethod
+    def setUpTestData(cls):
+        from .models import ConsentText, Role, RoleGrant
+        cls.password = secrets.token_urlsafe(24)
+        cls.admin = User.objects.create_user(username='admin-ficticio', password=cls.password)
+        cls.second = User.objects.create_user(username='admin-ficticio-2', password=cls.password)
+        cls.member = User.objects.create_user(username='persona-ficticia', password=cls.password)
+        RoleGrant.objects.create(user=cls.admin, role=Role.ADMINISTRACION, granted_by=cls.admin, confirmed_by=cls.admin)
+        RoleGrant.objects.create(user=cls.second, role=Role.ADMINISTRACION, granted_by=cls.admin, confirmed_by=cls.member)
+        cls.aviso = ConsentText.objects.create(kind='aviso', version='demo-1', body='Aviso ficticio de prueba.')
+        cls.sensible = ConsentText.objects.create(kind='dato_sensible', version='demo-1', body='Texto ficticio de prueba.')
+
+    def setUp(self):
+        from django.core.cache import cache
+        cache.clear()
+        self.fresh()
+
+    def fresh(self):
+        self.client = Client(enforce_csrf_checks=True)
+        self.refresh_csrf()
+
+    def refresh_csrf(self):
+        self.token = self.client.get('/api/v1/auth/csrf/').json()['csrfToken']
+
+    def post(self, url, data=None, **extra):
+        return self.client.post(url, data or {}, content_type='application/json', HTTP_X_CSRFTOKEN=self.token, **extra)
+
+    def sign_in(self, user):
+        self.fresh()
+        self.assertEqual(self.post('/api/v1/auth/login/', {'username': user.username, 'password': self.password}).status_code, 200)
+        self.refresh_csrf()
+
+    def ask_link(self, email='nueva@example.invalid', **extra):
+        from django.core import mail
+        sent = len(mail.outbox)
+        with self.captureOnCommitCallbacks(execute=True):
+            response = self.post('/api/v1/auth/link/', {'email': email}, **extra)
+        token = mail.outbox[-1].body.split('/entrar#')[1].split()[0] if len(mail.outbox) > sent else None
+        return response, token
+
+    def consume(self, token):
+        response = self.post('/api/v1/auth/link/consume/', {'token': token})
+        self.refresh_csrf()
+        return response
+
+    def profile(self, **changes):
+        data = {'display_name': 'Persona de ejemplo', 'birth_date': '1990-05-01', 'privacy_version': 'demo-1',
+                'sensitive_version': 'demo-1', 'accept_privacy': True, 'accept_sensitive': True, **changes}
+        response = self.post('/api/v1/auth/profile/', data)
+        self.refresh_csrf()
+        return response
+
+    def sign_up(self, email='nueva@example.invalid'):
+        _, token = self.ask_link(email)
+        self.assertEqual(self.consume(token).json()['status'], 'complete_profile')
+        self.assertEqual(self.profile().status_code, 201)
+        from .models import EmailIdentity
+        return EmailIdentity.objects.get(email=email).user
+
+    def code(self, secret, offset=0):
+        import pyotp
+        return pyotp.TOTP(secret).at(time.time() + offset)
+
+    def enroll(self):
+        secret = self.post('/api/v1/auth/mfa/setup/').json()['secret']
+        self.assertEqual(self.post('/api/v1/auth/mfa/confirm/', {'code': self.code(secret)}).status_code, 200)
+        self.refresh_csrf()
+        return secret
+
+    # Email link
+
+    def test_link_stores_only_verifier_and_same_answer_for_unknown(self):
+        from .models import LoginLink, OutboundEmail
+        response, token = self.ask_link('Nueva@Example.invalid')
+        self.assertEqual(response.status_code, 202)
+        self.assertNotIn(token, str(LoginLink.objects.values().get()))
+        self.assertEqual(LoginLink.objects.get().email, 'nueva@example.invalid')
+        self.assertEqual(OutboundEmail.objects.get().kind, 'login_link')
+        self.assertNotIn(token, str(OutboundEmail.objects.values().get()))
+
+    def test_link_requires_csrf(self):
+        self.assertEqual(self.client.post('/api/v1/auth/link/', {'email': 'x@example.invalid'}, content_type='application/json').status_code, 403)
+
+    def test_link_rejects_extra_fields(self):
+        self.assertEqual(self.post('/api/v1/auth/link/', {'email': 'x@example.invalid', 'user': str(self.admin.id)}).status_code, 400)
+
+    def test_link_is_single_use(self):
+        _, token = self.ask_link()
+        self.assertEqual(self.consume(token).status_code, 200)
+        self.fresh()
+        self.assertEqual(self.consume(token).status_code, 400)
+
+    def test_link_expires_after_15_minutes(self):
+        from datetime import timedelta
+        from .models import LoginLink
+        _, token = self.ask_link()
+        LoginLink.objects.update(expires_at=timezone.now() - timedelta(seconds=1))
+        self.assertEqual(self.consume(token).json()['detail'], self.consume('desconocido').json()['detail'])
+
+    def test_per_email_limit_keeps_same_answer(self):
+        from .models import LoginLink
+        answers = [self.ask_link('limite@example.invalid')[0] for _ in range(4)]
+        self.assertTrue(all(a.status_code == 202 and a.json() == answers[0].json() for a in answers))
+        self.assertEqual(LoginLink.objects.count(), 3)
+
+    def test_per_origin_limit(self):
+        statuses = [self.ask_link(f'origen{i}@example.invalid')[0].status_code for i in range(11)]
+        self.assertEqual(statuses[:10], [202] * 10)
+        self.assertEqual(statuses[10], 429)
+        self.assertEqual(self.ask_link('otro@example.invalid', REMOTE_ADDR='198.51.100.7')[0].status_code, 202)
+
+    def test_existing_identity_signs_in_with_personal_policy(self):
+        from .models import EmailIdentity
+        EmailIdentity.objects.create(user=self.member, email='miembro@example.invalid', verified_at=timezone.now())
+        _, token = self.ask_link('miembro@example.invalid')
+        self.assertEqual(self.consume(token).json(), {'status': 'signed_in', 'mfaRequired': False})
+        me = self.client.get('/api/v1/auth/me/').json()
+        self.assertEqual((me['username'], me['idleSeconds'], me['absoluteSeconds']), (self.member.username, 1800, 12 * 3600))
+
+    def test_privileged_identity_is_told_to_verify(self):
+        from .models import EmailIdentity
+        EmailIdentity.objects.create(user=self.admin, email='admin@example.invalid', verified_at=timezone.now())
+        _, token = self.ask_link('admin@example.invalid')
+        self.assertTrue(self.consume(token).json()['mfaRequired'])
+        self.assertTrue(self.client.get('/api/v1/auth/me/').json()['mfaPending'])
+
+    def test_inactive_account_cannot_sign_in(self):
+        from .models import EmailIdentity
+        inactive = User.objects.create_user(username='inactiva-ficticia', is_active=False)
+        EmailIdentity.objects.create(user=inactive, email='inactiva@example.invalid', verified_at=timezone.now())
+        _, token = self.ask_link('inactiva@example.invalid')
+        self.assertEqual(self.consume(token).status_code, 403)
+        self.assertEqual(self.client.get('/api/v1/auth/me/').status_code, 401)
+
+    # Profile and consents
+
+    def test_consent_texts_published_by_command(self):
+        import tempfile
+        from django.core.management import call_command
+        from django.core.management.base import CommandError
+        with tempfile.NamedTemporaryFile('w', suffix='.txt', encoding='utf-8', delete=False) as handle:
+            handle.write('Aviso ficticio, versión 2.')
+        call_command('publish_consent_text', 'aviso', 'demo-2', handle.name)
+        self.assertEqual(self.client.get('/api/v1/auth/consents/').json()['aviso'], {'version': 'demo-2', 'body': 'Aviso ficticio, versión 2.'})
+        with self.assertRaises(CommandError):
+            call_command('publish_consent_text', 'aviso', 'demo-2', handle.name)
+
+    def test_registration_closed_without_texts(self):
+        from .models import ConsentText
+        ConsentText.objects.filter(kind='dato_sensible').delete()
+        self.assertEqual(self.client.get('/api/v1/auth/consents/').status_code, 503)
+
+    def test_complete_profile_records_consents_without_birth_date(self):
+        from .models import AccountProfile, ConsentRecord
+        user = self.sign_up()
+        self.assertEqual(set(ConsentRecord.objects.filter(user=user).values_list('text__kind', flat=True)), {'aviso', 'dato_sensible'})
+        profile = AccountProfile.objects.get(user=user)
+        self.assertNotIn('1990', str(AccountProfile.objects.values().get()))
+        self.assertEqual(profile.display_name, 'Persona de ejemplo')
+        me = self.client.get('/api/v1/auth/me/').json()
+        self.assertEqual((me['displayName'], me['roles'], me['mfaPending']), ('Persona de ejemplo', [], False))
+        self.assertFalse(user.has_usable_password())
+        self.assertEqual(self.profile().status_code, 400)
+
+    def test_minor_stores_nothing(self):
+        from .models import AccountProfile, EmailIdentity
+        _, token = self.ask_link()
+        self.consume(token)
+        birth = timezone.localdate().replace(year=timezone.localdate().year - 17)
+        self.assertEqual(self.profile(birth_date=birth.isoformat()).status_code, 403)
+        self.assertEqual((User.objects.count(), EmailIdentity.objects.count(), AccountProfile.objects.count()), (3, 0, 0))
+        self.assertEqual(self.profile().status_code, 400)
+
+    def test_both_consents_required(self):
+        _, token = self.ask_link()
+        self.consume(token)
+        self.assertEqual(self.profile(accept_sensitive=False).status_code, 400)
+        self.assertEqual(self.profile(accept_privacy=False).status_code, 400)
+        self.assertEqual(User.objects.count(), 3)
+
+    def test_outdated_consent_version_rejected(self):
+        _, token = self.ask_link()
+        self.consume(token)
+        self.assertEqual(self.profile(privacy_version='demo-0').status_code, 409)
+
+    def test_signup_window_expires(self):
+        _, token = self.ask_link()
+        self.consume(token)
+        session = self.client.session
+        session['signup']['at'] = time.time() - 31 * 60
+        session.save()
+        self.assertEqual(self.profile().status_code, 400)
+
+    def test_profile_without_link_rejected(self):
+        self.assertEqual(self.profile().status_code, 400)
+
+    def test_profile_rejects_extra_fields(self):
+        _, token = self.ask_link()
+        self.consume(token)
+        self.assertEqual(self.profile(roles=['administracion']).status_code, 400)
+
+    # TOTP
+
+    def test_admin_api_opens_only_after_mfa(self):
+        with self.settings(ADMIN_MFA_REQUIRED=True):
+            self.sign_in(self.admin)
+            self.assertEqual(self.client.get('/api/v1/admin/accounts/').status_code, 403)
+            self.enroll()
+            self.assertEqual(self.client.get('/api/v1/admin/accounts/').status_code, 200)
+            self.assertFalse(self.client.get('/api/v1/auth/me/').json()['mfaPending'])
+            # A new session must verify again.
+            self.sign_in(self.admin)
+            self.assertEqual(self.client.get('/api/v1/admin/accounts/').status_code, 403)
+
+    def test_verify_in_new_session(self):
+        from .models import TotpDevice
+        self.sign_in(self.admin)
+        secret = self.enroll()
+        self.sign_in(self.admin)
+        TotpDevice.objects.update(last_step=0)
+        before = self.client.session.session_key
+        self.assertEqual(self.post('/api/v1/auth/mfa/verify/', {'code': self.code(secret)}).status_code, 200)
+        self.assertNotEqual(self.client.session.session_key, before)
+        self.assertIn('mfa_verified_at', self.client.session)
+
+    def test_secret_sealed_at_rest(self):
+        from .models import TotpDevice
+        self.sign_in(self.admin)
+        secret = self.enroll()
+        self.assertNotIn(secret, TotpDevice.objects.get().sealed_secret)
+        self.assertEqual(AuditEvent.objects.filter(action='mfa.enroll').count(), 1)
+
+    def test_code_cannot_be_reused(self):
+        self.sign_in(self.admin)
+        secret = self.enroll()
+        self.assertEqual(self.post('/api/v1/auth/mfa/verify/', {'code': self.code(secret)}).status_code, 400)
+
+    def test_cannot_setup_twice(self):
+        self.sign_in(self.admin)
+        self.enroll()
+        self.assertEqual(self.post('/api/v1/auth/mfa/setup/').status_code, 400)
+
+    def test_verify_without_device(self):
+        self.sign_in(self.admin)
+        self.assertEqual(self.post('/api/v1/auth/mfa/verify/', {'code': '123456'}).status_code, 400)
+
+    def test_lockout_after_five_failures(self):
+        from .models import TotpDevice
+        self.sign_in(self.admin)
+        secret = self.enroll()
+        self.sign_in(self.admin)
+        TotpDevice.objects.update(last_step=0)
+        wrong = '000000' if self.code(secret) != '000000' else '111111'
+        for _ in range(5):
+            self.assertEqual(self.post('/api/v1/auth/mfa/verify/', {'code': wrong}).status_code, 400)
+        self.assertEqual(self.post('/api/v1/auth/mfa/verify/', {'code': self.code(secret)}).status_code, 429)
+        self.assertNotIn('mfa_verified_at', self.client.session)
+
+    def test_malformed_code_rejected(self):
+        self.sign_in(self.admin)
+        self.post('/api/v1/auth/mfa/setup/')
+        self.assertEqual(self.post('/api/v1/auth/mfa/confirm/', {'code': "1' OR '1"}).status_code, 400)
+
+    def test_anonymous_cannot_use_mfa(self):
+        self.assertEqual(self.post('/api/v1/auth/mfa/setup/').status_code, 403)
+
+    def test_admin_resets_other_persons_mfa_and_closes_sessions(self):
+        from .models import TotpDevice
+        self.sign_in(self.second)
+        self.enroll()
+        target = self.client
+        self.sign_in(self.admin)
+        self.assertEqual(self.post(f'/api/v1/admin/accounts/{self.second.id}/mfa-reset/').status_code, 204)
+        self.assertFalse(TotpDevice.objects.filter(user=self.second).exists())
+        self.assertEqual(target.get('/api/v1/auth/me/').status_code, 401)
+        self.assertEqual(AuditEvent.objects.filter(action='mfa.reset', actor=self.admin).count(), 1)
+        self.assertEqual(self.post(f'/api/v1/admin/accounts/{self.admin.id}/mfa-reset/').status_code, 400)
+
+    def test_non_admin_cannot_reset_mfa(self):
+        self.sign_in(self.member)
+        self.assertEqual(self.post(f'/api/v1/admin/accounts/{self.admin.id}/mfa-reset/').status_code, 403)
+
+    # Sessions
+
+    def test_logout_everywhere_closes_other_sessions(self):
+        self.sign_in(self.member)
+        other = self.client
+        self.sign_in(self.member)
+        self.assertEqual(self.post('/api/v1/auth/logout-everywhere/').status_code, 204)
+        self.assertEqual(other.get('/api/v1/auth/me/').status_code, 401)
+        self.assertEqual(self.client.get('/api/v1/auth/me/').status_code, 401)
+        self.sign_in(self.member)
+        self.assertEqual(self.client.get('/api/v1/auth/me/').status_code, 200)
+
+    def test_session_without_version_is_closed(self):
+        self.sign_in(self.member)
+        session = self.client.session
+        del session['session_version']
+        session.save()
+        self.assertEqual(self.client.get('/api/v1/auth/me/').status_code, 401)
+
+    def test_shared_device_policy_for_local_login(self):
+        self.sign_in(self.member)
+        me = self.client.get('/api/v1/auth/me/').json()
+        self.assertEqual((me['idleSeconds'], me['absoluteSeconds']), (300, 8 * 3600))
+
+    def test_google_is_off(self):
+        self.assertEqual(self.client.get('/api/v1/auth/providers/').json(), {'emailLink': True, 'google': False})

@@ -42,7 +42,7 @@ class IsAdministrator(BasePermission):
     def has_permission(self, request, view):
         if not request.user.is_authenticated:
             return False
-        # Second factor arrives in phase 2; until then admin APIs stay closed outside development.
+        # Admin APIs need a second factor verified in this session (development skips it with synthetic data).
         if settings.ADMIN_MFA_REQUIRED and not request.session.get('mfa_verified_at'):
             return False
         return effective_grants().filter(user=request.user, role=Role.ADMINISTRACION).exists()
