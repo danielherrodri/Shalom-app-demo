@@ -28,7 +28,7 @@ Cada fase es un PR con pruebas automatizadas, datos ficticios y el control de se
 
 Kids trata datos de **menores** y de **salud** (alergias, medicamentos, notas médicas), además de la afiliación religiosa. Antes de la Fase 3:
 
-1. **Evaluación de impacto de Kids**, con `privacy-legal:pia-generation`, partiendo de la [evaluación de cuentas](legal/pia-cuentas-google-v01.md).
+1. **Evaluación de impacto de Kids**, partiendo de la [evaluación de cuentas](legal/pia-cuentas-google-v01.md). **Borrador listo para el abogado:** [pia-kids-v01](legal/pia-kids-v01.md), con 13 preguntas (K1–K13).
 2. El abogado confirma la forma del consentimiento del tutor para datos sensibles de salud y para la imagen del menor.
 3. Aviso de privacidad con un apartado de Kids.
 
