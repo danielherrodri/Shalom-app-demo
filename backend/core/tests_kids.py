@@ -343,6 +343,17 @@ class KidsSwapTests(KidsBase):
         self.assertEqual(self.call(self.volunteer, 'get', 'swaps/').json()['results'], [])
         self.assertEqual(len(self.call(self.coordinator, 'get', 'swaps/?status=pendiente').json()['results']), 2)
 
+    def test_deactivating_a_teacher_withdraws_their_swaps_and_reports_classes(self):
+        swap = self.swap().json()
+        self.roster(teacher=self.other_teacher, service=self.second)
+        client = self.client_for(self.admin)
+        response = client.post(f'/api/v1/admin/accounts/{self.other_teacher.id}/deactivate/', content_type='application/json')
+        self.assertEqual(response.json(), {'upcomingClasses': 1})
+        self.assertEqual(Swap.objects.get(pk=swap['id']).status, 'cancelada')
+        self.assertTrue(AuditEvent.objects.filter(action='kids.swap.cancelada', target_id=swap['id']).exists())
+        # The class stays in the roster so coordination sees who must be replaced.
+        self.assertTrue(RosterEntry.objects.filter(teacher=self.other_teacher).exists())
+
     def test_options_list_teachers_and_their_classes_only(self):
         EmailIdentity.objects.create(user=self.other_teacher, email='docente-b@example.invalid', verified_at=timezone.now())
         self.roster(teacher=self.other_teacher, service=self.second)

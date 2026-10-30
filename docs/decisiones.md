@@ -57,3 +57,7 @@ Estado: implementado en backend e interfaz, con datos ficticios. La docente cede
 ## 2026-10-30 · Correos del servidor con el diseño de Shalom
 
 Estado: implementado. Acceso, invitación, recordatorio de Kids y los nuevos avisos de permuta (confirmada a ambas docentes, rechazada a quien la registró) se envían con texto plano y el HTML de las plantillas de `emails/`, generados desde una sola estructura. Se quitaron de las plantillas lo que era de demostración (franja «sin envío», fuente web local, enlaces de preferencias y privacidad del prototipo). El logo se sirve desde el dominio de la app; no hay seguimiento. Los botones solo pueden llevar a la app. Pendiente: pruebas de entrega en clientes de correo reales. Ver [plan](plan-v1-kids.md).
+
+## 2026-10-30 · Baja de cuentas y bitácora de administración
+
+Estado: implementado en backend e interfaz, con datos ficticios. Dar de baja desactiva la cuenta, quita todos sus perfiles, cierra sus sesiones, cancela las invitaciones que creó y retira sus permutas por confirmar. No borra datos: el borrado a petición de la persona espera los plazos de conservación (K7). La reactivación no devuelve perfiles, para que los privilegiados vuelvan a pasar por la confirmación de otra persona. Se descartó pedir una segunda persona para la baja: quitar acceso reduce el riesgo, igual que quitar un perfil. Las clases del rol no se reasignan solas: Coordinación decide quién cubre. Bitácora de administración consultable, separada de la de Kids. Ver [plan](plan-v1-kids.md).

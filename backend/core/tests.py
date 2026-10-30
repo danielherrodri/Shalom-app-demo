@@ -333,6 +333,63 @@ class AdministrationTests(TestCase):
         self.sign_in(self.admin)
         self.assertEqual(self.post('/api/v1/admin/grants/', {'user': str(self.member.id), 'role': 'caja', 'confirmed_by': str(self.admin.id)}).status_code, 400)
 
+    def test_deactivation_ends_profiles_sessions_and_sign_in(self):
+        from .models import Invitation, RoleGrant
+        self.sign_in(self.admin)
+        self.grant(self.member, 'docente')
+        self.grant(self.second, 'administracion')
+        RoleGrant.objects.filter(user=self.second).update(confirmed_by=self.admin)
+        self.sign_in(self.second)
+        with self.captureOnCommitCallbacks(execute=True):
+            self.post('/api/v1/admin/invitations/', {'email': 'pendiente@example.invalid'})
+        member = Client(enforce_csrf_checks=True)
+        member.force_login(self.member)
+        self.sign_in(self.admin)
+        for user in (self.member, self.second):
+            self.assertEqual(self.post(f'/api/v1/admin/accounts/{user.id}/deactivate/').json(), {'upcomingClasses': 0})
+        self.assertFalse(RoleGrant.objects.filter(user__in=[self.member, self.second], revoked_at__isnull=True).exists())
+        self.assertIsNotNone(Invitation.objects.get().revoked_at)
+        self.assertNotEqual(member.get('/api/v1/auth/me/').status_code, 200)
+        self.sign_in(self.member)
+        self.assertNotEqual(self.client.get('/api/v1/auth/me/').status_code, 200)
+        self.sign_in(self.admin)
+        listed = lambda query='': {row['username'] for row in self.client.get(f'/api/v1/admin/accounts/{query}').json()['results']}
+        self.assertEqual(listed(), {self.admin.username})
+        self.assertEqual(listed('?status=inactive'), {self.member.username, self.second.username})
+        self.assertEqual(AuditEvent.objects.filter(action='account.deactivate').count(), 2)
+        self.assertEqual(self.post(f'/api/v1/admin/accounts/{self.member.id}/deactivate/').status_code, 404)
+
+    def test_nobody_deactivates_themselves_and_members_cannot_deactivate(self):
+        self.sign_in(self.admin)
+        self.assertEqual(self.post(f'/api/v1/admin/accounts/{self.admin.id}/deactivate/').status_code, 400)
+        self.sign_in(self.member)
+        self.assertEqual(self.post(f'/api/v1/admin/accounts/{self.second.id}/deactivate/').status_code, 403)
+        self.assertEqual(self.post(f'/api/v1/admin/accounts/{self.second.id}/reactivate/').status_code, 403)
+        self.assertTrue(User.objects.get(pk=self.second.pk).is_active)
+
+    def test_reactivation_returns_access_without_profiles(self):
+        self.sign_in(self.admin)
+        self.grant(self.member, 'docente')
+        self.post(f'/api/v1/admin/accounts/{self.member.id}/deactivate/')
+        self.assertEqual(self.post(f'/api/v1/admin/accounts/{self.member.id}/reactivate/').status_code, 204)
+        self.assertEqual(self.post(f'/api/v1/admin/accounts/{self.member.id}/reactivate/').status_code, 404)
+        self.sign_in(self.member)
+        self.assertEqual(self.client.get('/api/v1/auth/me/').json()['roles'], [])
+
+    def test_admin_audit_lists_account_changes_only(self):
+        self.sign_in(self.admin)
+        self.grant(self.member, 'docente')
+        self.invite()
+        self.post(f'/api/v1/admin/accounts/{self.second.id}/deactivate/')
+        AuditEvent.objects.create(actor=self.admin, action='kids.group.create', target_id=self.family.id)
+        AuditEvent.objects.create(actor=self.admin, action='attendance.enter', target_id=self.person.id)
+        rows = self.client.get('/api/v1/admin/audit/').json()['results']
+        self.assertEqual([(r['action'], r['target']) for r in rows], [
+            ('account.deactivate', self.second.username), ('invitation.create', 'invitada@example.invalid'), ('role.grant', f'Docente · {self.member.username}')])
+        self.assertEqual({r['actorName'] for r in rows}, {self.admin.username})
+        self.sign_in(self.member)
+        self.assertEqual(self.client.get('/api/v1/admin/audit/').status_code, 403)
+
     def test_bootstrap_only_without_admin(self):
         from django.core.management import call_command
         from django.core.management.base import CommandError
