@@ -3,9 +3,9 @@ import logo from '../../../assets/shalom-logo.png';
 
 export type ShalomArea = 'home' | 'kids' | 'admin' | 'security';
 
-const LABELS: Record<ShalomArea, string> = { home: 'Inicio', kids: 'Mi clase de hoy', admin: 'Administración', security: 'Mi cuenta' };
+const LABELS: Record<ShalomArea, string> = { home: 'Inicio', kids: 'Shalom Kids', admin: 'Administración', security: 'Mi cuenta' };
 // The phone bar fits four short labels at 360 px; the full names stay in the sidebar and title.
-const SHORT: Record<ShalomArea, string> = { home: 'Inicio', kids: 'Mi clase', admin: 'Admin', security: 'Cuenta' };
+const SHORT: Record<ShalomArea, string> = { home: 'Inicio', kids: 'Kids', admin: 'Admin', security: 'Cuenta' };
 
 type AppShellProps = {
   activeArea: ShalomArea;

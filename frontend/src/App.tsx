@@ -6,7 +6,7 @@ import { Mfa } from './access/Mfa';
 import { Security } from './access/Security';
 import { SignIn } from './access/SignIn';
 import { Admin } from './admin/Admin';
-import { Attendance } from './kids/Attendance';
+import { Kids } from './kids/Kids';
 import { AppShell, type ShalomArea } from './ui/AppShell';
 
 type Stage = 'loading' | 'signin' | 'profile' | 'app';
@@ -84,7 +84,7 @@ export function App() {
   else if (stage === 'profile') content = <CompleteProfile onCreated={refresh} onRestart={() => signOut()} />;
   else if (me?.mfaPending) content = <Mfa enrolled={me.mfaEnrolled} onVerified={refresh} />;
   else if (me && invitation) content = <InvitationAccept token={invitation} onDone={async () => { await refresh(); setInvitation(''); }} />;
-  else if (me && current === 'kids') content = <Attendance onActivity={refresh} />;
+  else if (me && current === 'kids') content = <Kids me={me} onActivity={refresh} />;
   else if (me && current === 'admin') content = <Admin me={me} />;
   else if (me && current === 'security') content = <Security me={me} onSignedOut={signOut} />;
   else if (me) content = <Home me={me} areas={areas} onNavigate={setArea} />;
@@ -108,9 +108,9 @@ function Home({ me, areas, onNavigate }: { me: Me; areas: ShalomArea[]; onNaviga
     <h1 id="home-title">Hola, {me.displayName}</h1>
     {!me.roles.length && !areas.includes('kids') && <p className="shalom-empty">Tu cuenta está lista. Administración te asignará los perfiles de las actividades en las que participas.</p>}
     {areas.includes('kids') && <div className="shalom-dashboard-card">
-      <h2>Mi clase de hoy</h2>
-      <p>Consulta tu grupo, verifica la sesión y registra entradas.</p>
-      <button type="button" onClick={() => onNavigate('kids')}>Abrir asistencia Kids</button>
+      <h2>Shalom Kids</h2>
+      <p>{me.roles.includes('coordinacion_kids') ? 'Tu clase de hoy, tu agenda, el rol de clases, lecciones, eventos y configuración.' : 'Tu clase de hoy, tu agenda con las próximas clases y las lecciones.'}</p>
+      <button type="button" onClick={() => onNavigate('kids')}>Abrir Shalom Kids</button>
     </div>}
     {areas.includes('admin') && <div className="shalom-dashboard-card">
       <h2>Administración</h2>
