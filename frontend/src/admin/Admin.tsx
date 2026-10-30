@@ -10,9 +10,13 @@ type Invitation = { id: string; email: string; roles: Role[]; expires_at: string
 
 const plain = (text: string) => text.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim();
 
-const deactivated = ({ upcomingClasses }: { upcomingClasses: number }) => upcomingClasses
-  ? `Cuenta dada de baja. Tenía ${upcomingClasses === 1 ? '1 clase o día a cargo' : `${upcomingClasses} clases o días a cargo`} en Shalom Kids: avisa a Coordinación Kids para reasignarlos.`
-  : 'Cuenta dada de baja.';
+type Deactivation = { upcomingClasses: number; oneAdministratorLeft: boolean };
+
+const deactivated = ({ upcomingClasses, oneAdministratorLeft }: Deactivation) => [
+  'Cuenta dada de baja.',
+  upcomingClasses ? `Tenía ${upcomingClasses === 1 ? '1 clase o día a cargo' : `${upcomingClasses} clases o días a cargo`} en Shalom Kids: avisa a Coordinación Kids para reasignarlos.` : '',
+  oneAdministratorLeft ? 'Ahora solo queda una persona de administración: nadie puede confirmar perfiles privilegiados hasta que se confirme una segunda desde el servidor.' : '',
+].filter(Boolean).join(' ');
 
 /** Administration of accounts, profiles and invitations. Every rule is enforced again by the server. */
 export function Admin({ me }: { me: Me }) {
@@ -92,8 +96,8 @@ export function Admin({ me }: { me: Me }) {
         {account.id !== me.id && (!asking(account.id, 'deactivate')
           ? <button type="button" className="shalom-secondary" aria-label={`Dar de baja a ${account.displayName}`} onClick={() => setConfirming({ id: account.id, step: 'deactivate' })}>Dar de baja</button>
           : <div className="shalom-confirm" role="group" aria-label={`Confirmar baja de ${account.displayName}`}>
-              <p>Se le quitarán todos sus perfiles, se cerrarán sus sesiones y ya no podrá entrar. Sus invitaciones pendientes y sus permutas por confirmar se cancelan. Puedes reactivarla después, sin perfiles.</p>
-              <button type="button" disabled={task.busy} onClick={() => { setConfirming(null); act(() => request<{ upcomingClasses: number }>(`admin/accounts/${account.id}/deactivate/`, {}), deactivated); }}>Sí, dar de baja</button>
+              <p>Se le quitarán todos sus perfiles y grupos de asistencia, se cerrarán sus sesiones y ya no podrá entrar. Se borra su verificación en dos pasos y se cancelan sus permutas por confirmar y las invitaciones que envió o que recibió. Puedes reactivarla después, sin perfiles ni grupos.</p>
+              <button type="button" disabled={task.busy} onClick={() => { setConfirming(null); act(() => request<Deactivation>(`admin/accounts/${account.id}/deactivate/`, {}), deactivated); }}>Sí, dar de baja</button>
               <button type="button" className="shalom-secondary" onClick={() => setConfirming(null)}>Cancelar</button>
             </div>)}
       </li>)}

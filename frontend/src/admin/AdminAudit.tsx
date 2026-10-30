@@ -6,6 +6,7 @@ type Entry = { id: string; action: string; actorName: string; target: string; cr
 const ACTIONS: Record<string, string> = {
   'account.create': 'creó su cuenta', 'account.deactivate': 'dio de baja a', 'account.reactivate': 'reactivó a',
   'role.grant': 'asignó el perfil', 'role.confirm': 'confirmó el perfil', 'role.revoke': 'quitó el perfil',
+  'role.bootstrap': 'recibió por comando del servidor el perfil',
   'invitation.create': 'invitó a', 'invitation.revoke': 'canceló la invitación a', 'invitation.accept': 'aceptó una invitación',
   'mfa.enroll': 'activó la verificación en dos pasos', 'mfa.reset': 'reinició la verificación en dos pasos de',
   'session.revoke_all': 'cerró sus sesiones en todos los dispositivos',

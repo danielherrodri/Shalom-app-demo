@@ -11,10 +11,12 @@ from rest_framework.permissions import BasePermission
 from rest_framework.response import Response
 from rest_framework.exceptions import ValidationError
 from .emails import INVITATION, cancel, send_after_commit
-from .models import User, Person, Role, PRIVILEGED_ROLES, RoleGrant, Invitation, AuditEvent, RosterEntry, DayLead, Swap
+from .models import (User, Person, Role, PRIVILEGED_ROLES, RoleGrant, Invitation, AuditEvent, RosterEntry, DayLead, Swap,
+                     Assignment, EmailIdentity, TotpDevice)
 
 INVITATION_TTL = timedelta(days=7)
 INVALID_INVITATION = 'Esta invitación ya no es válida. Pide una nueva a administración.'
+OTHER_ADDRESS = 'Esta invitación se envió a otro correo. Cierra sesión y entra con el correo en el que la recibiste.'
 
 
 def verifier(token):
@@ -78,7 +80,10 @@ class AccountList(generics.ListAPIView):
 
 
 class AccountDeactivate(generics.GenericAPIView):
-    """Someone stops serving: every profile ends, sessions close and the account can no longer sign in."""
+    """Someone stops serving: every profile, group and second factor ends, sessions close and the account can no longer sign in.
+
+    Nothing comes back on reactivation, so each access is granted again on purpose.
+    """
     permission_classes = [IsAdministrator]
     def post(self, request, pk):
         with transaction.atomic():
@@ -86,13 +91,19 @@ class AccountDeactivate(generics.GenericAPIView):
             # The caller stays as an administrator, so there is always one left.
             if user == request.user:
                 raise ValidationError({'detail': 'Otra persona de administración debe hacerlo.'})
+            was_admin = effective_grants().filter(user=user, role=Role.ADMINISTRACION).exists()
             now = timezone.now()
             for grant in open_grants().select_for_update().filter(user=user):
                 grant.revoked_at = now
                 grant.save(update_fields=['revoked_at'])
                 audit(request.user, 'role.revoke', grant)
-            # Their pending invitations would still grant profiles in their name.
-            for invitation in pending_invitations().select_for_update().filter(created_by=user):
+            # Attendance groups come from assignments, not profiles: without this a reactivated account would see them again.
+            Assignment.objects.filter(user=user, active=True).update(active=False)
+            # A new device is enrolled if a privileged profile is granted again.
+            TotpDevice.objects.filter(user=user).delete()
+            # Invitations they sent would still grant profiles in their name; those sent to them, on reactivation.
+            addresses = EmailIdentity.objects.filter(user=user).values('email')
+            for invitation in pending_invitations().select_for_update().filter(Q(created_by=user) | Q(email__in=addresses)):
                 invitation.revoked_at = now
                 invitation.save(update_fields=['revoked_at'])
                 cancel(invitation.pk)
@@ -106,7 +117,9 @@ class AccountDeactivate(generics.GenericAPIView):
             # Classes stay in the roster so coordination sees the gap; the caller is told how many.
             today = timezone.localdate()
             upcoming = RosterEntry.objects.filter(teacher=user, date__gte=today).count() + DayLead.objects.filter(lead=user, date__gte=today).count()
-        return Response({'upcomingClasses': upcoming})
+            # With one administrator left nobody can confirm privileged profiles until bootstrap_admin confirms a second one.
+            last_admin = was_admin and effective_grants().filter(role=Role.ADMINISTRACION).count() < 2
+        return Response({'upcomingClasses': upcoming, 'oneAdministratorLeft': last_admin})
 
 
 class AccountReactivate(generics.GenericAPIView):
@@ -274,6 +287,9 @@ class InvitationAccept(generics.GenericAPIView):
             # Same answer for unknown, used, revoked, expired or self-issued invitations.
             if invitation is None or invitation.created_by_id == user.id:
                 raise ValidationError({'detail': INVALID_INVITATION})
+            # Only the account that verified the invited address takes it: a forwarded or old link grants nothing.
+            if not EmailIdentity.objects.filter(user=user, email=invitation.email).exists():
+                raise ValidationError({'detail': OTHER_ADDRESS})
             if invitation.person_id:
                 person = Person.objects.select_for_update().get(pk=invitation.person_id)
                 if not person.active or person.account_id not in {None, user.id} or Person.objects.filter(account=user).exclude(pk=person.pk).exists():

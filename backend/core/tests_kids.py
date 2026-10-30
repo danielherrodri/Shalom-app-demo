@@ -348,7 +348,7 @@ class KidsSwapTests(KidsBase):
         self.roster(teacher=self.other_teacher, service=self.second)
         client = self.client_for(self.admin)
         response = client.post(f'/api/v1/admin/accounts/{self.other_teacher.id}/deactivate/', content_type='application/json')
-        self.assertEqual(response.json(), {'upcomingClasses': 1})
+        self.assertEqual(response.json(), {'upcomingClasses': 1, 'oneAdministratorLeft': False})
         self.assertEqual(Swap.objects.get(pk=swap['id']).status, 'cancelada')
         self.assertTrue(AuditEvent.objects.filter(action='kids.swap.cancelada', target_id=swap['id']).exists())
         # The class stays in the roster so coordination sees who must be replaced.
