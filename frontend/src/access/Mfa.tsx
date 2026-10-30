@@ -3,7 +3,10 @@ import { request } from '../api';
 import { Field } from '../ui/Primitives';
 import { Status, useTask } from '../ui/Status';
 
-type Setup = { secret: string; uri: string };
+type Setup = { secret: string; uri: string; qr: string };
+
+// Only an inline SVG built by the server: inside <img> it cannot run scripts or load anything.
+const isQr = (src: string) => src.startsWith('data:image/svg+xml');
 
 /** Second factor for privileged profiles: first enrollment, then a code in every new session. */
 export function Mfa({ enrolled, onVerified }: { enrolled: boolean; onVerified: () => Promise<void> }) {
@@ -30,9 +33,14 @@ export function Mfa({ enrolled, onVerified }: { enrolled: boolean; onVerified: (
     <Status {...task} />
     {confirming && !setup && <button type="button" disabled={task.busy} onClick={() => void task.run(async () => setSetup(await request<Setup>('auth/mfa/setup/', {})))}>Generar mi clave</button>}
     {confirming && setup && <ol className="shalom-steps">
-      <li>En tu app de autenticación, agrega una cuenta nueva con «Ingresar una clave de configuración».</li>
+      <li>En tu app de autenticación, agrega una cuenta nueva.</li>
       <li>
-        <p>Escribe esta clave (no la compartas ni le tomes captura):</p>
+        {isQr(setup.qr) && <>
+          <p>Desde la computadora, escanea este código con la cámara de tu app (no lo compartas ni le tomes captura):</p>
+          <img className="shalom-qr" src={setup.qr} width={180} height={180} alt="Código QR con tu clave de configuración para la app de autenticación" />
+          <p>O elige «Ingresar una clave de configuración» y escribe esta clave:</p>
+        </>}
+        {!isQr(setup.qr) && <p>Elige «Ingresar una clave de configuración» y escribe esta clave (no la compartas ni le tomes captura):</p>}
         <p className="shalom-secret" aria-label="Clave de configuración">{setup.secret.match(/.{1,4}/g)?.join(' ')}</p>
         <p className="shalom-field-hint">En el celular también puedes <a href={setup.uri}>abrirla directamente en tu app</a>.</p>
       </li>

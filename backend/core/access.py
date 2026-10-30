@@ -1,4 +1,3 @@
-import hashlib
 import hmac
 import json
 import secrets
@@ -6,9 +5,9 @@ import time
 import uuid
 from datetime import date, timedelta
 import pyotp
+import segno
 from django.conf import settings
 from django.contrib.auth import login, logout
-from django.core.cache import cache
 from django.db import IntegrityError, transaction
 from django.db.models import F
 from django.http import JsonResponse
@@ -23,6 +22,7 @@ from rest_framework.exceptions import ValidationError, Throttled
 from .admin_api import IsAdministrator, Strict, audit, display_name, effective_grants, roles_of, verifier
 from .crypto import seal, unseal
 from .emails import LOGIN_LINK, send_after_commit
+from .limits import origin_key, over_limit
 from .models import (User, PRIVILEGED_ROLES, EmailIdentity, AccountProfile, LoginLink, ConsentKind,
                      ConsentText, ConsentRecord, TotpDevice)
 
@@ -83,16 +83,6 @@ class LinkInput(Strict):
     email = serializers.EmailField(max_length=254)
 
 
-def over_limit(key, limit):
-    # add + incr is atomic on shared caches; the window starts with the first request.
-    cache.add(key, 0, int(LINK_TTL.total_seconds()))
-    try:
-        return cache.incr(key) > limit
-    except ValueError:
-        cache.set(key, 1, int(LINK_TTL.total_seconds()))
-        return False
-
-
 @require_POST
 @csrf_protect
 def request_link(request):
@@ -101,8 +91,7 @@ def request_link(request):
         return JsonResponse({'detail': 'Solicitud no válida.'}, status=400)
     email = data['email'].lower()
     answer = JsonResponse({'detail': 'Si el correo es válido, te enviamos un enlace. Revisa tu bandeja.'}, status=202)
-    origin = hashlib.sha256(request.META.get('REMOTE_ADDR', '').encode()).hexdigest()
-    if over_limit(f'link-origin:{origin}', LINKS_PER_ORIGIN):
+    if over_limit(f'link-origin:{origin_key(request)}', LINKS_PER_ORIGIN, LINK_TTL):
         return JsonResponse({'detail': 'Demasiados intentos. Espera unos minutos.'}, status=429)
     # Same answer whether or not the address has an account or hit its own limit.
     if LoginLink.objects.filter(email=email, created_at__gt=timezone.now() - LINK_TTL).count() >= LINKS_PER_EMAIL:
@@ -240,8 +229,11 @@ class MfaSetup(generics.GenericAPIView):
                 raise ValidationError({'detail': 'Ya tienes verificación en dos pasos.'})
             secret = pyotp.random_base32()
             TotpDevice.objects.update_or_create(user=user, defaults={'sealed_secret': seal(secret), 'confirmed_at': None, 'last_step': 0, 'failures': 0, 'locked_until': None})
-        # Shown once, to the account owner only; never logged or stored in clear.
-        return Response({'secret': secret, 'uri': pyotp.TOTP(secret).provisioning_uri(name=user.username, issuer_name='Shalom')})
+        uri = pyotp.TOTP(secret).provisioning_uri(name=user.username, issuer_name='Shalom')
+        # Shown once, to the account owner only; never logged or stored in clear. The QR is built
+        # here so the key never goes to a third-party image service.
+        qr = segno.make(uri, error='m').svg_data_uri(scale=6, border=4, dark='#000000', light='#ffffff')
+        return Response({'secret': secret, 'uri': uri, 'qr': qr})
 
 
 class MfaConfirm(generics.GenericAPIView):

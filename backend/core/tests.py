@@ -1,6 +1,6 @@
 import secrets
 import time
-from django.test import TestCase, Client, override_settings
+from django.test import TestCase, TransactionTestCase, Client, override_settings
 from django.utils import timezone
 from .models import User, Family, Person, Group, Assignment, Enrollment, Meeting, Attendance, AuditEvent
 
@@ -428,6 +428,18 @@ class AccessTests(TestCase):
         self.assertTrue(all(a.status_code == 202 and a.json() == answers[0].json() for a in answers))
         self.assertEqual(LoginLink.objects.count(), 3)
 
+    @override_settings(CLIENT_IP_HEADER='HTTP_X_FORWARDED_FOR', TRUSTED_PROXY_COUNT=2)
+    def test_per_origin_limit_uses_balancer_address(self):
+        for i in range(10):
+            self.ask_link(f'balanceo{i}@example.invalid', HTTP_X_FORWARDED_FOR=f'10.9.9.{i}, 203.0.113.5, 192.0.2.1')
+        # A different forged left-most value is still the same client for the balancer.
+        self.assertEqual(self.ask_link('x@example.invalid', HTTP_X_FORWARDED_FOR='10.1.1.1, 203.0.113.5, 192.0.2.1')[0].status_code, 429)
+        self.assertEqual(self.ask_link('y@example.invalid', HTTP_X_FORWARDED_FOR='203.0.113.6, 192.0.2.1')[0].status_code, 202)
+
+    def test_forged_forwarded_header_ignored_without_configuration(self):
+        statuses = [self.ask_link(f'falso{i}@example.invalid', HTTP_X_FORWARDED_FOR=f'198.51.100.{i}')[0].status_code for i in range(11)]
+        self.assertEqual(statuses[10], 429)
+
     def test_per_origin_limit(self):
         statuses = [self.ask_link(f'origen{i}@example.invalid')[0].status_code for i in range(11)]
         self.assertEqual(statuses[:10], [202] * 10)
@@ -568,6 +580,19 @@ class AccessTests(TestCase):
         self.enroll()
         self.assertEqual(self.post('/api/v1/auth/mfa/setup/').status_code, 400)
 
+    def test_setup_includes_qr_of_the_same_key(self):
+        from urllib.parse import unquote
+        self.sign_in(self.admin)
+        response = self.post('/api/v1/auth/mfa/setup/')
+        data = response.json()
+        self.assertTrue(data['qr'].startswith('data:image/svg+xml'))
+        svg = unquote(data['qr'].split(',', 1)[1])
+        self.assertIn('<svg', svg)
+        self.assertNotIn('<script', svg.lower())
+        self.assertNotIn('href', svg)
+        self.assertIn(data['secret'], data['uri'])
+        self.assertEqual(response['Cache-Control'], 'no-store')
+
     def test_verify_without_device(self):
         self.sign_in(self.admin)
         self.assertEqual(self.post('/api/v1/auth/mfa/verify/', {'code': '123456'}).status_code, 400)
@@ -634,3 +659,115 @@ class AccessTests(TestCase):
 
     def test_google_is_off(self):
         self.assertEqual(self.client.get('/api/v1/auth/providers/').json(), {'emailLink': True, 'google': False, 'localPassword': True})
+
+
+class ClientOriginTests(TestCase):
+    """Client address behind the load balancer and the counters shared by every instance."""
+    def request(self, remote='192.0.2.10', forwarded=None):
+        from django.test import RequestFactory
+        extra = {'REMOTE_ADDR': remote}
+        if forwarded is not None:
+            extra['HTTP_X_FORWARDED_FOR'] = forwarded
+        return RequestFactory().get('/', **extra)
+
+    def test_remote_addr_without_configuration(self):
+        from .limits import client_ip
+        self.assertEqual(client_ip(self.request(forwarded='198.51.100.1')), '192.0.2.10')
+
+    @override_settings(CLIENT_IP_HEADER='HTTP_X_FORWARDED_FOR', TRUSTED_PROXY_COUNT=1)
+    def test_one_proxy_takes_right_most(self):
+        from .limits import client_ip
+        self.assertEqual(client_ip(self.request(forwarded='10.0.0.1, 203.0.113.9')), '203.0.113.9')
+
+    @override_settings(CLIENT_IP_HEADER='HTTP_X_FORWARDED_FOR', TRUSTED_PROXY_COUNT=2)
+    def test_two_proxies_skip_the_last_hop(self):
+        from .limits import client_ip
+        self.assertEqual(client_ip(self.request(forwarded='10.0.0.1,203.0.113.9 ,192.0.2.1')), '203.0.113.9')
+
+    @override_settings(CLIENT_IP_HEADER='HTTP_X_FORWARDED_FOR', TRUSTED_PROXY_COUNT=2)
+    def test_missing_or_short_header_falls_back_to_remote(self):
+        from .limits import client_ip
+        self.assertEqual(client_ip(self.request()), '192.0.2.10')
+        self.assertEqual(client_ip(self.request(forwarded='203.0.113.9')), '192.0.2.10')
+
+    @override_settings(CLIENT_IP_HEADER='HTTP_X_FORWARDED_FOR', TRUSTED_PROXY_COUNT=1)
+    def test_origin_key_hashes_and_groups(self):
+        from .limits import origin_key
+        key = origin_key(self.request(forwarded='203.0.113.9'))
+        self.assertEqual(len(key), 64)
+        self.assertNotIn('203.0.113.9', key)
+        self.assertEqual(origin_key(self.request(forwarded='2001:db8:1:2::a')), origin_key(self.request(forwarded='2001:db8:1:2:ffff::b')))
+        self.assertNotEqual(origin_key(self.request(forwarded='2001:db8:1:2::a')), origin_key(self.request(forwarded='2001:db8:1:3::a')))
+        self.assertEqual(origin_key(self.request(forwarded='::ffff:203.0.113.9')), key)
+        self.assertEqual(origin_key(self.request(forwarded='basura')), origin_key(self.request(forwarded='otra-basura')))
+
+    def test_counter_window_and_purge(self):
+        from datetime import timedelta
+        from .limits import over_limit, purge_expired
+        from .models import RateCounter
+        window = timedelta(minutes=15)
+        self.assertEqual([over_limit('prueba:a', 2, window) for _ in range(3)], [False, False, True])
+        self.assertFalse(over_limit('prueba:b', 2, window))
+        RateCounter.objects.filter(key='prueba:a').update(window_start=timezone.now() - window)
+        self.assertFalse(over_limit('prueba:a', 2, window))
+        self.assertEqual(RateCounter.objects.get(key='prueba:a').hits, 1)
+        RateCounter.objects.filter(key='prueba:b').update(window_start=timezone.now() - window - timedelta(seconds=1))
+        self.assertEqual(purge_expired(), 1)
+        self.assertEqual(list(RateCounter.objects.values_list('key', flat=True)), ['prueba:a'])
+
+
+class SharedCounterConcurrencyTests(TransactionTestCase):
+    def test_parallel_hits_are_all_counted(self):
+        from concurrent.futures import ThreadPoolExecutor
+        from datetime import timedelta
+        from django.db import connection
+        from .limits import over_limit
+        from .models import RateCounter
+
+        def hit(_):
+            try:
+                return over_limit('prueba:paralelo', 10, timedelta(minutes=15))
+            finally:
+                connection.close()
+        # Each thread has its own database connection, as separate Cloud Run instances would.
+        with ThreadPoolExecutor(max_workers=8) as pool:
+            results = list(pool.map(hit, range(24)))
+        self.assertEqual(RateCounter.objects.get(key='prueba:paralelo').hits, 24)
+        self.assertEqual(results.count(False), 10)
+
+
+class EnvironmentSettingsTests(TestCase):
+    def test_trusted_origins(self):
+        from config.env import trusted_origins
+        self.assertEqual(trusted_origins(' https://pruebas.example.invalid , https://kids.example.invalid:8443/'),
+                         ['https://pruebas.example.invalid', 'https://kids.example.invalid:8443'])
+        self.assertEqual(trusted_origins(''), [])
+        self.assertEqual(trusted_origins('http://localhost:5173', allow_http=True), ['http://localhost:5173'])
+
+    def test_rejects_unsafe_origins(self):
+        from django.core.exceptions import ImproperlyConfigured
+        from config.env import trusted_origins
+        for value in ['http://pruebas.example.invalid', 'https://*.example.invalid', 'pruebas.example.invalid',
+                      'https://pruebas.example.invalid/ruta', 'https://persona@pruebas.example.invalid',
+                      'https://pruebas.example.invalid?x=1', 'https://pruebas.example.invalid:puerto', 'javascript:alert(1)']:
+            with self.subTest(value=value), self.assertRaises(ImproperlyConfigured):
+                trusted_origins(value)
+
+    def test_client_ip_settings(self):
+        from django.core.exceptions import ImproperlyConfigured
+        from config.env import client_ip_settings
+        self.assertEqual(client_ip_settings('', ''), ('', 0))
+        self.assertEqual(client_ip_settings('X-Forwarded-For', '2'), ('HTTP_X_FORWARDED_FOR', 2))
+        for header, count in [('X-Forwarded-For', ''), ('', '1'), ('X-Forwarded-For', '-1'), ('X-Forwarded-For', 'dos'), ('X Forwarded', '1')]:
+            with self.subTest(header=header, count=count), self.assertRaises(ImproperlyConfigured):
+                client_ip_settings(header, count)
+
+    @override_settings(CSRF_TRUSTED_ORIGINS=['https://pruebas.example.invalid'])
+    def test_trusted_origin_passes_csrf_from_public_domain(self):
+        client = Client(enforce_csrf_checks=True)
+        token = client.get('/api/v1/auth/csrf/').json()['csrfToken']
+        def ask(origin):
+            return client.post('/api/v1/auth/link/', {'email': 'origen@example.invalid'}, content_type='application/json',
+                               HTTP_X_CSRFTOKEN=token, HTTP_ORIGIN=origin, secure=True).status_code
+        self.assertEqual(ask('https://pruebas.example.invalid'), 202)
+        self.assertEqual(ask('https://otro.example.invalid'), 403)

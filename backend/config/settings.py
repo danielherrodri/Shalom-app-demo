@@ -1,6 +1,7 @@
 import os
 from pathlib import Path
 from django.core.exceptions import ImproperlyConfigured
+from .env import client_ip_settings, origin_of, trusted_origins
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 ENVIRONMENT = os.environ.get('SHALOM_ENV', 'production')
@@ -84,6 +85,11 @@ ADMIN_MFA_REQUIRED = not DEVELOPMENT
 PUBLIC_APP_URL = os.environ.get('SHALOM_PUBLIC_APP_URL', 'http://localhost:5173' if DEVELOPMENT else '')
 if not DEVELOPMENT and not PUBLIC_APP_URL.startswith('https://'):
     raise ImproperlyConfigured('SHALOM_PUBLIC_APP_URL debe usar https')
+# Behind Firebase Hosting the browser's Origin is the public domain, not the Cloud Run host Django sees.
+CSRF_TRUSTED_ORIGINS = sorted({origin_of(PUBLIC_APP_URL), *trusted_origins(os.environ.get('DJANGO_CSRF_TRUSTED_ORIGINS', ''), allow_http=DEVELOPMENT)})
+# Per-origin limits read the client address from the header the load balancer sets, counting
+# proxies from the right; unset means REMOTE_ADDR, so a forged X-Forwarded-For is ignored.
+CLIENT_IP_HEADER, TRUSTED_PROXY_COUNT = client_ip_settings(os.environ.get('SHALOM_CLIENT_IP_HEADER', ''), os.environ.get('SHALOM_TRUSTED_PROXY_COUNT', ''))
 DEFAULT_FROM_EMAIL = os.environ.get('SHALOM_FROM_EMAIL', 'Shalom <no-responder@example.invalid>')
 if DEVELOPMENT:
     # Messages stay in memory: emailed links carry single-use tokens and must not reach consoles or logs.

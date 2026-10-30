@@ -10,3 +10,4 @@ cffi==2.1.1
 pycparser==3.12
 pyotp==2.9.0
 cryptography==50.0.2
+segno==1.6.6
