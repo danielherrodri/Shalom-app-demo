@@ -183,7 +183,7 @@ async function axe(page, label) {
       await page.getByRole("checkbox", { name: "Voluntario" }).check();
       await page.getByRole("button", { name: "Enviar invitación" }).click();
       await page.getByText("Invitación enviada. Vence en 7 días.").waitFor();
-      await page.getByText("invitada@example.invalid").waitFor();
+      await page.getByText("invitada@example.invalid", { exact: true }).waitFor();
       assert.equal(await page.evaluate(() => document.activeElement.getAttribute("role")), "status", "el foco queda junto al resultado");
       await axe(page, "Administración");
       if (shots) await page.screenshot({ path: path.join(shots, "admin-360.png"), fullPage: true });
@@ -205,6 +205,26 @@ async function axe(page, label) {
       await page.getByRole("button", { name: "Confirmar" }).click();
       await page.getByText("Perfil confirmado.").waitFor();
       await page.getByText("No hay perfiles esperando confirmación.").waitFor();
+    });
+
+    await check("administración busca, da de baja y reactiva una cuenta, y lo ve en la bitácora", async () => {
+      await page.getByLabel("Buscar por nombre o usuario").fill("persona FICTICIA");
+      const accounts = page.getByRole("list").filter({ has: page.getByLabel("Asignar perfil") });
+      assert.equal(await accounts.getByRole("listitem").filter({ has: page.getByLabel("Asignar perfil") }).count(), 1, "la búsqueda deja solo la cuenta buscada");
+      await page.getByRole("button", { name: "Dar de baja a Persona ficticia" }).click();
+      await page.getByRole("group", { name: "Confirmar baja de Persona ficticia" }).waitFor();
+      await axe(page, "Confirmar baja");
+      await page.getByRole("button", { name: "Sí, dar de baja" }).click();
+      await page.getByText("Cuenta dada de baja.").waitFor();
+      await page.getByText("Ninguna cuenta activa coincide con la búsqueda.").waitFor();
+      await page.getByRole("button", { name: "Reactivar a Persona ficticia" }).waitFor();
+      await page.getByText(/dio de baja a Persona ficticia/).waitFor();
+      await page.getByText(/quitó el perfil Docente · Persona ficticia/).waitFor();
+      await axe(page, "Administración con bajas y bitácora");
+      await page.getByRole("button", { name: "Reactivar a Persona ficticia" }).click();
+      await page.getByText("Cuenta reactivada, sin perfiles. Asígnale los que necesite.").waitFor();
+      await page.getByText("No hay cuentas dadas de baja.").waitFor();
+      await page.getByText(/reactivó a Persona ficticia/).waitFor();
     });
   } finally {
     await browser.close();

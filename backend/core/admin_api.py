@@ -3,7 +3,7 @@ import secrets
 from datetime import timedelta
 from django.conf import settings
 from django.db import transaction
-from django.db.models import Q
+from django.db.models import F, Q
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
 from rest_framework import generics, serializers
@@ -11,7 +11,7 @@ from rest_framework.permissions import BasePermission
 from rest_framework.response import Response
 from rest_framework.exceptions import ValidationError
 from .emails import INVITATION, cancel, send_after_commit
-from .models import User, Person, Role, PRIVILEGED_ROLES, RoleGrant, Invitation, AuditEvent
+from .models import User, Person, Role, PRIVILEGED_ROLES, RoleGrant, Invitation, AuditEvent, RosterEntry, DayLead, Swap
 
 INVITATION_TTL = timedelta(days=7)
 INVALID_INVITATION = 'Esta invitación ya no es válida. Pide una nueva a administración.'
@@ -70,10 +70,73 @@ def assignable(role):
 class AccountList(generics.ListAPIView):
     permission_classes = [IsAdministrator]
     def get_queryset(self):
-        return User.objects.filter(is_active=True).select_related('profile').order_by('username', 'id')
+        active = self.request.query_params.get('status') != 'inactive'
+        return User.objects.filter(is_active=active).select_related('profile').order_by('username', 'id')
     def list(self, request, *args, **kwargs):
         page = self.paginate_queryset(self.get_queryset())
         return self.get_paginated_response([{'id': str(u.id), 'username': u.username, 'displayName': display_name(u), 'roles': roles_of(u)} for u in page])
+
+
+class AccountDeactivate(generics.GenericAPIView):
+    """Someone stops serving: every profile ends, sessions close and the account can no longer sign in."""
+    permission_classes = [IsAdministrator]
+    def post(self, request, pk):
+        with transaction.atomic():
+            user = get_object_or_404(User.objects.select_for_update(), pk=pk, is_active=True)
+            # The caller stays as an administrator, so there is always one left.
+            if user == request.user:
+                raise ValidationError({'detail': 'Otra persona de administración debe hacerlo.'})
+            now = timezone.now()
+            for grant in open_grants().select_for_update().filter(user=user):
+                grant.revoked_at = now
+                grant.save(update_fields=['revoked_at'])
+                audit(request.user, 'role.revoke', grant)
+            # Their pending invitations would still grant profiles in their name.
+            for invitation in pending_invitations().select_for_update().filter(created_by=user):
+                invitation.revoked_at = now
+                invitation.save(update_fields=['revoked_at'])
+                cancel(invitation.pk)
+                audit(request.user, 'invitation.revoke', invitation)
+            for swap in Swap.objects.select_for_update().filter(Q(from_teacher=user) | Q(to_teacher=user), status=Swap.Status.PENDIENTE):
+                swap.status, swap.decided_by, swap.decided_at = Swap.Status.CANCELADA, request.user, now
+                swap.save(update_fields=['status', 'decided_by', 'decided_at'])
+                audit(request.user, 'kids.swap.cancelada', swap)
+            User.objects.filter(pk=user.pk).update(is_active=False, session_version=F('session_version') + 1)
+            audit(request.user, 'account.deactivate', user)
+            # Classes stay in the roster so coordination sees the gap; the caller is told how many.
+            today = timezone.localdate()
+            upcoming = RosterEntry.objects.filter(teacher=user, date__gte=today).count() + DayLead.objects.filter(lead=user, date__gte=today).count()
+        return Response({'upcomingClasses': upcoming})
+
+
+class AccountReactivate(generics.GenericAPIView):
+    """Undoes a deactivation without restoring profiles: they are assigned again, with confirmation where needed."""
+    permission_classes = [IsAdministrator]
+    def post(self, request, pk):
+        with transaction.atomic():
+            user = get_object_or_404(User.objects.select_for_update(), pk=pk, is_active=False)
+            User.objects.filter(pk=user.pk).update(is_active=True, session_version=F('session_version') + 1)
+            audit(request.user, 'account.reactivate', user)
+        return Response(status=204)
+
+
+ADMIN_ACTIONS = ('account.', 'role.', 'invitation.', 'mfa.', 'session.')
+
+
+class AuditLog(generics.GenericAPIView):
+    """Last 200 changes to accounts, profiles and invitations. Kids and attendance have their own records."""
+    permission_classes = [IsAdministrator]
+    def get(self, request):
+        actions = Q()
+        for prefix in ADMIN_ACTIONS:
+            actions |= Q(action__startswith=prefix)
+        events = list(AuditEvent.objects.filter(actions).select_related('actor__profile').order_by('-created_at')[:200])
+        ids = {e.target_id for e in events}
+        targets = {g.id: f'{Role(g.role).label} · {display_name(g.user)}' for g in RoleGrant.objects.filter(pk__in=ids).select_related('user__profile')}
+        targets.update(Invitation.objects.filter(pk__in=ids).values_list('id', 'email'))
+        targets.update((u.id, display_name(u)) for u in User.objects.filter(pk__in=ids).select_related('profile'))
+        return Response({'results': [{'id': str(e.id), 'action': e.action, 'actorName': display_name(e.actor), 'target': targets.get(e.target_id, ''),
+                                      'created_at': e.created_at.isoformat()} for e in events]})
 
 
 class GrantInput(Strict):
