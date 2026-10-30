@@ -44,13 +44,13 @@ El atractivo de Firestore es el costo ($0 en la cuota gratuita). Para Kids pesa 
 | **Cloud Run** | API Django en contenedor | Escala a cero; la cuota gratuita cubre el tráfico de una iglesia. Sin servidor que parchar |
 | **Cloud SQL (PostgreSQL)** | Base de datos | Respaldos automáticos, parches y cifrado administrados. Instancia más pequeña (`db-f1-micro`) |
 | **Secret Manager** | Llave de Django, llave de cifrado de campos, SMTP o API de correo, token y secreto de webhook de Mercado Pago | Ninguna credencial en el repositorio ni en el navegador |
-| **Cloud Scheduler** | Vaciar la cola de correo cada minuto; tarea diaria (recordatorios a docentes, conciliación de pagos, limpieza) | 3 tareas gratis por cuenta de facturación; evita agregar Pub/Sub o Cloud Tasks |
+| **Cloud Scheduler** | Reintentar la cola de correo cada 5 minutos (el primer intento es inmediato); tarea diaria (recordatorios a docentes, conciliación de pagos, limpieza) | 3 tareas gratis por cuenta de facturación; evita agregar Pub/Sub o Cloud Tasks |
 | **Cloud Storage** | Solo si se guardan fotos de docentes o PDF de gafetes | Los gafetes pueden generarse al momento sin guardarse |
 | **Artifact Registry** | Imagen del contenedor | Lo exige Cloud Run; costo mínimo |
 
 **Descartados:** Firestore (sección 2); Firebase Authentication (sección 6); Cloud Functions (Cloud Run ya ejecuta la API completa, y una sola pieza es más fácil de operar); Pub/Sub y Cloud Tasks (Scheduler basta); GKE y máquinas virtuales (requieren mantenimiento).
 
-**Región:** la documentación de Cloud SQL lista Querétaro (`northamerica-south1`), lo que mantendría los datos en México y simplificaría el aviso de privacidad. **Falta verificar** que Cloud Run y las redirecciones de Firebase Hosting funcionen ahí. Si no, usar `us-central1` para ambos (misma región entre API y base) y declararlo en el aviso como remisión a un encargado.
+**Región:** la documentación de Cloud SQL lista Querétaro (`northamerica-south1`), lo que mantendría los datos en México y simplificaría el aviso de privacidad. **Verificado el 30 oct 2026:** Cloud Run sí está en Querétaro, pero las redirecciones de Firebase Hosting a Cloud Run y Cloud Scheduler no. Staging usa `us-central1` para todo (misma región entre API y base). Para producción: `us-central1` declarado en el aviso como remisión a un encargado, o Querétaro con un balanceador de aplicaciones en lugar de Hosting. Detalle y fuentes en [infraestructura de staging](infraestructura-staging.md).
 
 **Arranque en frío:** con escala a cero, la primera petición del domingo tarda unos segundos. Si molesta en Recepción, se fija una instancia mínima solo el domingo de 8:00 a 14:00 (costo marginal).
 
@@ -124,7 +124,7 @@ Se extiende el [plan v1](plan-v1-kids.md). Cada fase es un PR con pruebas y dato
 
 1. ✅ **Administración de perfiles e invitaciones.**
 2. ✅ **Acceso:** enlace por correo, consentimientos, verificación en dos pasos con QR y límites compartidos entre instancias; Google cuando haya credenciales.
-3. **Infraestructura:** Dockerfile, despliegue a Cloud Run y Cloud SQL de *staging*, Secret Manager, cola de correo con Scheduler, Firebase Hosting en un subdominio de pruebas y CI que despliega a staging.
+3. ✅ **Infraestructura** (código y scripts; recursos por crear, ver [staging](infraestructura-staging.md)): Dockerfile, despliegue a Cloud Run y Cloud SQL de *staging*, Secret Manager, cola de correo con Scheduler, Firebase Hosting en un subdominio de pruebas y CI que despliega a staging.
 4. **Datos de Kids** (tras la evaluación de impacto y el abogado): familias, tutores, niños, salud cifrada, autorizados e imagen.
 5. **Operación de Kids:** reservas, Recepción con QR y gafetes, salida validada, Mi grupo hoy, Mis hijos, avisos de entrada y salida por correo, Seguimiento.
 6. **Libros y pagos:** catálogo, inventario, Checkout Pro, webhook, conciliación, folio y entrega.

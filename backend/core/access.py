@@ -99,6 +99,7 @@ def request_link(request):
     token = secrets.token_urlsafe(32)
     with transaction.atomic():
         LoginLink.objects.create(email=email, verifier=verifier(token), expires_at=timezone.now() + LINK_TTL)
+        # Never retried, so the token is never stored: a lost link is cheaper to request again.
         send_after_commit('login_link', email, LOGIN_LINK, link=f'{settings.PUBLIC_APP_URL}/entrar#{token}')
     return answer
 

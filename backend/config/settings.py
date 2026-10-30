@@ -48,7 +48,11 @@ else:
         'PASSWORD': os.environ.get('PGPASSWORD', ''),
         'HOST': os.environ.get('PGHOST', '127.0.0.1'),
         'PORT': os.environ.get('PGPORT', '5432'),
-        'OPTIONS': {} if DEVELOPMENT else {'sslmode': 'verify-full'},
+        # Cloud Run reaches Cloud SQL through a Unix socket under /cloudsql/ whose connector already
+        # encrypts with mutual TLS; libpq never negotiates TLS on sockets, so verify-full is for TCP.
+        'OPTIONS': {} if DEVELOPMENT or os.environ.get('PGHOST', '').startswith('/') else {'sslmode': 'verify-full'},
+        'CONN_MAX_AGE': 0 if DEVELOPMENT else 60,
+        'CONN_HEALTH_CHECKS': not DEVELOPMENT,
     }}
 PASSWORD_HASHERS = ['django.contrib.auth.hashers.Argon2PasswordHasher']
 AUTH_PASSWORD_VALIDATORS = [
@@ -64,6 +68,10 @@ REST_FRAMEWORK = {
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
     'PAGE_SIZE': 25,
 }
+# Firebase Hosting strips every cookie except __session before reaching Cloud Run, so the session
+# uses that name and the CSRF token lives inside it (the frontend reads it from auth/csrf/).
+SESSION_COOKIE_NAME = '__session'
+CSRF_USE_SESSIONS = True
 SESSION_COOKIE_SECURE = not DEVELOPMENT
 SESSION_COOKIE_HTTPONLY = True
 SESSION_COOKIE_SAMESITE = 'Lax'
@@ -72,9 +80,13 @@ SESSION_EXPIRE_AT_BROWSER_CLOSE = True
 CSRF_COOKIE_SECURE = not DEVELOPMENT
 CSRF_COOKIE_SAMESITE = 'Lax'
 SECURE_SSL_REDIRECT = not DEVELOPMENT
+# Cloud Run terminates TLS and its front end sets X-Forwarded-Proto; without this every request looks like http.
+SECURE_PROXY_SSL_HEADER = None if DEVELOPMENT else ('HTTP_X_FORWARDED_PROTO', 'https')
 SECURE_HSTS_SECONDS = 31536000 if not DEVELOPMENT else 0
 SECURE_HSTS_INCLUDE_SUBDOMAINS = not DEVELOPMENT
 SECURE_HSTS_PRELOAD = False
+# Preload is hard to undo and would bind every subdomain of the church's domain; a deliberate choice.
+SILENCED_SYSTEM_CHECKS = ['security.W021']
 SECURE_CONTENT_TYPE_NOSNIFF = True
 X_FRAME_OPTIONS = 'DENY'
 DATA_UPLOAD_MAX_MEMORY_SIZE = 65536
@@ -109,5 +121,27 @@ if not FIELD_ENCRYPTION_KEY:
         raise ImproperlyConfigured('Se requiere SHALOM_FIELD_KEY')
     from cryptography.fernet import Fernet
     FIELD_ENCRYPTION_KEY = Fernet.generate_key().decode()
+# Cloud Scheduler calls /internal/ with a Google-signed OIDC token for this service account; empty turns them off.
+SCHEDULER_SERVICE_ACCOUNT = os.environ.get('SHALOM_SCHEDULER_SERVICE_ACCOUNT', '')
+SCHEDULER_AUDIENCE = os.environ.get('SHALOM_SCHEDULER_AUDIENCE', '')
+if SCHEDULER_SERVICE_ACCOUNT and not SCHEDULER_AUDIENCE.startswith('https://'):
+    raise ImproperlyConfigured('SHALOM_SCHEDULER_AUDIENCE debe ser la URL https del servicio')
+if not DEVELOPMENT:
+    # One JSON object per line for Cloud Logging, with an allow-list of fields (config/logs.py).
+    LOGGING = {
+        'version': 1,
+        'disable_existing_loggers': False,
+        'formatters': {'json': {'()': 'config.logs.JsonFormatter'}},
+        'handlers': {
+            'stdout': {'class': 'logging.StreamHandler', 'stream': 'ext://sys.stdout', 'formatter': 'json'},
+            'discard': {'class': 'logging.NullHandler'},
+        },
+        'root': {'handlers': ['stdout'], 'level': 'INFO'},
+        'loggers': {
+            'django': {'handlers': ['stdout'], 'level': 'INFO', 'propagate': False},
+            # Scanners hit the run.app URL with random Host headers; Cloud Run already logs the 400.
+            'django.security.DisallowedHost': {'handlers': ['discard'], 'propagate': False},
+        },
+    }
 # Google OpenID Connect stays off until the church provides the Google Cloud project and credentials.
 GOOGLE_OIDC_ENABLED = False
