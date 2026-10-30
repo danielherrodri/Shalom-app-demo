@@ -1,4 +1,4 @@
-"""Coordinación Kids: configuration, class roster, teachers, lessons, events and the teacher's agenda.
+"""Coordinación Kids: configuration, class roster, day leads, swaps, teachers, lessons, events and the teacher's agenda.
 
 Only adults' data: accounts, groups as age ranges, services, lessons and event tasks. No child appears
 here. Every permission is decided on the server for each request and record.
@@ -15,7 +15,7 @@ from rest_framework.permissions import BasePermission
 from rest_framework.response import Response
 from .admin_api import Strict, audit, display_name, effective_grants
 from .emails import send_after_commit
-from .models import AuditEvent, EmailIdentity, EventItem, Group, KidsEvent, Lesson, Role, RosterEntry, Service, User
+from .models import AuditEvent, DayLead, EmailIdentity, EventItem, Group, KidsEvent, Lesson, Role, RosterEntry, Service, Swap, User
 
 # Profiles that work in Kids; Joven is never part of the team.
 TEAM_ROLES = {Role.DOCENTE, Role.VOLUNTARIO, Role.PREPARACION, Role.COORDINACION_KIDS}
@@ -268,6 +268,229 @@ class RosterDetail(generics.GenericAPIView):
         return Response(status=204)
 
 
+# ---------- Encargado(a) del día ----------
+
+class LeadInput(Strict):
+    date = serializers.DateField()
+    group = serializers.UUIDField()
+    lead = serializers.UUIDField()
+
+
+class LeadChange(Strict):
+    lead = serializers.UUIDField()
+
+
+def lead_row(lead):
+    return {'id': str(lead.id), 'date': lead.date.isoformat(), 'group': str(lead.group_id), 'lead': str(lead.lead_id),
+            'leadName': display_name(lead.lead), 'reminded': lead.reminded_at is not None}
+
+
+def check_lead(lead):
+    if not Group.objects.filter(pk=lead.group_id, active=True).exists():
+        raise ValidationError({'detail': 'El grupo no existe o está inactivo.'})
+    if not teachers().filter(pk=lead.lead_id).exists():
+        raise ValidationError({'detail': 'La persona no tiene el perfil Docente.'})
+    if lead.date < today():
+        raise ValidationError({'detail': 'No se puede programar una fecha pasada.'})
+    if not Service.objects.filter(active=True, weekday=lead.date.weekday()).exists():
+        raise ValidationError({'detail': 'No hay servicios ese día.'})
+
+
+class LeadList(generics.GenericAPIView):
+    permission_classes = [IsCoordinator]
+    def get(self, request):
+        start, end = date_range(request)
+        leads = DayLead.objects.filter(date__range=(start, end)).select_related('lead__profile').order_by('date', 'group__min_age', 'id')
+        return Response({'results': [lead_row(l) for l in leads]})
+    def post(self, request):
+        data = LeadInput(data=request.data)
+        data.is_valid(raise_exception=True)
+        values = data.validated_data
+        lead = DayLead(date=values['date'], group_id=values['group'], lead_id=values['lead'], created_by=request.user)
+        with transaction.atomic():
+            Group.objects.select_for_update().filter(pk=lead.group_id).exists()
+            check_lead(lead)
+            if DayLead.objects.filter(date=lead.date, group_id=lead.group_id).exists():
+                raise ValidationError({'detail': 'Ese grupo ya tiene encargado(a) ese día.'})
+            lead.save()
+            audit(request.user, 'kids.lead.create', lead)
+        return Response(lead_row(lead), status=201)
+
+
+class LeadDetail(generics.GenericAPIView):
+    permission_classes = [IsCoordinator]
+    def patch(self, request, pk):
+        data = LeadChange(data=request.data)
+        data.is_valid(raise_exception=True)
+        with transaction.atomic():
+            lead = get_object_or_404(DayLead.objects.select_for_update(), pk=pk)
+            if lead.lead_id != data.validated_data['lead']:
+                lead.lead_id = data.validated_data['lead']
+                lead.reminded_at = None
+            check_lead(lead)
+            lead.save()
+            audit(request.user, 'kids.lead.update', lead)
+        return Response(lead_row(lead))
+    def delete(self, request, pk):
+        with transaction.atomic():
+            lead = get_object_or_404(DayLead.objects.select_for_update(), pk=pk)
+            audit(request.user, 'kids.lead.delete', lead)
+            lead.delete()
+        return Response(status=204)
+
+
+# ---------- Permutas ----------
+
+class SwapInput(Strict):
+    entry = serializers.UUIDField()
+    to_teacher = serializers.UUIDField()
+    return_entry = serializers.UUIDField(required=False, allow_null=True)
+
+
+def class_summary(entry):
+    return {'id': str(entry.id), 'date': entry.date.isoformat(), 'service': entry.service.name,
+            'starts_at': entry.service.starts_at.strftime('%H:%M'), 'group': entry.group.name}
+
+
+def swap_row(swap):
+    return {'id': str(swap.id), 'status': swap.status, 'entry': class_summary(swap.entry),
+            'returnEntry': class_summary(swap.return_entry) if swap.return_entry_id else None,
+            'from': str(swap.from_teacher_id), 'fromName': display_name(swap.from_teacher),
+            'to': str(swap.to_teacher_id), 'toName': display_name(swap.to_teacher),
+            'createdAt': swap.created_at.isoformat()}
+
+
+SWAP_RELATED = ('entry__service', 'entry__group', 'return_entry__service', 'return_entry__group', 'from_teacher__profile', 'to_teacher__profile')
+
+
+def apply_swap(swap):
+    """Hands each class to the other teacher with every roster rule checked again under lock."""
+    entry = RosterEntry.objects.select_for_update().get(pk=swap.entry_id)
+    back = RosterEntry.objects.select_for_update().get(pk=swap.return_entry_id) if swap.return_entry_id else None
+    if entry.teacher_id != swap.from_teacher_id or (back and back.teacher_id != swap.to_teacher_id):
+        raise ValidationError({'detail': 'El rol cambió desde que se registró la permuta.'})
+    for target, teacher_id in [(entry, swap.to_teacher_id)] + ([(back, swap.from_teacher_id)] if back else []):
+        target.teacher_id = teacher_id
+        target.reminded_at = None
+        lock(target)
+        check_entry(target)
+        target.save(update_fields=['teacher', 'reminded_at'])
+
+
+def check_swap(swap):
+    if swap.to_teacher_id == swap.from_teacher_id:
+        raise ValidationError({'detail': 'Elige a otra persona para cubrir la clase.'})
+    if not teachers().filter(pk=swap.to_teacher_id).exists():
+        raise ValidationError({'detail': 'La persona que cubre no tiene el perfil Docente.'})
+    if swap.return_entry_id == swap.entry_id:
+        raise ValidationError({'detail': 'La clase que se devuelve debe ser otra.'})
+    if swap.return_entry_id and not RosterEntry.objects.filter(pk=swap.return_entry_id, teacher_id=swap.to_teacher_id).exists():
+        raise ValidationError({'detail': 'La clase que se devuelve debe ser de quien cubre.'})
+    if Swap.objects.filter(entry_id=swap.entry_id, status=Swap.Status.PENDIENTE).exists():
+        raise ValidationError({'detail': 'Ya hay una permuta por confirmar para esa clase.'})
+
+
+def may_swap(request):
+    return is_coordinator(request) or has_role(request.user, {Role.DOCENTE})
+
+
+class SwapList(generics.GenericAPIView):
+    """Coordination sees every swap; a teacher only the ones that give or take one of their classes."""
+    permission_classes = [IsTeam]
+    def get(self, request):
+        start, end = date_range(request)
+        swaps = Swap.objects.filter(entry__date__range=(start, end)).select_related(*SWAP_RELATED).order_by('entry__date', 'entry__service__starts_at', 'created_at')
+        if not is_coordinator(request):
+            swaps = swaps.filter(Q(from_teacher=request.user) | Q(to_teacher=request.user))
+        if request.query_params.get('status') in Swap.Status.values:
+            swaps = swaps.filter(status=request.query_params['status'])
+        return Response({'results': [swap_row(s) for s in swaps]})
+    def post(self, request):
+        if not may_swap(request):
+            return Response({'detail': DENIED}, status=403)
+        data = SwapInput(data=request.data)
+        data.is_valid(raise_exception=True)
+        values = data.validated_data
+        coordinator = is_coordinator(request)
+        with transaction.atomic():
+            entry = RosterEntry.objects.select_for_update().filter(pk=values['entry']).first()
+            # A teacher only hands over their own classes; other people's classes are not disclosed.
+            if entry is None or (not coordinator and entry.teacher_id != request.user.id):
+                return Response({'detail': 'No encontrado.'}, status=404)
+            swap = Swap(entry=entry, return_entry_id=values.get('return_entry'), from_teacher_id=entry.teacher_id,
+                        to_teacher_id=values['to_teacher'], created_by=request.user)
+            check_swap(swap)
+            # Dry run: the same checks as the confirmation, rolled back, so problems show up now.
+            with transaction.atomic():
+                apply_swap(swap)
+                if not coordinator:
+                    transaction.set_rollback(True)
+            if coordinator:
+                swap.status, swap.decided_by, swap.decided_at = Swap.Status.CONFIRMADA, request.user, timezone.now()
+            swap.save()
+            audit(request.user, f'kids.swap.{"confirmada" if coordinator else "create"}', swap)
+        swap = Swap.objects.select_related(*SWAP_RELATED).get(pk=swap.pk)
+        return Response(swap_row(swap), status=201)
+
+
+class SwapDecision(generics.GenericAPIView):
+    permission_classes = [IsTeam]
+    target = ''
+    def post(self, request, pk):
+        coordinator = is_coordinator(request)
+        with transaction.atomic():
+            swap = get_object_or_404(Swap.objects.select_for_update(of=('self',)).select_related(*SWAP_RELATED), pk=pk)
+            if self.target == Swap.Status.CANCELADA:
+                # Either teacher can withdraw before coordination decides; nobody else learns it exists.
+                if not coordinator and request.user.id not in (swap.from_teacher_id, swap.to_teacher_id):
+                    return Response({'detail': 'No encontrado.'}, status=404)
+            elif not coordinator:
+                return Response({'detail': DENIED}, status=403)
+            if swap.status != Swap.Status.PENDIENTE:
+                raise ValidationError({'detail': 'La permuta ya no está por confirmar.'})
+            if self.target == Swap.Status.CONFIRMADA:
+                apply_swap(swap)
+            swap.status, swap.decided_by, swap.decided_at = self.target, request.user, timezone.now()
+            swap.save(update_fields=['status', 'decided_by', 'decided_at'])
+            audit(request.user, f'kids.swap.{self.target}', swap)
+        return Response(swap_row(swap))
+
+
+class SwapConfirm(SwapDecision):
+    target = Swap.Status.CONFIRMADA
+
+
+class SwapReject(SwapDecision):
+    target = Swap.Status.RECHAZADA
+
+
+class SwapCancel(SwapDecision):
+    target = Swap.Status.CANCELADA
+
+
+class SwapOptions(generics.GenericAPIView):
+    """Who can cover a class and, for an exchange, that person's upcoming classes. Names and classes only."""
+    permission_classes = [IsTeam]
+    def get(self, request):
+        if not may_swap(request):
+            return Response({'detail': DENIED}, status=403)
+        people = teachers().select_related('profile')
+        result = {'teachers': sorted(({'id': str(t.id), 'displayName': display_name(t)} for t in people if t.id != request.user.id),
+                                     key=lambda t: t['displayName'].casefold())}
+        teacher = request.query_params.get('teacher')
+        if teacher:
+            try:
+                teacher = serializers.UUIDField().run_validation(teacher)
+            except ValidationError:
+                raise ValidationError({'detail': 'Docente no válido.'})
+            if not people.filter(pk=teacher).exists():
+                raise ValidationError({'detail': 'La persona no tiene el perfil Docente.'})
+            start = today()
+            classes = RosterEntry.objects.filter(teacher_id=teacher, date__range=(start, start + timedelta(days=AGENDA_DAYS))).select_related('service', 'group').order_by('date', 'service__starts_at')
+            result['classes'] = [class_summary(c) for c in classes]
+        return Response(result)
+
+
 # ---------- Maestros y equipo ----------
 
 class TeamList(generics.GenericAPIView):
@@ -479,18 +702,24 @@ class Agenda(generics.GenericAPIView):
         end = start + timedelta(days=AGENDA_DAYS)
         entries = list(RosterEntry.objects.filter(teacher=request.user, date__range=(start, end)).select_related('service', 'group').order_by('date', 'service__starts_at'))
         lessons = {(l.group_id, l.date): l for l in Lesson.objects.filter(date__range=(start, end), group__in={e.group_id for e in entries})}
+        leads = {(l.group_id, l.date): l for l in DayLead.objects.filter(date__range=(start, end)).select_related('group', 'lead__profile')}
+        pending = set(Swap.objects.filter(entry__in=entries, status=Swap.Status.PENDIENTE).values_list('entry_id', flat=True))
         classes = []
         for entry in entries:
             lesson = lessons.get((entry.group_id, entry.date))
+            lead = leads.get((entry.group_id, entry.date))
             classes.append({
                 'id': str(entry.id), 'date': entry.date.isoformat(), 'service': entry.service.name,
                 'starts_at': entry.service.starts_at.strftime('%H:%M'), 'ends_at': entry.service.ends_at.strftime('%H:%M'),
                 'group': entry.group.name, 'min_age': entry.group.min_age, 'max_age': entry.group.max_age,
                 'lesson': {'unit': lesson.unit, 'title': lesson.title, 'manual_page': lesson.manual_page,
                            'objective': lesson.objective, 'materials': lesson.materials} if lesson else None,
+                'lead': display_name(lead.lead) if lead else None, 'swapPending': entry.id in pending,
             })
+        own_leads = [{'id': str(l.id), 'date': l.date.isoformat(), 'group': l.group.name}
+                     for l in sorted(leads.values(), key=lambda l: (l.date, l.group.name)) if l.lead_id == request.user.id]
         items = EventItem.objects.filter(assignee=request.user, event__active=True).exclude(status=EventItem.Status.COMPLETADA).select_related('event').order_by('due_date', 'event__date')
-        return Response({'classes': classes, 'items': [{**item_row(i), 'eventTitle': i.event.title, 'eventDate': i.event.date.isoformat()} for i in items]})
+        return Response({'classes': classes, 'leads': own_leads, 'items': [{**item_row(i), 'eventTitle': i.event.title, 'eventDate': i.event.date.isoformat()} for i in items]})
 
 
 # ---------- Bitácora ----------
@@ -507,11 +736,11 @@ class AuditLog(generics.GenericAPIView):
 
 REMINDER = ('Recordatorio: tienes clase en Shalom Kids', """¡Hola, {name}!
 
-Te recordamos tu clase en Shalom Kids:
+Te recordamos tus próximos turnos en Shalom Kids:
 
 {classes}
 
-Si no puedes asistir, avisa a coordinación lo antes posible.
+Si no puedes asistir, registra una permuta en «Mi agenda» o avisa a coordinación lo antes posible.
 
 ¡Gracias por servir!
 Equipo de Shalom Kids
@@ -519,23 +748,33 @@ Equipo de Shalom Kids
 
 
 def send_reminders():
-    """Queue one email per teacher for classes up to REMINDER_DAYS ahead that have no reminder yet."""
+    """Queue one email per teacher for classes and days in charge up to REMINDER_DAYS ahead with no reminder yet."""
     start = today()
+    window = (start, start + timedelta(days=REMINDER_DAYS))
     with transaction.atomic():
-        due = list(RosterEntry.objects.select_for_update(skip_locked=True, of=('self',))
-                   .filter(date__range=(start, start + timedelta(days=REMINDER_DAYS)), reminded_at__isnull=True, teacher__in=teachers())
-                   .select_related('service', 'group', 'teacher__profile').order_by('date', 'service__starts_at'))
+        entries = list(RosterEntry.objects.select_for_update(skip_locked=True, of=('self',))
+                       .filter(date__range=window, reminded_at__isnull=True, teacher__in=teachers())
+                       .select_related('service', 'group', 'teacher__profile').order_by('date', 'service__starts_at'))
+        leads = list(DayLead.objects.select_for_update(skip_locked=True, of=('self',))
+                     .filter(date__range=window, reminded_at__isnull=True, lead__in=teachers())
+                     .select_related('group', 'lead__profile').order_by('date', 'group__name'))
         by_teacher = {}
-        for entry in due:
-            by_teacher.setdefault(entry.teacher_id, []).append(entry)
+        for entry in entries:
+            by_teacher.setdefault(entry.teacher_id, ([], []))[0].append(entry)
+        for lead in leads:
+            by_teacher.setdefault(lead.lead_id, ([], []))[1].append(lead)
         sent = skipped = 0
-        for teacher_id, entries in by_teacher.items():
+        for teacher_id, (own_entries, own_leads) in by_teacher.items():
             address = EmailIdentity.objects.filter(user_id=teacher_id).order_by('-verified_at').values_list('email', flat=True).first()
             if not address:
-                skipped += len(entries)
+                skipped += len(own_entries) + len(own_leads)
                 continue
-            lines = '\n'.join(f'• {e.date.strftime("%d/%m/%Y")} · {e.service.name} ({e.service.starts_at.strftime("%H:%M")}) · {e.group.name}' for e in entries)
-            send_after_commit('class_reminder', address, REMINDER, retry=True, name=display_name(entries[0].teacher), classes=lines)
-            RosterEntry.objects.filter(pk__in=[e.pk for e in entries]).update(reminded_at=timezone.now())
-            sent += len(entries)
+            lines = [f'• {e.date.strftime("%d/%m/%Y")} · {e.service.name} ({e.service.starts_at.strftime("%H:%M")}) · {e.group.name}' for e in own_entries]
+            lines += [f'• {l.date.strftime("%d/%m/%Y")} · Encargado(a) del día · {l.group.name}' for l in own_leads]
+            person = (own_entries[0].teacher if own_entries else own_leads[0].lead)
+            send_after_commit('class_reminder', address, REMINDER, retry=True, name=display_name(person), classes='\n'.join(lines))
+            now = timezone.now()
+            RosterEntry.objects.filter(pk__in=[e.pk for e in own_entries]).update(reminded_at=now)
+            DayLead.objects.filter(pk__in=[l.pk for l in own_leads]).update(reminded_at=now)
+            sent += len(own_entries) + len(own_leads)
     return {'reminded': sent, 'without_email': skipped}
