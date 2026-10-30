@@ -153,6 +153,9 @@ async function axe(page, label) {
       assert.equal(await page.getByRole("button", { name: "Administración" }).count(), 0);
       await page.getByRole("button", { name: "Generar mi clave" }).click();
       const secret = await page.getByLabel("Clave de configuración").innerText();
+      const qr = page.getByRole("img", { name: /Código QR/ });
+      assert.ok(await qr.evaluate(img => img.complete && img.naturalWidth > 0), "el QR se dibuja");
+      if (shots) await page.screenshot({ path: path.join(shots, "mfa-qr-360.png"), fullPage: true });
       await axe(page, "Verificación en dos pasos");
       await page.getByLabel("Código de 6 dígitos").fill("000000" === totp(secret) ? "111111" : "000000");
       await page.getByRole("button", { name: "Activar" }).click();
@@ -161,6 +164,7 @@ async function axe(page, label) {
       await page.getByRole("button", { name: "Activar" }).click();
       await page.getByRole("heading", { name: /^Hola,/ }).waitFor();
       assert.ok(!(await page.innerText("body")).includes(secret), "la clave desaparece al confirmar");
+      assert.equal(await page.getByRole("img", { name: /Código QR/ }).count(), 0, "el QR desaparece al confirmar");
     });
 
     await check("administración asigna perfiles e invita", async () => {

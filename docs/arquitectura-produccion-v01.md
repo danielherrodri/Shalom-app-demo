@@ -123,7 +123,7 @@ No incluye comisiones de Mercado Pago, impuestos, desarrollo ni soporte.
 Se extiende el [plan v1](plan-v1-kids.md). Cada fase es un PR con pruebas y datos ficticios:
 
 1. ✅ **Administración de perfiles e invitaciones.**
-2. **Acceso:** enlace por correo, consentimientos y verificación en dos pasos (en curso); Google cuando haya credenciales.
+2. ✅ **Acceso:** enlace por correo, consentimientos, verificación en dos pasos con QR y límites compartidos entre instancias; Google cuando haya credenciales.
 3. **Infraestructura:** Dockerfile, despliegue a Cloud Run y Cloud SQL de *staging*, Secret Manager, cola de correo con Scheduler, Firebase Hosting en un subdominio de pruebas y CI que despliega a staging.
 4. **Datos de Kids** (tras la evaluación de impacto y el abogado): familias, tutores, niños, salud cifrada, autorizados e imagen.
 5. **Operación de Kids:** reservas, Recepción con QR y gafetes, salida validada, Mi grupo hoy, Mis hijos, avisos de entrada y salida por correo, Seguimiento.

@@ -178,3 +178,10 @@ class TotpDevice(models.Model):
     last_step = models.BigIntegerField(default=0)
     failures = models.PositiveSmallIntegerField(default=0)
     locked_until = models.DateTimeField(null=True, blank=True)
+
+
+class RateCounter(models.Model):
+    # Fixed-window counter keyed by scope and a hash; never stores an address in clear.
+    key = models.CharField(max_length=100, primary_key=True)
+    window_start = models.DateTimeField()
+    hits = models.PositiveIntegerField()
