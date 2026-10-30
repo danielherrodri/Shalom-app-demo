@@ -1,3 +1,4 @@
+import json
 import logging
 from datetime import timedelta
 from cryptography.fernet import InvalidToken
@@ -6,6 +7,7 @@ from django.core.mail import send_mail
 from django.db import transaction
 from django.utils import timezone
 from .crypto import seal, unseal
+from .email_layout import Email, render
 from .models import OutboundEmail
 
 logger = logging.getLogger(__name__)
@@ -19,22 +21,17 @@ RETRY_WINDOW = timedelta(hours=24)
 # if the instance dies mid-attempt, the next run after this picks it up.
 CLAIM = timedelta(minutes=2)
 
-# Draft wording (docs/legal/textos-cuentas-borrador.md, text 6); pending legal review.
-INVITATION = ('Tu invitación a Shalom', """¡Hola!
-
-Te invitamos a formar parte de Shalom App, nuestro espacio digital para la comunidad de la iglesia. Con tu cuenta podrás acceder a las funciones disponibles para ti.
-
-Para comenzar, utiliza este enlace: {link}
-
-El enlace es de un solo uso y vence en 7 días.
-
-Crear tu cuenta es voluntario. Antes de activarla, podrás consultar nuestro Aviso de Privacidad y decidir si otorgas tu consentimiento.
-
-Si no solicitaste esta invitación, puedes ignorar el mensaje.
-
-¡Bendiciones!
-Equipo de Shalom
-""")
+# Draft wording (docs/legal/textos-cuentas-borrador.md, text 6), unchanged inside the design; pending legal review.
+INVITATION = Email(
+    subject='Tu invitación a Shalom', theme='shalom', eyebrow='INVITACIÓN · SHALOM', title='¡Hola!',
+    intro='Te invitamos a formar parte de Shalom App, nuestro espacio digital para la comunidad de la iglesia. Con tu cuenta podrás acceder a las funciones disponibles para ti.',
+    blocks=(('Para comenzar', 'Utiliza el enlace de este correo. El enlace es de un solo uso y vence en 7 días.'),
+            ('Es tu decisión', 'Crear tu cuenta es voluntario. Antes de activarla, podrás consultar nuestro Aviso de Privacidad y decidir si otorgas tu consentimiento.')),
+    cta='Comenzar', cta_url='link', show_url=True,
+    note='Si no solicitaste esta invitación, puedes ignorar el mensaje.',
+    closing='¡Bendiciones!\nEquipo de Shalom',
+    reason='Recibes este correo porque administración de Shalom envió una invitación a esta dirección.',
+)
 
 
 def send_after_commit(kind, recipient, template, retry=False, reference=None, **values):
@@ -43,13 +40,23 @@ def send_after_commit(kind, recipient, template, retry=False, reference=None, **
     Without retry, a failure is final and no body is stored. With retry, the body is kept sealed
     and the queue (drain) tries again until MAX_ATTEMPTS or RETRY_WINDOW.
     """
-    subject, body = template
-    text = body.format(**values)
+    subject, text, html = render(template, **values)
     now = timezone.now()
-    pending = {'sealed_body': seal(text), 'retry_until': now + RETRY_WINDOW, 'next_attempt_at': now + CLAIM} if retry else {}
+    body = json.dumps({'text': text, 'html': html})
+    pending = {'sealed_body': seal(body), 'retry_until': now + RETRY_WINDOW, 'next_attempt_at': now + CLAIM} if retry else {}
     record = OutboundEmail.objects.create(kind=kind, recipient=recipient, subject=subject, reference=reference, **pending)
-    transaction.on_commit(lambda: attempt(record, text))
+    transaction.on_commit(lambda: attempt(record, text, html))
     return record
+
+
+def unpack(sealed):
+    """Text and HTML of a sealed body; bodies queued before the HTML design hold only text."""
+    body = unseal(sealed)
+    try:
+        parts = json.loads(body)
+    except ValueError:
+        return body, None
+    return (parts['text'], parts['html']) if isinstance(parts, dict) else (body, None)
 
 
 def open_records():
@@ -60,10 +67,11 @@ def close(record, **outcome):
     open_records().filter(pk=record.pk).update(attempts=record.attempts, sealed_body='', next_attempt_at=None, **outcome)
 
 
-def attempt(record, text):
+def attempt(record, text, html=None):
     record.attempts += 1
     try:
-        send_mail(record.subject, text, settings.DEFAULT_FROM_EMAIL, [record.recipient])
+        # multipart/alternative: the text part first, the design's HTML as the preferred part.
+        send_mail(record.subject, text, settings.DEFAULT_FROM_EMAIL, [record.recipient], html_message=html)
     except Exception:
         logger.warning('email delivery failed', extra={'email_id': str(record.pk), 'kind': record.kind, 'attempt': record.attempts})
         if record.sealed_body and record.attempts < MAX_ATTEMPTS:
@@ -96,22 +104,21 @@ def drain(limit=50):
     sent = 0
     for record in due:
         try:
-            text = unseal(record.sealed_body)
+            text, html = unpack(record.sealed_body)
         except InvalidToken:
             # Sealed with a key that is no longer configured: it can never be sent.
             close(record, failed=True)
             continue
-        sent += attempt(record, text)
+        sent += attempt(record, text, html)
     return {'due': len(due), 'sent': sent, 'expired': expired}
 
 
-LOGIN_LINK = ('Tu enlace para entrar a Shalom', """¡Hola!
-
-Usa este enlace para entrar a Shalom: {link}
-
-Es de un solo uso y vence en 15 minutos.
-
-Si no lo pediste, puedes ignorar este mensaje: nadie puede entrar sin abrirlo.
-
-Equipo de Shalom
-""")
+LOGIN_LINK = Email(
+    subject='Tu enlace para entrar a Shalom', theme='shalom', eyebrow='ACCESO · SHALOM', title='Tu enlace para entrar.',
+    intro='¡Hola! Usa el botón para entrar a Shalom.',
+    blocks=(('Es de un solo uso', 'Vence en 15 minutos.'),),
+    cta='Entrar a Shalom', cta_url='link', show_url=True,
+    note='Si no lo pediste, puedes ignorar este mensaje: nadie puede entrar sin abrirlo.',
+    closing='Equipo de Shalom',
+    reason='Recibes este correo porque se pidió un enlace de acceso para esta dirección.',
+)

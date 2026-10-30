@@ -53,3 +53,7 @@ Estado: implementado en backend e interfaz, con datos ficticios. Configuración 
 ## 2026-10-30 · Permutas y encargado(a) del día
 
 Estado: implementado en backend e interfaz, con datos ficticios. La docente cede una clase propia (o la intercambia por una clase próxima de quien cubre) y el rol no cambia hasta que Coordinación confirma; al confirmar se repiten en el servidor las validaciones del rol (perfil, fecha, traslapes y cupo, con los mismos bloqueos) y se reinicia el recordatorio. Se descartó aplicar la permuta en cuanto la registra la docente: Coordinación debe saber quién da cada clase. No se guarda motivo escrito para no recolectar datos de salud. Encargado(a) del día: una docente por grupo y fecha, incluida en el recordatorio de 2 días antes. Ver [plan](plan-v1-kids.md).
+
+## 2026-10-30 · Correos del servidor con el diseño de Shalom
+
+Estado: implementado. Acceso, invitación, recordatorio de Kids y los nuevos avisos de permuta (confirmada a ambas docentes, rechazada a quien la registró) se envían con texto plano y el HTML de las plantillas de `emails/`, generados desde una sola estructura. Se quitaron de las plantillas lo que era de demostración (franja «sin envío», fuente web local, enlaces de preferencias y privacidad del prototipo). El logo se sirve desde el dominio de la app; no hay seguimiento. Los botones solo pueden llevar a la app. Pendiente: pruebas de entrega en clientes de correo reales. Ver [plan](plan-v1-kids.md).

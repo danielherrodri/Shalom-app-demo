@@ -2,6 +2,7 @@ import json
 import secrets
 import time
 from datetime import timedelta
+from django.conf import settings
 from django.test import TestCase, TransactionTestCase, Client, override_settings
 from django.utils import timezone
 from .models import User, Family, Person, Group, Assignment, Enrollment, Meeting, Attendance, AuditEvent
@@ -796,7 +797,7 @@ class EmailQueueTests(TestCase):
     def queue(self, kind='invitation', retry=True, token='token-sintetico-123'):
         from .emails import INVITATION, send_after_commit
         with self.captureOnCommitCallbacks(execute=True):
-            send_after_commit(kind, 'cola@example.invalid', INVITATION, retry=retry, link=f'https://pruebas.example.invalid/invitacion#{token}')
+            send_after_commit(kind, 'cola@example.invalid', INVITATION, retry=retry, link=f'{settings.PUBLIC_APP_URL}/invitacion#{token}')
         from .models import OutboundEmail
         return OutboundEmail.objects.get()
 
@@ -827,6 +828,48 @@ class EmailQueueTests(TestCase):
             record = self.queue()
         self.assertNotIn('token-sintetico-123', str(type(record).objects.values().get()))
         self.assertIn('token-sintetico-123', unseal(record.sealed_body))
+
+    def test_message_carries_the_design_and_its_text(self):
+        from django.core import mail
+        self.queue()
+        message = mail.outbox[-1]
+        html, kind = message.alternatives[0]
+        self.assertEqual(kind, 'text/html')
+        link = f'{settings.PUBLIC_APP_URL}/invitacion#token-sintetico-123'
+        self.assertIn(link, message.body)
+        self.assertIn(f'href="{link}"', html)
+        self.assertIn(f'{settings.PUBLIC_APP_URL}/correo/shalom-logo.png', html)
+        self.assertIn('max-width:600px', html)
+        self.assertIn('v:roundrect', html)
+        # The draft wording for the invitation is kept as written.
+        self.assertIn('Crear tu cuenta es voluntario.', message.body)
+        self.assertNotIn('<script', html)
+
+    def test_body_queued_before_the_design_is_still_sent_as_text(self):
+        from django.core import mail
+        from .crypto import seal
+        from .emails import drain
+        from .models import OutboundEmail
+        due = timezone.now() - timedelta(seconds=1)
+        OutboundEmail.objects.create(kind='invitation', recipient='cola@example.invalid', subject='Prueba', sealed_body=seal('cuerpo sintético'),
+                                     next_attempt_at=due, retry_until=due + timedelta(hours=1))
+        self.assertEqual(drain()['sent'], 1)
+        self.assertEqual((mail.outbox[-1].body, mail.outbox[-1].alternatives), ('cuerpo sintético', []))
+
+    def test_links_outside_the_app_are_refused(self):
+        from .emails import INVITATION, send_after_commit
+        with self.assertRaises(ValueError):
+            send_after_commit('invitation', 'cola@example.invalid', INVITATION, link='https://otro.example.invalid/invitacion#x')
+        with self.assertRaises(ValueError):
+            send_after_commit('invitation', 'cola@example.invalid', INVITATION, link=f'{settings.PUBLIC_APP_URL}.otro.example.invalid/x')
+
+    def test_values_are_escaped_in_the_html(self):
+        from .email_layout import render
+        from .kids import REMINDER
+        subject, text, html = render(REMINDER, name='<b>Ficticia</b>', classes='• 01/11/2026 · <i>grupo</i>', app=f'{settings.PUBLIC_APP_URL}/')
+        self.assertIn('&lt;b&gt;Ficticia&lt;/b&gt;', html)
+        self.assertNotIn('<b>Ficticia', html)
+        self.assertIn('<b>Ficticia</b>', text)
 
     def test_retry_waits_then_delivers_and_erases_body(self):
         from django.core import mail
@@ -871,7 +914,7 @@ class EmailQueueTests(TestCase):
         from django.core import mail
         from .emails import INVITATION, drain, send_after_commit
         # The instance died before the on-commit attempt ran.
-        record = send_after_commit('invitation', 'cola@example.invalid', INVITATION, retry=True, link='https://pruebas.example.invalid/x')
+        record = send_after_commit('invitation', 'cola@example.invalid', INVITATION, retry=True, link=f'{settings.PUBLIC_APP_URL}/x')
         self.assertEqual(drain()['due'], 0)
         self.make_due()
         self.assertEqual(drain()['sent'], 1)
@@ -904,7 +947,7 @@ class EmailQueueConcurrencyTests(TransactionTestCase):
             OutboundEmail.objects.create(kind='invitation', recipient=f'cola{number}@example.invalid', subject='Prueba',
                                          sealed_body=seal('cuerpo sintético'), next_attempt_at=due, retry_until=due + timedelta(hours=1))
         sent, lock = [], threading.Lock()
-        def slow_send(subject, body, sender, recipients):
+        def slow_send(subject, body, sender, recipients, **options):
             time.sleep(0.05)
             with lock:
                 sent.extend(recipients)
