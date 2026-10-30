@@ -8,7 +8,7 @@ from django.conf import settings
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST
-from . import emails, limits
+from . import emails, kids, limits
 
 GOOGLE_CERTS = 'https://www.googleapis.com/oauth2/v3/certs'
 GOOGLE_ISSUERS = ('https://accounts.google.com', 'accounts.google.com')
@@ -74,4 +74,4 @@ def scheduler_task(task):
 
 
 drain_email = scheduler_task(emails.drain)
-daily = scheduler_task(lambda: {'counters': limits.purge_expired(), 'expired_email': emails.expire()})
+daily = scheduler_task(lambda: {'counters': limits.purge_expired(), 'expired_email': emails.expire(), **kids.send_reminders()})
