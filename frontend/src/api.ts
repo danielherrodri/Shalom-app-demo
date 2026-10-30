@@ -33,11 +33,11 @@ async function freshCsrf() {
   csrf = (await response.json()).csrfToken;
 }
 
-export async function request<T = any>(path: string, data?: unknown): Promise<T> {
+export async function request<T = any>(path: string, data?: unknown, method: 'POST' | 'PATCH' | 'DELETE' = 'POST'): Promise<T> {
   const post = data !== undefined;
   if (post && !csrf) await freshCsrf();
   const response = await fetch('/api/v1/' + path, {
-    method: post ? 'POST' : 'GET', credentials: 'same-origin', cache: 'no-store',
+    method: post ? method : 'GET', credentials: 'same-origin', cache: 'no-store',
     headers: post ? { 'Content-Type': 'application/json', 'X-CSRFToken': csrf } : {},
     body: post ? JSON.stringify(data) : undefined,
   });
@@ -60,6 +60,17 @@ export async function all<T>(path: string): Promise<T[]> {
     rows.push(...result.results);
     if (!result.next) return rows;
   }
+}
+
+/** Local calendar date as YYYY-MM-DD, without the UTC shift of toISOString. */
+export function localDate(date = new Date()): string {
+  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+}
+
+/** Shows a YYYY-MM-DD date in Spanish without moving it to another day. */
+export function showDate(value: string, options: Intl.DateTimeFormatOptions = { weekday: 'short', day: 'numeric', month: 'short' }): string {
+  const [y, m, d] = value.split('-').map(Number);
+  return new Date(y, m - 1, d).toLocaleDateString('es-MX', options);
 }
 
 /** Takes a single-use token from the URL fragment and removes it from the address bar and history. */

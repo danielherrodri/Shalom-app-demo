@@ -980,7 +980,7 @@ class SchedulerEndpointTests(TestCase):
         over_limit('prueba-diaria', 5, timedelta(minutes=1))
         RateCounter.objects.update(window_start=timezone.now() - timedelta(hours=1))
         response = self.call(self.token(), path='/internal/daily/')
-        self.assertEqual(response.json(), {'counters': 1, 'expired_email': 0})
+        self.assertEqual(response.json(), {'counters': 1, 'expired_email': 0, 'reminded': 0, 'without_email': 0})
 
     def test_rejected_tokens(self):
         from cryptography.hazmat.primitives import serialization

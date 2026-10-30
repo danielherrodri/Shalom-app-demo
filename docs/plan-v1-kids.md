@@ -1,6 +1,6 @@
 # Plan de la versión 1 · Administración, correos y Shalom Kids
 
-**Fecha:** 28 de octubre de 2026 · **Estado:** alcance aceptado; fases 1 y 2 cerradas en código, con su interfaz React. Infraestructura lista en código y scripts; falta que la iglesia cree los recursos de staging.
+**Fecha:** 28 de octubre de 2026 · **Estado:** alcance aceptado; fases 1 y 2 cerradas en código, con su interfaz React. Infraestructura lista en código y scripts; falta que la iglesia cree los recursos de staging. Coordinación Kids (solo datos de adultos) implementada con su interfaz.
 
 ## Alcance
 
@@ -73,6 +73,23 @@ Detalle, pasos y fuentes en [infraestructura de staging](infraestructura-staging
 - **Scripts:** `infra/staging/01…07`, en simulación por omisión (`APLICAR=1` ejecuta). Secretos generados o leídos del teclado directo a Secret Manager.
 - **CI:** `deploy-staging.yml` despliega tras «Security and backend» en `main`, con Workload Identity Federation y el entorno protegido `staging`; sin variables no corre. `security.yml` agrega la construcción de la imagen con `check --deploy`, la simulación de los scripts y `tests/hosting-staging.cjs`.
 - **Pendiente:** crear los recursos, confirmar en staging el número de proxies y el host que envía Hosting, procedimiento de rotación de la llave de campos y retención de `OutboundEmail` y `LoginLink`.
+
+## Coordinación Kids · Uso (solo datos de adultos)
+
+El sistema vigente (Apps Script y Sheets) sigue siendo la fuente de verdad: este módulo no lo lee ni escribe en él, no hay doble captura ni sincronización. Se usa con datos ficticios en desarrollo y staging, y en el piloto según la fase de corte.
+
+- **Perfiles:** Coordinación Kids (privilegiado: lo confirma otra persona de administración y exige el segundo factor) administra todo; Docente, Voluntario y Preparación forman el equipo Kids. Administración, por sí sola, no ve Coordinación Kids. Cada permiso se decide en el servidor por petición y por registro (`core/kids.py`).
+- **Configuración** (`kids/groups/`, `kids/services/`): grupos con nombre, rango de edad (0 a 17) y docentes por clase; servicios con día, inicio y fin. No se borran, se desactivan. Ningún niño se registra aquí.
+- **Rol de clases** (`kids/roster/`): fecha, servicio, grupo y docente. El servidor exige el perfil Docente vigente, un servicio de ese día de la semana, una fecha no pasada, que la persona no tenga otra clase que se traslape y que la clase no supere su cupo; bloquea a la docente y al grupo para que dos asignaciones simultáneas no rebasen el cupo. Consultas de 120 días como máximo.
+- **Recordatorio:** la tarea diaria (`internal/daily/`) envía un correo por docente con sus clases de los próximos 2 días que no se le hayan recordado, por la cola con reintentos y al correo verificado de su cuenta. Si cambian la fecha o la docente, se vuelve a recordar.
+- **Maestros** (`kids/team/`): equipo Kids con sus perfiles, número de clases próximas, siguiente fecha y grupos. Sin teléfonos ni correos. Para sumar a alguien, Administración invita con el perfil Docente.
+- **Lecciones** (`kids/lessons/`): una por grupo y fecha, con unidad, título, página del manual, objetivo y materiales. Coordinación escribe; el equipo consulta.
+- **Eventos Kids** (`kids/events/`, `kids/items/`): tareas y materiales con responsable del equipo, fecha límite, cantidad y recibidos. Asignar no equivale a aceptar: la persona acepta y luego completa en «Mi agenda»; si se reasigna, vuelve a quedar pendiente. Un evento archivado congela sus tareas.
+- **Mi agenda docente** (`kids/agenda/`): solo las clases propias de las próximas 8 semanas con su lección, y las tareas propias pendientes.
+- **Bitácora** (`kids/audit/`): cada alta, cambio, baja, aceptación y cierre queda en `AuditEvent` con quién y cuándo; Coordinación consulta los últimos 200.
+- **Errores:** la API responde un solo mensaje legible por error de validación (`core/errors.py`).
+- **Pruebas:** `core/tests_kids.py` (permisos por perfil, segundo factor, reglas del rol, cupo con asignaciones simultáneas, recordatorios, bitácora y que ningún nombre de niño aparezca en las respuestas) y `tests/coordinacion-react.cjs` (recorrido completo a 360 px con axe; corre en CI).
+- **Fuera de alcance:** reportes de asistencia con nombres de niños y cualquier dato de menores (fase Datos Kids). **Pendiente:** permutas registradas por docentes, encargado(a) del día y que «Mi clase de hoy» use el rol en lugar de las asignaciones actuales (fase Operación Kids).
 
 ## Interfaz de las fases 1 y 2 (Fase 6, en curso)
 

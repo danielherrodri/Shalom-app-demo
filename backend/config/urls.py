@@ -1,5 +1,5 @@
 from django.urls import path
-from core import access, views, admin_api, internal
+from core import access, views, admin_api, internal, kids
 
 urlpatterns = [
     path('api/v1/auth/csrf/', views.csrf_token),
@@ -28,6 +28,23 @@ urlpatterns = [
     path('api/v1/admin/grants/<uuid:pk>/revoke/', admin_api.GrantRevoke.as_view()),
     path('api/v1/admin/invitations/', admin_api.InvitationList.as_view()),
     path('api/v1/admin/invitations/<uuid:pk>/revoke/', admin_api.InvitationRevoke.as_view()),
+    path('api/v1/kids/groups/', kids.GroupList.as_view()),
+    path('api/v1/kids/groups/<uuid:pk>/', kids.GroupDetail.as_view()),
+    path('api/v1/kids/services/', kids.ServiceList.as_view()),
+    path('api/v1/kids/services/<uuid:pk>/', kids.ServiceDetail.as_view()),
+    path('api/v1/kids/team/', kids.TeamList.as_view()),
+    path('api/v1/kids/roster/', kids.RosterList.as_view()),
+    path('api/v1/kids/roster/<uuid:pk>/', kids.RosterDetail.as_view()),
+    path('api/v1/kids/lessons/', kids.LessonList.as_view()),
+    path('api/v1/kids/lessons/<uuid:pk>/', kids.LessonDetail.as_view()),
+    path('api/v1/kids/events/', kids.EventList.as_view()),
+    path('api/v1/kids/events/<uuid:pk>/', kids.EventDetail.as_view()),
+    path('api/v1/kids/events/<uuid:pk>/items/', kids.ItemCreate.as_view()),
+    path('api/v1/kids/items/<uuid:pk>/', kids.ItemDetail.as_view()),
+    path('api/v1/kids/items/<uuid:pk>/accept/', kids.ItemAccept.as_view()),
+    path('api/v1/kids/items/<uuid:pk>/complete/', kids.ItemComplete.as_view()),
+    path('api/v1/kids/agenda/', kids.Agenda.as_view()),
+    path('api/v1/kids/audit/', kids.AuditLog.as_view()),
     # Called directly on the Cloud Run URL by Cloud Scheduler; Firebase Hosting only forwards /api/.
     path('internal/email/drain/', internal.drain_email),
     path('internal/daily/', internal.daily),
