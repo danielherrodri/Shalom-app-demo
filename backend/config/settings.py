@@ -67,6 +67,7 @@ REST_FRAMEWORK = {
     'DEFAULT_RENDERER_CLASSES': ['rest_framework.renderers.JSONRenderer'],
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
     'PAGE_SIZE': 25,
+    'EXCEPTION_HANDLER': 'core.errors.exception_handler',
 }
 # Firebase Hosting strips every cookie except __session before reaching Cloud Run, so the session
 # uses that name and the CSRF token lives inside it (the frontend reads it from auth/csrf/).
