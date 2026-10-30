@@ -1,6 +1,6 @@
 # Plan de la versión 1 · Administración, correos y Shalom Kids
 
-**Fecha:** 28 de octubre de 2026 · **Estado:** alcance aceptado; fases 1 y 2 cerradas en código, con su interfaz React.
+**Fecha:** 28 de octubre de 2026 · **Estado:** alcance aceptado; fases 1 y 2 cerradas en código, con su interfaz React. Infraestructura lista en código y scripts; falta que la iglesia cree los recursos de staging.
 
 ## Alcance
 
@@ -58,9 +58,21 @@ Antes de la Fase 7: aviso publicado, persona de datos personales designada y con
 - **Sesiones:** dispositivo personal 30 minutos de inactividad y 12 horas absolutas; el acceso local de desarrollo (equipo compartido de Kids) conserva 5 minutos y 8 horas. `auth/logout-everywhere/` cierra todas las sesiones de la cuenta; las sesiones sin versión vigente se cierran.
 - **Google OpenID Connect:** apagado (`GOOGLE_OIDC_ENABLED = False`; `auth/providers/` lo informa) hasta tener el proyecto de Google Cloud y sus credenciales.
 - **Límite por origen compartido (30 oct 2026):** el contador vive en PostgreSQL (`RateCounter`) con un incremento atómico (`INSERT … ON CONFLICT`), así que todas las instancias de Cloud Run cuentan juntas sin pagar Memorystore. Solo se guarda el hash del origen; IPv6 se agrupa por /64 y los valores mal formados comparten un mismo contador. `limits.purge_expired()` borra las ventanas vencidas; la tarea diaria de la fase de Infraestructura lo llamará.
-- **IP del cliente detrás del balanceador:** `SHALOM_CLIENT_IP_HEADER` (por ejemplo `X-Forwarded-For`) y `SHALOM_TRUSTED_PROXY_COUNT` (cuántos proxies agregan su salto al encabezado; se toma la entrada N contando desde la derecha). Sin configurar se usa `REMOTE_ADDR` y un `X-Forwarded-For` falsificado se ignora; si el encabezado trae menos saltos de los esperados, también. Valor esperado: 1 con Cloud Run directo y 2 con Firebase Hosting delante, **por confirmar en staging**. Riesgo conocido: quien llame directo a la URL `run.app` puede rotar el valor más a la izquierda y eludir el límite por origen (el límite por correo sigue vigente); se revisa en Infraestructura.
+- **IP del cliente detrás del balanceador:** `SHALOM_CLIENT_IP_HEADER` (por ejemplo `X-Forwarded-For`) y `SHALOM_TRUSTED_PROXY_COUNT` (cuántos proxies agregan su salto al encabezado; se toma la entrada N contando desde la derecha). Sin configurar se usa `REMOTE_ADDR` y un `X-Forwarded-For` falsificado se ignora; si el encabezado trae menos saltos de los esperados, también. Valor esperado: 1 con Cloud Run directo y 2 con Firebase Hosting delante, **por confirmar en staging**. Riesgo conocido: quien llame directo a la URL `run.app` puede rotar el valor más a la izquierda y eludir el límite por origen (el límite por correo sigue vigente). Revisado en Infraestructura: con Firebase Hosting delante no se puede cerrar `run.app`; la solución es un balanceador ([staging](infraestructura-staging.md)).
 - **`CSRF_TRUSTED_ORIGINS`:** siempre incluye el origen de `SHALOM_PUBLIC_APP_URL`; `DJANGO_CSRF_TRUSTED_ORIGINS` agrega otros (separados por coma). Fuera de desarrollo cada uno debe ser `https://host[:puerto]`, sin comodines, rutas ni usuario; si no, Django no arranca. Detrás de Firebase Hosting el `Origin` del navegador es el dominio público y no el host que ve Django, por eso hace falta.
-- La cola de correo con Cloud Scheduler es de la fase de Infraestructura.
+
+## Infraestructura · Uso
+
+Detalle, pasos y fuentes en [infraestructura de staging](infraestructura-staging.md).
+
+- **Región:** Firebase Hosting no reenvía a Cloud Run en Querétaro y Cloud Scheduler no existe ahí; staging va completo en `us-central1`. Producción: `us-central1` igual, o Querétaro con balanceador en lugar de Hosting (decisión de la iglesia).
+- **Contenedor:** `backend/Dockerfile` (Python 3.13 slim fijado por digest, usuario 10001, Gunicorn sin registro de accesos). Migraciones en un Cloud Run Job, antes de cada despliegue. `backend/.env.example` lista las variables, sin valores reales.
+- **Settings de producción:** cookie `__session` y CSRF dentro de la sesión (Hosting borra las demás cookies), `SECURE_PROXY_SSL_HEADER`, Cloud SQL por socket `/cloudsql/` y TLS verificado por TCP, registros JSON con lista cerrada de campos y sin mensajes de excepción.
+- **Cola de correo:** intento inmediato. Los enlaces de acceso no se reintentan ni guardan cuerpo. Las invitaciones guardan el cuerpo cifrado mientras están pendientes y se reintentan a los 5, 10, 20 y 40 minutos; el cuerpo se borra al enviar, al agotar intentos o en 24 h, y revocar la invitación cancela el envío.
+- **Endpoints internos:** `internal/email/drain/` y `internal/daily/` (contadores vencidos y cuerpos fuera de ventana) solo con token OIDC de Google para la cuenta `SHALOM_SCHEDULER_SERVICE_ACCOUNT` y la audiencia `SHALOM_SCHEDULER_AUDIENCE`. Verificación con PyJWT y las llaves públicas de Google.
+- **Scripts:** `infra/staging/01…07`, en simulación por omisión (`APLICAR=1` ejecuta). Secretos generados o leídos del teclado directo a Secret Manager.
+- **CI:** `deploy-staging.yml` despliega tras «Security and backend» en `main`, con Workload Identity Federation y el entorno protegido `staging`; sin variables no corre. `security.yml` agrega la construcción de la imagen con `check --deploy`, la simulación de los scripts y `tests/hosting-staging.cjs`.
+- **Pendiente:** crear los recursos, confirmar en staging el número de proxies y el host que envía Hosting, procedimiento de rotación de la llave de campos y retención de `OutboundEmail` y `LoginLink`.
 
 ## Interfaz de las fases 1 y 2 (Fase 6, en curso)
 

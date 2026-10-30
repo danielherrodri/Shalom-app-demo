@@ -10,7 +10,7 @@ from rest_framework import generics, serializers
 from rest_framework.permissions import BasePermission
 from rest_framework.response import Response
 from rest_framework.exceptions import ValidationError
-from .emails import INVITATION, send_after_commit
+from .emails import INVITATION, cancel, send_after_commit
 from .models import User, Person, Role, PRIVILEGED_ROLES, RoleGrant, Invitation, AuditEvent
 
 INVITATION_TTL = timedelta(days=7)
@@ -179,7 +179,9 @@ class InvitationList(generics.ListCreateAPIView):
                 created_by=request.user, expires_at=timezone.now() + INVITATION_TTL)
             audit(request.user, 'invitation.create', invitation)
             # Fragment, not query string: the token stays out of server logs and Referer headers.
-            send_after_commit('invitation', invitation.email, INVITATION, link=f'{settings.PUBLIC_APP_URL}/invitacion#{token}')
+            # Retried from the queue: the invitee cannot ask for another one.
+            send_after_commit('invitation', invitation.email, INVITATION, retry=True, reference=invitation.pk,
+                              link=f'{settings.PUBLIC_APP_URL}/invitacion#{token}')
         return Response(InvitationSerializer(invitation).data, status=201)
 
 
@@ -190,6 +192,7 @@ class InvitationRevoke(generics.GenericAPIView):
             invitation = get_object_or_404(pending_invitations().select_for_update(), pk=pk)
             invitation.revoked_at = timezone.now()
             invitation.save(update_fields=['revoked_at'])
+            cancel(invitation.pk)
             audit(request.user, 'invitation.revoke', invitation)
         return Response(status=204)
 

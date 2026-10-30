@@ -1,5 +1,7 @@
+import json
 import secrets
 import time
+from datetime import timedelta
 from django.test import TestCase, TransactionTestCase, Client, override_settings
 from django.utils import timezone
 from .models import User, Family, Person, Group, Assignment, Enrollment, Meeting, Attendance, AuditEvent
@@ -308,7 +310,23 @@ class AdministrationTests(TestCase):
             with self.captureOnCommitCallbacks(execute=True):
                 response = self.post('/api/v1/admin/invitations/', {'email': 'otra@example.invalid'})
         self.assertEqual(response.status_code, 201)
-        self.assertTrue(OutboundEmail.objects.get().failed)
+        record = OutboundEmail.objects.get()
+        self.assertEqual((record.failed, record.attempts), (False, 1))
+        self.assertIsNotNone(record.next_attempt_at)
+
+    def test_revoking_invitation_cancels_its_pending_email(self):
+        from unittest.mock import patch
+        from .emails import drain
+        from .models import Invitation, OutboundEmail
+        self.sign_in(self.admin)
+        with patch('core.emails.send_mail', side_effect=OSError('synthetic failure')):
+            with self.captureOnCommitCallbacks(execute=True):
+                self.post('/api/v1/admin/invitations/', {'email': 'otra@example.invalid'})
+        self.post(f'/api/v1/admin/invitations/{Invitation.objects.get().id}/revoke/')
+        OutboundEmail.objects.update(next_attempt_at=timezone.now())
+        record = OutboundEmail.objects.get()
+        self.assertEqual((record.failed, record.sealed_body), (True, ''))
+        self.assertEqual(drain()['due'], 0)
 
     def test_extra_fields_rejected(self):
         self.sign_in(self.admin)
@@ -771,3 +789,322 @@ class EnvironmentSettingsTests(TestCase):
                                HTTP_X_CSRFTOKEN=token, HTTP_ORIGIN=origin, secure=True).status_code
         self.assertEqual(ask('https://pruebas.example.invalid'), 202)
         self.assertEqual(ask('https://otro.example.invalid'), 403)
+
+
+class EmailQueueTests(TestCase):
+    """Invitations retry from a sealed body; login links never store one."""
+    def queue(self, kind='invitation', retry=True, token='token-sintetico-123'):
+        from .emails import INVITATION, send_after_commit
+        with self.captureOnCommitCallbacks(execute=True):
+            send_after_commit(kind, 'cola@example.invalid', INVITATION, retry=retry, link=f'https://pruebas.example.invalid/invitacion#{token}')
+        from .models import OutboundEmail
+        return OutboundEmail.objects.get()
+
+    def make_due(self):
+        from .models import OutboundEmail
+        OutboundEmail.objects.update(next_attempt_at=timezone.now() - timedelta(seconds=1))
+
+    def failing(self):
+        from unittest.mock import patch
+        return patch('core.emails.send_mail', side_effect=OSError('synthetic failure'))
+
+    def test_delivered_message_keeps_no_body(self):
+        from django.core import mail
+        record = self.queue()
+        self.assertEqual(len(mail.outbox), 1)
+        self.assertIsNotNone(record.sent_at)
+        self.assertEqual((record.sealed_body, record.next_attempt_at, record.attempts), ('', None, 1))
+
+    def test_failed_login_link_is_final_and_stores_no_token(self):
+        with self.failing():
+            record = self.queue(kind='login_link', retry=False)
+        self.assertEqual((record.failed, record.sealed_body, record.next_attempt_at), (True, '', None))
+        self.assertNotIn('token-sintetico-123', str(type(record).objects.values().get()))
+
+    def test_pending_body_is_sealed(self):
+        from .crypto import unseal
+        with self.failing():
+            record = self.queue()
+        self.assertNotIn('token-sintetico-123', str(type(record).objects.values().get()))
+        self.assertIn('token-sintetico-123', unseal(record.sealed_body))
+
+    def test_retry_waits_then_delivers_and_erases_body(self):
+        from django.core import mail
+        from .emails import drain
+        with self.failing():
+            record = self.queue()
+        wait = record.next_attempt_at - timezone.now()
+        self.assertTrue(timedelta(minutes=4) < wait <= timedelta(minutes=5))
+        self.assertEqual(drain()['due'], 0)
+        self.make_due()
+        self.assertEqual(drain(), {'due': 1, 'sent': 1, 'expired': 0})
+        record.refresh_from_db()
+        self.assertEqual((record.attempts, record.sealed_body), (2, ''))
+        self.assertIsNotNone(record.sent_at)
+        self.assertIn('token-sintetico-123', mail.outbox[-1].body)
+
+    def test_backoff_doubles_and_gives_up_after_five_attempts(self):
+        from .emails import drain
+        with self.failing():
+            record = self.queue()
+            waits = []
+            for _ in range(4):
+                record.refresh_from_db()
+                waits.append(round((record.next_attempt_at - timezone.now()).total_seconds() / 60))
+                self.make_due()
+                drain()
+        record.refresh_from_db()
+        self.assertEqual(waits, [5, 10, 20, 40])
+        self.assertEqual((record.attempts, record.failed, record.sealed_body, record.next_attempt_at), (5, True, '', None))
+
+    def test_window_expiry_erases_body(self):
+        from .emails import drain
+        with self.failing():
+            record = self.queue()
+        type(record).objects.update(retry_until=timezone.now())
+        self.make_due()
+        self.assertEqual(drain(), {'due': 0, 'sent': 0, 'expired': 1})
+        record.refresh_from_db()
+        self.assertEqual((record.failed, record.sealed_body), (True, ''))
+
+    def test_unattempted_message_is_picked_up_after_claim(self):
+        from django.core import mail
+        from .emails import INVITATION, drain, send_after_commit
+        # The instance died before the on-commit attempt ran.
+        record = send_after_commit('invitation', 'cola@example.invalid', INVITATION, retry=True, link='https://pruebas.example.invalid/x')
+        self.assertEqual(drain()['due'], 0)
+        self.make_due()
+        self.assertEqual(drain()['sent'], 1)
+        self.assertEqual(len(mail.outbox), 1)
+        record.refresh_from_db()
+        self.assertEqual(record.attempts, 1)
+
+    def test_body_sealed_with_old_key_is_dropped(self):
+        from cryptography.fernet import Fernet
+        from .emails import drain
+        with self.failing():
+            record = self.queue()
+        self.make_due()
+        with override_settings(FIELD_ENCRYPTION_KEY=Fernet.generate_key().decode()):
+            self.assertEqual(drain()['sent'], 0)
+        record.refresh_from_db()
+        self.assertEqual((record.failed, record.sealed_body), (True, ''))
+
+
+class EmailQueueConcurrencyTests(TransactionTestCase):
+    def test_parallel_drains_send_each_message_once(self):
+        import threading
+        from unittest.mock import patch
+        from django.db import connection
+        from .crypto import seal
+        from .emails import drain
+        from .models import OutboundEmail
+        due = timezone.now() - timedelta(seconds=1)
+        for number in range(6):
+            OutboundEmail.objects.create(kind='invitation', recipient=f'cola{number}@example.invalid', subject='Prueba',
+                                         sealed_body=seal('cuerpo sintético'), next_attempt_at=due, retry_until=due + timedelta(hours=1))
+        sent, lock = [], threading.Lock()
+        def slow_send(subject, body, sender, recipients):
+            time.sleep(0.05)
+            with lock:
+                sent.extend(recipients)
+        def run():
+            try:
+                drain()
+            finally:
+                connection.close()
+        with patch('core.emails.send_mail', side_effect=slow_send):
+            threads = [threading.Thread(target=run) for _ in range(3)]
+            for thread in threads:
+                thread.start()
+            for thread in threads:
+                thread.join()
+        self.assertEqual(sorted(sent), sorted(f'cola{n}@example.invalid' for n in range(6)))
+        self.assertEqual(OutboundEmail.objects.filter(sent_at__isnull=False, sealed_body='').count(), 6)
+
+
+SCHEDULER = 'programador@proyecto-ficticio.iam.gserviceaccount.com'
+AUDIENCE = 'https://api-ficticia.example.invalid'
+
+
+@override_settings(SCHEDULER_SERVICE_ACCOUNT=SCHEDULER, SCHEDULER_AUDIENCE=AUDIENCE)
+class SchedulerEndpointTests(TestCase):
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+        from cryptography.hazmat.primitives.asymmetric import rsa
+        cls.private = rsa.generate_private_key(public_exponent=65537, key_size=2048)
+        cls.stranger = rsa.generate_private_key(public_exponent=65537, key_size=2048)
+
+    def setUp(self):
+        from unittest.mock import patch
+        public = self.private.public_key()
+        patcher = patch('core.internal.google_keys.get', side_effect=lambda kid: public if kid == 'llave-1' else None)
+        patcher.start()
+        self.addCleanup(patcher.stop)
+
+    def token(self, key=None, kid='llave-1', algorithm='RS256', **changes):
+        import jwt
+        now = int(time.time())
+        claims = {'iss': 'https://accounts.google.com', 'aud': AUDIENCE, 'email': SCHEDULER, 'email_verified': True,
+                  'sub': '1234567890', 'iat': now, 'exp': now + 3600, **changes}
+        claims = {name: value for name, value in claims.items() if value is not None}
+        return jwt.encode(claims, key or self.private, algorithm=algorithm, headers={'kid': kid})
+
+    def forged(self, algorithm, secret=None):
+        # Key-confusion and unsigned tokens, built by hand because PyJWT refuses to create them.
+        import base64
+        import hashlib
+        import hmac
+        def part(data):
+            return base64.urlsafe_b64encode(json.dumps(data).encode()).rstrip(b'=').decode()
+        now = int(time.time())
+        body = f"{part({'alg': algorithm, 'kid': 'llave-1', 'typ': 'JWT'})}.{part({'iss': 'https://accounts.google.com', 'aud': AUDIENCE, 'email': SCHEDULER, 'email_verified': True, 'iat': now, 'exp': now + 3600})}"
+        signature = base64.urlsafe_b64encode(hmac.new(secret, body.encode(), hashlib.sha256).digest()).rstrip(b'=').decode() if secret else ''
+        return f'{body}.{signature}'
+
+    def call(self, token=None, path='/internal/email/drain/', **extra):
+        if token is not None:
+            extra['HTTP_AUTHORIZATION'] = f'Bearer {token}'
+        return Client(enforce_csrf_checks=True).post(path, **extra)
+
+    def test_valid_token_runs_the_queue(self):
+        response = self.call(self.token())
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json(), {'due': 0, 'sent': 0, 'expired': 0})
+        self.assertEqual(response['Cache-Control'], 'no-store')
+
+    def test_daily_purges_counters_and_expired_bodies(self):
+        from .limits import over_limit
+        from .models import RateCounter
+        over_limit('prueba-diaria', 5, timedelta(minutes=1))
+        RateCounter.objects.update(window_start=timezone.now() - timedelta(hours=1))
+        response = self.call(self.token(), path='/internal/daily/')
+        self.assertEqual(response.json(), {'counters': 1, 'expired_email': 0})
+
+    def test_rejected_tokens(self):
+        from cryptography.hazmat.primitives import serialization
+        public_pem = self.private.public_key().public_bytes(serialization.Encoding.PEM, serialization.PublicFormat.SubjectPublicKeyInfo)
+        cases = {
+            'other audience': self.token(aud='https://otra.example.invalid'),
+            'other account': self.token(email='otra@proyecto-ficticio.iam.gserviceaccount.com'),
+            'unverified email': self.token(email_verified=False),
+            'missing email': self.token(email=None),
+            'expired': self.token(iat=int(time.time()) - 7200, exp=int(time.time()) - 3600),
+            'other issuer': self.token(iss='https://emisor.example.invalid'),
+            'unknown key id': self.token(kid='llave-2'),
+            'signed by another key': self.token(key=self.stranger),
+            'hmac with public key': self.forged('HS256', public_pem),
+            'unsigned': self.forged('none'),
+            'garbage': 'no-es-un-token',
+        }
+        for case, token in cases.items():
+            with self.subTest(case):
+                self.assertEqual(self.call(token).status_code, 403)
+        self.assertEqual(self.call().status_code, 403)
+        self.assertEqual(Client().post('/internal/email/drain/', HTTP_AUTHORIZATION=f'Basic {self.token()}').status_code, 403)
+
+    def test_only_post(self):
+        self.assertEqual(Client().get('/internal/email/drain/', HTTP_AUTHORIZATION=f'Bearer {self.token()}').status_code, 405)
+
+    @override_settings(SCHEDULER_SERVICE_ACCOUNT='')
+    def test_disabled_without_configuration(self):
+        self.assertEqual(self.call(self.token()).status_code, 403)
+
+    def test_administrator_session_is_not_enough(self):
+        from .models import Role, RoleGrant
+        admin = User.objects.create_user(username='admin-interno', password=secrets.token_urlsafe(24))
+        RoleGrant.objects.create(user=admin, role=Role.ADMINISTRACION, granted_by=admin, confirmed_by=admin)
+        client = Client()
+        client.force_login(admin)
+        session = client.session
+        session.update({'started_at': time.time(), 'active_at': time.time(), 'idle_limit': 300, 'absolute_limit': 3600, 'session_version': admin.session_version})
+        session.save()
+        self.assertEqual(client.get('/api/v1/auth/me/').status_code, 200)
+        self.assertEqual(client.post('/internal/email/drain/').status_code, 403)
+
+
+class GoogleKeysTests(TestCase):
+    def keys(self, results):
+        from unittest.mock import MagicMock
+        from .internal import GoogleKeys
+        keys = GoogleKeys()
+        keys.fetch = MagicMock(side_effect=results)
+        return keys
+
+    def test_unknown_key_refetches_at_most_every_five_minutes(self):
+        from unittest.mock import patch
+        keys = self.keys([{'a': 'llave-a'}, {'a': 'llave-a', 'b': 'llave-b'}])
+        with patch('core.internal.time.monotonic', return_value=1000.0):
+            self.assertEqual(keys.get('a'), 'llave-a')
+            self.assertIsNone(keys.get('b'))
+        self.assertEqual(keys.fetch.call_count, 1)
+        with patch('core.internal.time.monotonic', return_value=1301.0):
+            self.assertEqual(keys.get('b'), 'llave-b')
+        self.assertEqual(keys.fetch.call_count, 2)
+
+    def test_failed_fetch_keeps_old_keys_and_waits(self):
+        from unittest.mock import patch
+        keys = self.keys([{'a': 'llave-a'}, OSError('sin red'), {'b': 'llave-b'}])
+        with patch('core.internal.time.monotonic', return_value=0.0):
+            keys.get('a')
+        with patch('core.internal.time.monotonic', return_value=4000.0):
+            self.assertEqual(keys.get('a'), 'llave-a')
+            self.assertIsNone(keys.get('b'))
+        self.assertEqual(keys.fetch.call_count, 2)
+
+
+class ProductionConfigTests(TestCase):
+    """Production settings boot only from environment variables, all fictitious here."""
+    def boot(self, code, **extra):
+        import os
+        import subprocess
+        import sys
+        from pathlib import Path
+        from cryptography.fernet import Fernet
+        env = {key: value for key, value in os.environ.items() if not key.startswith(('SHALOM_', 'DJANGO_'))}
+        env.update({
+            'SHALOM_ENV': 'production', 'DJANGO_SETTINGS_MODULE': 'config.settings',
+            'DJANGO_SECRET_KEY': secrets.token_urlsafe(64), 'SHALOM_FIELD_KEY': Fernet.generate_key().decode(),
+            'DJANGO_ALLOWED_HOSTS': 'api-ficticia.example.invalid', 'SHALOM_PUBLIC_APP_URL': 'https://pruebas.example.invalid',
+            'PGHOST': '/cloudsql/proyecto-ficticio:us-central1:instancia', **extra})
+        script = f'import django; django.setup(); from django.conf import settings as s; {code}'
+        return subprocess.run([sys.executable, '-c', script], env=env, cwd=Path(__file__).resolve().parent.parent,
+                              capture_output=True, text=True, timeout=60)
+
+    def test_cloud_run_settings(self):
+        result = self.boot("import json; print(json.dumps([s.SESSION_COOKIE_NAME, s.CSRF_USE_SESSIONS, s.SECURE_PROXY_SSL_HEADER, "
+                           "s.DATABASES['default']['OPTIONS'], s.LOGGING['formatters']['json']['()'], s.SECURE_SSL_REDIRECT]))")
+        self.assertEqual(result.returncode, 0, result.stderr[-500:])
+        self.assertEqual(json.loads(result.stdout), ['__session', True, ['HTTP_X_FORWARDED_PROTO', 'https'], {}, 'config.logs.JsonFormatter', True])
+
+    def test_tcp_database_requires_verified_tls(self):
+        result = self.boot("print(s.DATABASES['default']['OPTIONS']['sslmode'])", PGHOST='10.0.0.5')
+        self.assertEqual(result.stdout.strip(), 'verify-full')
+
+    def test_scheduler_needs_https_audience(self):
+        result = self.boot('pass', SHALOM_SCHEDULER_SERVICE_ACCOUNT=SCHEDULER, SHALOM_SCHEDULER_AUDIENCE='http://api.example.invalid')
+        self.assertNotEqual(result.returncode, 0)
+        self.assertIn('SHALOM_SCHEDULER_AUDIENCE', result.stderr)
+
+
+class JsonLogTests(TestCase):
+    def test_only_allowed_fields_and_no_exception_message(self):
+        import logging
+        from config.logs import JsonFormatter
+        try:
+            value = 'persona@example.invalid'
+            raise ValueError(f'duplicado: {value}')
+        except ValueError:
+            import sys
+            record = logging.LogRecord('core', logging.ERROR, __file__, 1, 'Internal Server Error: %s', ('/api/v1/x/',), sys.exc_info())
+        record.request = 'cuerpo y cabeceras'
+        record.email_id = 'abc'
+        entry = json.loads(JsonFormatter().format(record))
+        self.assertEqual(entry['severity'], 'ERROR')
+        self.assertEqual(entry['message'], 'Internal Server Error: /api/v1/x/')
+        self.assertEqual(entry['email_id'], 'abc')
+        self.assertEqual(entry['error'], 'builtins.ValueError')
+        self.assertNotIn('request', entry)
+        self.assertNotIn('persona@example.invalid', json.dumps(entry))
+        self.assertIn('test_only_allowed_fields_and_no_exception_message', entry['stack_trace'])
