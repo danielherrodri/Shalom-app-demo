@@ -4,8 +4,8 @@ import { EmptyState } from '../ui/Primitives';
 import { Status, useTask } from '../ui/Status';
 
 type Entry = { id: string; action: string; actorName: string; target: string; created_at: string };
-const SUBJECTS: Record<string, string> = { group: 'grupo', service: 'servicio', roster: 'clase del rol', lesson: 'lección', event: 'evento', item: 'tarea o material' };
-const VERBS: Record<string, string> = { create: 'creó', update: 'modificó', delete: 'eliminó', aceptada: 'aceptó', completada: 'completó' };
+const SUBJECTS: Record<string, string> = { group: 'grupo', service: 'servicio', roster: 'clase del rol', lead: 'encargado(a) del día', swap: 'permuta', lesson: 'lección', event: 'evento', item: 'tarea o material' };
+const VERBS: Record<string, string> = { create: 'creó', update: 'modificó', delete: 'eliminó', aceptada: 'aceptó', completada: 'completó', confirmada: 'confirmó', rechazada: 'rechazó', cancelada: 'retiró' };
 
 export function describe(action: string): string {
   const [, subject, verb] = action.split('.');

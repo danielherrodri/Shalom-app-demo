@@ -6,8 +6,8 @@ from datetime import time as clock, timedelta
 from django.core import mail
 from django.test import Client, TestCase, TransactionTestCase, override_settings
 from django.utils import timezone
-from .models import (AuditEvent, EmailIdentity, Enrollment, EventItem, Family, Group, Lesson, Person, Role, RoleGrant,
-                     RosterEntry, Service, User)
+from .models import (AuditEvent, DayLead, EmailIdentity, Enrollment, EventItem, Family, Group, Lesson, Person, Role, RoleGrant,
+                     RosterEntry, Service, Swap, User)
 
 
 def next_weekday(weekday, after=0):
@@ -57,8 +57,8 @@ class KidsBase(TestCase):
 
 
 class KidsPermissionTests(KidsBase):
-    COORDINATION_ONLY = ['roster/', 'team/', 'events/', 'audit/']
-    TEAM = ['groups/', 'services/', 'lessons/', 'agenda/']
+    COORDINATION_ONLY = ['roster/', 'leads/', 'team/', 'events/', 'audit/']
+    TEAM = ['groups/', 'services/', 'lessons/', 'agenda/', 'swaps/']
 
     def test_people_without_kids_profiles_get_nothing(self):
         for url in self.TEAM + self.COORDINATION_ONLY:
@@ -196,6 +196,138 @@ class KidsRosterTests(KidsBase):
         self.assertNotIn('example.invalid', json.dumps(team))
 
 
+class KidsLeadTests(KidsBase):
+    def lead(self, person=None, day=None, user=None):
+        return self.call(user or self.coordinator, 'post', 'leads/', {
+            'date': (day or self.sunday).isoformat(), 'group': str(self.group.id), 'lead': str((person or self.teacher).id)})
+
+    def test_one_lead_per_group_and_day(self):
+        self.assertEqual(self.lead(user=self.teacher).status_code, 403)
+        created = self.lead()
+        self.assertEqual(created.status_code, 201)
+        self.assertEqual(created.json()['leadName'], 'docente-a')
+        self.assertEqual(self.lead(person=self.other_teacher).json()['detail'], 'Ese grupo ya tiene encargado(a) ese día.')
+        self.assertTrue(AuditEvent.objects.filter(action='kids.lead.create', target_id=created.json()['id']).exists())
+
+    def test_rules(self):
+        cases = {
+            'not a teacher': self.lead(person=self.volunteer),
+            'past date': self.lead(day=next_weekday(6) - timedelta(days=7)),
+            'no service that day': self.lead(day=self.sunday + timedelta(days=1)),
+        }
+        for case, response in cases.items():
+            with self.subTest(case):
+                self.assertEqual(response.status_code, 400)
+
+    def test_change_resets_reminder_and_agenda_shows_it(self):
+        lead = self.lead().json()
+        self.roster(teacher=self.other_teacher)
+        DayLead.objects.filter(pk=lead['id']).update(reminded_at=timezone.now())
+        agenda = self.call(self.teacher, 'get', 'agenda/').json()
+        self.assertEqual([(l['date'], l['group']) for l in agenda['leads']], [(self.sunday.isoformat(), self.group.name)])
+        self.assertEqual(self.call(self.other_teacher, 'get', 'agenda/').json()['classes'][0]['lead'], 'docente-a')
+        moved = self.call(self.coordinator, 'patch', f"leads/{lead['id']}/", {'lead': str(self.other_teacher.id)})
+        self.assertEqual((moved.json()['leadName'], moved.json()['reminded']), ('docente-b', False))
+        self.assertEqual(self.call(self.teacher, 'get', 'agenda/').json()['leads'], [])
+        self.assertEqual(self.call(self.coordinator, 'patch', f"leads/{lead['id']}/", {'date': '2030-01-01'}).status_code, 400)
+        self.assertEqual(self.call(self.coordinator, 'delete', f"leads/{lead['id']}/").status_code, 204)
+        self.assertTrue(AuditEvent.objects.filter(action='kids.lead.delete', target_id=lead['id']).exists())
+
+
+class KidsSwapTests(KidsBase):
+    def setUp(self):
+        self.third = self.account('docente-c', [Role.DOCENTE])
+        self.entry = self.roster().json()['id']
+
+    def swap(self, to=None, user=None, entry=None, **data):
+        return self.call(user or self.teacher, 'post', 'swaps/', {'entry': entry or self.entry, 'to_teacher': str((to or self.other_teacher).id), **data})
+
+    def teacher_of(self, entry_id):
+        return RosterEntry.objects.get(pk=entry_id).teacher
+
+    def test_teacher_registers_and_coordination_confirms(self):
+        RosterEntry.objects.filter(pk=self.entry).update(reminded_at=timezone.now())
+        swap = self.swap()
+        self.assertEqual(swap.status_code, 201)
+        swap = swap.json()
+        self.assertEqual((swap['status'], swap['fromName'], swap['toName']), ('pendiente', 'docente-a', 'docente-b'))
+        # Nothing changes until coordination confirms.
+        self.assertEqual(self.teacher_of(self.entry), self.teacher)
+        self.assertTrue(self.call(self.teacher, 'get', 'agenda/').json()['classes'][0]['swapPending'])
+        self.assertEqual(self.swap(to=self.third).json()['detail'], 'Ya hay una permuta por confirmar para esa clase.')
+        self.assertEqual(self.call(self.teacher, 'post', f"swaps/{swap['id']}/confirm/").status_code, 403)
+        confirmed = self.call(self.coordinator, 'post', f"swaps/{swap['id']}/confirm/")
+        self.assertEqual(confirmed.json()['status'], 'confirmada')
+        entry = RosterEntry.objects.get(pk=self.entry)
+        self.assertEqual((entry.teacher, entry.reminded_at), (self.other_teacher, None))
+        self.assertEqual(self.call(self.teacher, 'get', 'agenda/').json()['classes'], [])
+        self.assertEqual(len(self.call(self.other_teacher, 'get', 'agenda/').json()['classes']), 1)
+        self.assertEqual(self.call(self.coordinator, 'post', f"swaps/{swap['id']}/reject/").status_code, 400)
+        actions = set(AuditEvent.objects.filter(target_id=swap['id']).values_list('action', flat=True))
+        self.assertEqual(actions, {'kids.swap.create', 'kids.swap.confirmada'})
+
+    def test_only_own_classes_and_only_teachers(self):
+        self.assertEqual(self.swap(user=self.other_teacher, to=self.third).status_code, 404)
+        self.assertEqual(self.swap(user=self.volunteer, to=self.third).status_code, 403)
+        self.assertEqual(self.swap(to=self.teacher).status_code, 400)
+        self.assertEqual(self.swap(to=self.volunteer).status_code, 400)
+        self.assertEqual(self.call(self.teacher, 'post', 'swaps/', {'entry': self.entry, 'to_teacher': str(self.third.id), 'reason': 'x'}).status_code, 400)
+
+    def test_cover_must_be_free(self):
+        self.roster(teacher=self.other_teacher, service=Service.objects.create(name='Traslape', weekday=6, starts_at=clock(10), ends_at=clock(11)))
+        self.assertEqual(self.swap().json()['detail'], 'Esa persona ya tiene una clase en ese horario.')
+        self.assertFalse(Swap.objects.exists())
+        self.assertEqual(self.teacher_of(self.entry), self.teacher)
+
+    def test_exchange_hands_back_a_later_class(self):
+        later = self.roster(teacher=self.other_teacher, day=self.sunday + timedelta(days=7)).json()['id']
+        mine_later = self.roster(day=self.sunday + timedelta(days=14)).json()['id']
+        self.assertEqual(self.swap(return_entry=mine_later).json()['detail'], 'La clase que se devuelve debe ser de quien cubre.')
+        swap = self.swap(return_entry=later).json()
+        self.assertEqual(swap['returnEntry']['date'], (self.sunday + timedelta(days=7)).isoformat())
+        self.call(self.coordinator, 'post', f"swaps/{swap['id']}/confirm/")
+        self.assertEqual((self.teacher_of(self.entry), self.teacher_of(later)), (self.other_teacher, self.teacher))
+
+    def test_roster_changed_after_request(self):
+        swap = self.swap().json()
+        self.call(self.coordinator, 'patch', f'roster/{self.entry}/', {'teacher': str(self.third.id)})
+        self.assertEqual(self.call(self.coordinator, 'post', f"swaps/{swap['id']}/confirm/").json()['detail'], 'El rol cambió desde que se registró la permuta.')
+        self.assertEqual(Swap.objects.get(pk=swap['id']).status, 'pendiente')
+
+    def test_cancel_and_reject(self):
+        swap = self.swap().json()
+        self.assertEqual(self.call(self.third, 'post', f"swaps/{swap['id']}/cancel/").status_code, 404)
+        self.assertEqual(self.call(self.other_teacher, 'post', f"swaps/{swap['id']}/cancel/").json()['status'], 'cancelada')
+        again = self.swap().json()
+        self.assertEqual(self.call(self.coordinator, 'post', f"swaps/{again['id']}/reject/").json()['status'], 'rechazada')
+        self.assertEqual(self.teacher_of(self.entry), self.teacher)
+
+    def test_coordination_registration_applies_at_once(self):
+        swap = self.swap(user=self.coordinator, to=self.third).json()
+        self.assertEqual(swap['status'], 'confirmada')
+        self.assertEqual(self.teacher_of(self.entry), self.third)
+
+    def test_each_teacher_sees_only_their_swaps(self):
+        self.swap()
+        other = self.roster(teacher=self.third, service=self.second).json()['id']
+        self.swap(user=self.third, entry=other, to=self.teacher)
+        self.assertEqual(len(self.call(self.coordinator, 'get', 'swaps/').json()['results']), 2)
+        self.assertEqual(len(self.call(self.teacher, 'get', 'swaps/').json()['results']), 2)
+        self.assertEqual([s['fromName'] for s in self.call(self.other_teacher, 'get', 'swaps/').json()['results']], ['docente-a'])
+        self.assertEqual(self.call(self.volunteer, 'get', 'swaps/').json()['results'], [])
+        self.assertEqual(len(self.call(self.coordinator, 'get', 'swaps/?status=pendiente').json()['results']), 2)
+
+    def test_options_list_teachers_and_their_classes_only(self):
+        EmailIdentity.objects.create(user=self.other_teacher, email='docente-b@example.invalid', verified_at=timezone.now())
+        self.roster(teacher=self.other_teacher, service=self.second)
+        options = self.call(self.teacher, 'get', f'swaps/options/?teacher={self.other_teacher.id}').json()
+        self.assertEqual([t['displayName'] for t in options['teachers']], ['docente-b', 'docente-c'])
+        self.assertEqual([c['service'] for c in options['classes']], ['2° servicio'])
+        self.assertNotIn('example.invalid', json.dumps(options))
+        self.assertEqual(self.call(self.teacher, 'get', f'swaps/options/?teacher={self.volunteer.id}').status_code, 400)
+        self.assertEqual(self.call(self.volunteer, 'get', 'swaps/options/').status_code, 403)
+
+
 class KidsAgendaAndLessonTests(KidsBase):
     def test_agenda_shows_only_own_classes_with_lesson(self):
         self.roster()
@@ -308,6 +440,14 @@ class KidsReminderTests(KidsBase):
         self.entry(2)
         self.assertEqual(self.remind()['reminded'], 0)
         self.assertEqual(len(mail.outbox), 0)
+
+    def test_day_in_charge_goes_in_the_same_email(self):
+        entry = self.entry(2)
+        DayLead.objects.create(date=entry.date, group=self.group, lead=self.teacher, created_by=self.coordinator)
+        self.assertEqual(self.remind(), {'reminded': 2, 'without_email': 0})
+        self.assertEqual(len(mail.outbox), 1)
+        self.assertIn('Encargado(a) del día', mail.outbox[0].body)
+        self.assertEqual(self.remind()['reminded'], 0)
 
     def test_changed_entry_is_reminded_again(self):
         entry = self.entry(2)

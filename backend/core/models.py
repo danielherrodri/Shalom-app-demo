@@ -267,3 +267,40 @@ class EventItem(Identified):
     quantity = models.PositiveIntegerField(null=True, blank=True)
     received = models.PositiveIntegerField(default=0)
     status = models.CharField(max_length=12, choices=Status.choices, default=Status.PENDIENTE)
+
+
+class DayLead(Identified):
+    """The teacher in charge of one group for a whole day (encargado o encargada del día)."""
+    date = models.DateField()
+    group = models.ForeignKey(Group, on_delete=models.PROTECT)
+    lead = models.ForeignKey(User, on_delete=models.PROTECT, related_name='day_leads')
+    created_by = models.ForeignKey(User, on_delete=models.PROTECT, related_name='+')
+    # Same rule as the roster: set once the reminder is queued, cleared when the date or the person changes.
+    reminded_at = models.DateTimeField(null=True, blank=True)
+    class Meta:
+        constraints = [models.UniqueConstraint(fields=['group', 'date'], name='one_lead_per_group_date')]
+
+
+class Swap(Identified):
+    """A teacher hands one class to another teacher (permuta). An exchange also hands back a later class.
+
+    Nothing changes in the roster until coordination confirms it. No free-text reason is stored, so health
+    or other personal details never end up here.
+    """
+    class Status(models.TextChoices):
+        PENDIENTE = 'pendiente', 'Por confirmar'
+        CONFIRMADA = 'confirmada', 'Confirmada'
+        RECHAZADA = 'rechazada', 'Rechazada'
+        CANCELADA = 'cancelada', 'Cancelada'
+    entry = models.ForeignKey(RosterEntry, on_delete=models.CASCADE, related_name='swaps')
+    # The class the covering teacher hands back in an exchange.
+    return_entry = models.ForeignKey(RosterEntry, null=True, blank=True, on_delete=models.CASCADE, related_name='return_swaps')
+    from_teacher = models.ForeignKey(User, on_delete=models.PROTECT, related_name='swaps_given')
+    to_teacher = models.ForeignKey(User, on_delete=models.PROTECT, related_name='swaps_taken')
+    status = models.CharField(max_length=12, choices=Status.choices, default=Status.PENDIENTE)
+    created_by = models.ForeignKey(User, on_delete=models.PROTECT, related_name='+')
+    created_at = models.DateTimeField(auto_now_add=True)
+    decided_by = models.ForeignKey(User, null=True, blank=True, on_delete=models.PROTECT, related_name='+')
+    decided_at = models.DateTimeField(null=True, blank=True)
+    class Meta:
+        constraints = [models.UniqueConstraint(fields=['entry'], condition=models.Q(status='pendiente'), name='one_pending_swap_per_entry')]

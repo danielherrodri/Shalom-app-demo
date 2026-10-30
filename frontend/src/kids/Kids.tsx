@@ -31,7 +31,7 @@ export function Kids({ me, onActivity }: { me: Me; onActivity: () => Promise<voi
       {tabs.map(id => <button key={id} type="button" aria-current={current === id ? 'page' : undefined} onClick={() => setTab(id)}>{LABELS[id]}</button>)}
     </nav>}
     {current === 'clase' && <Attendance onActivity={onActivity} />}
-    {current === 'agenda' && <Agenda />}
+    {current === 'agenda' && <Agenda canSwap={me.roles.includes('docente')} />}
     {current === 'lecciones' && <Lessons canEdit={coordinator} />}
     {current === 'rol' && <Roster />}
     {current === 'maestros' && <Team />}

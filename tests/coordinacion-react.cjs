@@ -1,7 +1,8 @@
 "use strict";
 // Recorrido de extremo a extremo de Coordinación Kids (solo datos de adultos) contra Django real,
-// PostgreSQL y Vite. Coordinación configura, arma el rol, registra la lección y un evento; la docente
-// ve su agenda y acepta su tarea. Solo crea datos ficticios en una base *_e2e.
+// PostgreSQL y Vite. Coordinación configura, arma el rol con su encargada, registra la lección y un evento;
+// la docente ve su agenda, acepta su tarea y cede su clase, y coordinación confirma la permuta.
+// Solo crea datos ficticios en una base *_e2e.
 //
 // Requiere: PGDATABASE terminada en _e2e (se vacía). Uso: node tests/coordinacion-react.cjs
 const localBrowserPath = require("node:path").resolve(__dirname, "../.pw-browsers");
@@ -35,6 +36,7 @@ def account(username, name, role):
 account('coordinacion-e2e', 'Coordinación Ficticia', Role.COORDINACION_KIDS)
 teacher = account('docente-e2e', 'Docente Ficticia', Role.DOCENTE)
 EmailIdentity.objects.create(user=teacher, email='docente-e2e@example.invalid', verified_at=timezone.now())
+account('suplente-e2e', 'Docente Suplente', Role.DOCENTE)
 `;
 
 function totp(secret) {
@@ -94,7 +96,7 @@ async function signIn(page, username) {
   const browser = await chromium.launch();
   const sunday = nextSunday();
   let passed = 0;
-  let page;
+  let page, coordination;
   const check = async (name, fn) => {
     try { await fn(); } catch (error) {
       console.error("✗ " + name + "\n--- página ---\n" + (await page.innerText("body").catch(() => "")).slice(0, 1500));
@@ -154,14 +156,20 @@ async function signIn(page, username) {
       await axe(page, "Lecciones");
     });
 
-    await check("rol de clases: asigna a la docente en el próximo domingo", async () => {
+    await check("rol de clases: asigna a la docente y a la encargada del próximo domingo", async () => {
       await tab("Rol de clases").click();
       await page.getByRole("heading", { name: "1er servicio · 09:00 a 10:30" }).waitFor();
       assert.equal(await page.getByLabel("Fecha").inputValue(), sunday);
-      await page.getByLabel("Docente para Tesoros (ficticio), 1er servicio").selectOption({ label: "Docente Ficticia" });
-      await page.getByRole("button", { name: "Asignar" }).click();
+      const teacherSelect = page.getByLabel("Docente para Tesoros (ficticio), 1er servicio");
+      await teacherSelect.selectOption({ label: "Docente Ficticia" });
+      await page.locator("form", { has: teacherSelect }).getByRole("button", { name: "Asignar" }).click();
       await page.getByText("Docente asignado a Tesoros (ficticio), 1er servicio.").waitFor();
       await page.getByRole("list", { name: "Docentes de Tesoros (ficticio), 1er servicio" }).getByText("Docente Ficticia").waitFor();
+      const leadSelect = page.getByLabel("Encargado(a) de Tesoros (ficticio)");
+      await leadSelect.selectOption({ label: "Docente Ficticia" });
+      await page.locator("form", { has: leadSelect }).getByRole("button", { name: "Asignar" }).click();
+      await page.getByText("Encargado(a) de Tesoros (ficticio) guardado.").waitFor();
+      await page.getByText("No hay permutas por confirmar.").waitFor();
       await axe(page, "Rol de clases");
     });
 
@@ -196,13 +204,18 @@ async function signIn(page, username) {
     });
 
     await check("la docente ve su agenda con la lección, acepta y completa su tarea", async () => {
-      await page.getByRole("button", { name: "Cerrar sesión" }).click();
+      // Coordination stays signed in on its own device to confirm the swap later.
+      coordination = page;
+      page = await (await browser.newContext({ viewport: { width: 360, height: 780 }, timezoneId: TZ })).newPage();
+      await page.goto(base);
       await signIn(page, "docente-e2e");
       await page.getByRole("button", { name: "Abrir Shalom Kids" }).click();
       await page.getByRole("heading", { name: "Mi agenda" }).waitFor();
       for (const name of ["Rol de clases", "Maestros", "Eventos Kids", "Configuración", "Bitácora"]) assert.equal(await tab(name).count(), 0, `sin ${name}`);
       await page.getByText("Lección ficticia de prueba", { exact: true }).waitFor();
       await page.getByText("1er servicio · 09:00 a 10:30").waitFor();
+      await page.getByText("Encargado(a) del día: Docente Ficticia").waitFor();
+      await page.getByRole("heading", { name: "Días como encargado(a)" }).waitFor();
       await axe(page, "Mi agenda");
       await page.getByRole("button", { name: "Aceptar «Preparar la dinámica»" }).click();
       await page.getByText("Tarea aceptada.").waitFor();
@@ -214,6 +227,34 @@ async function signIn(page, username) {
     await check("el servidor niega a la docente lo que la interfaz no muestra", async () => {
       const status = await page.evaluate(async () => (await Promise.all(["roster", "team", "events", "audit"].map(p => fetch(`/api/v1/kids/${p}/`)))).map(r => r.status));
       assert.deepEqual(status, [403, 403, 403, 403]);
+    });
+
+    await check("la docente cede su clase y queda por confirmar", async () => {
+      await page.getByRole("button", { name: /^Ceder la clase del/ }).click();
+      await page.getByLabel("¿Quién la cubre?").selectOption({ label: "Docente Suplente" });
+      await page.getByRole("button", { name: "Registrar permuta" }).click();
+      await page.getByText(/^Permuta registrada\./).waitFor();
+      await page.getByText("Tienes una permuta por confirmar para esta clase.").waitFor();
+      await page.getByText("Docente Ficticia → Docente Suplente").waitFor();
+      await axe(page, "Mi agenda con permuta");
+    });
+
+    await check("coordinación confirma la permuta y la clase cambia de docente", async () => {
+      const teacher = page;
+      page = coordination;
+      await tab("Rol de clases").click();
+      await page.getByRole("button", { name: /^Confirmar permuta de Docente Ficticia a Docente Suplente/ }).click();
+      await page.getByText("Permuta confirmada: Docente Suplente da la clase.").waitFor();
+      await page.getByRole("list", { name: "Docentes de Tesoros (ficticio), 1er servicio" }).getByText("Docente Suplente").waitFor();
+      await page.getByText("No hay permutas por confirmar.").waitFor();
+      await tab("Bitácora").click();
+      await page.getByText("Coordinación Ficticia confirmó permuta").waitFor();
+      await page.getByText("Docente Ficticia creó permuta").waitFor();
+      page = teacher;
+      await page.reload();
+      await page.getByRole("button", { name: "Abrir Shalom Kids" }).click();
+      await page.getByText("No tienes clases programadas. Coordinación arma el rol de clases.").waitFor();
+      await page.getByText("Confirmada", { exact: false }).first().waitFor();
     });
   } finally {
     await browser.close();
