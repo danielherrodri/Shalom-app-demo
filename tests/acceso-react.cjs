@@ -221,8 +221,14 @@ async function axe(page, label) {
       await page.getByText(/dio de baja a Persona ficticia/).waitFor();
       await page.getByText(/quitó el perfil Docente · Persona ficticia/).waitFor();
       await axe(page, "Administración con bajas y bitácora");
+      await page.getByText(/Tenía: Docente, Finanzas\./).waitFor();
       await page.getByRole("button", { name: "Reactivar a Persona ficticia" }).click();
-      await page.getByText("Cuenta reactivada, sin perfiles. Asígnale los que necesite.").waitFor();
+      const reactivation = page.getByRole("form", { name: "Confirmar reactivación de Persona ficticia" });
+      assert.ok(await reactivation.getByRole("checkbox", { name: "Docente" }).isChecked(), "propone los perfiles que tenía");
+      assert.ok(!(await reactivation.getByRole("checkbox", { name: "Caja" }).isChecked()), "no marca perfiles que no tenía");
+      await axe(page, "Confirmar reactivación");
+      await reactivation.getByRole("button", { name: "Sí, reactivar" }).click();
+      await page.getByText("Cuenta reactivada. Perfiles activos: Docente. Falta que otra persona de administración confirme: Finanzas. Le avisamos por correo.").waitFor();
       await page.getByText("No hay cuentas dadas de baja.").waitFor();
       await page.getByText(/reactivó a Persona ficticia/).waitFor();
     });

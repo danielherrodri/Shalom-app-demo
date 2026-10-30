@@ -7,6 +7,9 @@ class User(AbstractUser):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     # Bumped by "cerrar sesión en todos los dispositivos"; each session keeps the value it started with.
     session_version = models.PositiveIntegerField(default=0)
+    # Set by "dar de baja" to the same instant as the profiles it revoked, so reactivation can offer them again.
+    deactivated_at = models.DateTimeField(null=True, blank=True)
+    deactivated_by = models.ForeignKey('self', null=True, blank=True, on_delete=models.PROTECT, related_name='+')
 
 
 class Identified(models.Model):

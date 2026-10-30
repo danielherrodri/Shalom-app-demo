@@ -1,6 +1,7 @@
 import json
 import secrets
 import time
+from io import StringIO
 from datetime import timedelta
 from django.conf import settings
 from django.test import TestCase, TransactionTestCase, Client, override_settings
@@ -274,6 +275,8 @@ class AdministrationTests(TestCase):
         self.assertIsNotNone(OutboundEmail.objects.get().sent_at)
 
     def test_accept_links_person_and_grants_roles_once(self):
+        from .models import EmailIdentity
+        EmailIdentity.objects.create(user=self.member, email='invitada@example.invalid', verified_at=timezone.now())
         self.sign_in(self.admin)
         _, token = self.invite(roles=['familia', 'voluntario'], person=str(self.person.id))
         self.sign_in(self.member)
@@ -345,8 +348,9 @@ class AdministrationTests(TestCase):
         member = Client(enforce_csrf_checks=True)
         member.force_login(self.member)
         self.sign_in(self.admin)
-        for user in (self.member, self.second):
-            self.assertEqual(self.post(f'/api/v1/admin/accounts/{user.id}/deactivate/').json(), {'upcomingClasses': 0})
+        self.assertEqual(self.post(f'/api/v1/admin/accounts/{self.member.id}/deactivate/').json(), {'upcomingClasses': 0, 'oneAdministratorLeft': False})
+        # Without the second administrator nobody can confirm privileged profiles, and the caller is told.
+        self.assertEqual(self.post(f'/api/v1/admin/accounts/{self.second.id}/deactivate/').json(), {'upcomingClasses': 0, 'oneAdministratorLeft': True})
         self.assertFalse(RoleGrant.objects.filter(user__in=[self.member, self.second], revoked_at__isnull=True).exists())
         self.assertIsNotNone(Invitation.objects.get().revoked_at)
         self.assertNotEqual(member.get('/api/v1/auth/me/').status_code, 200)
@@ -371,10 +375,122 @@ class AdministrationTests(TestCase):
         self.sign_in(self.admin)
         self.grant(self.member, 'docente')
         self.post(f'/api/v1/admin/accounts/{self.member.id}/deactivate/')
-        self.assertEqual(self.post(f'/api/v1/admin/accounts/{self.member.id}/reactivate/').status_code, 204)
+        response = self.post(f'/api/v1/admin/accounts/{self.member.id}/reactivate/')
+        self.assertEqual(response.json(), {'roles': [], 'pendingRoles': [], 'notified': False, 'upcomingClasses': 0})
         self.assertEqual(self.post(f'/api/v1/admin/accounts/{self.member.id}/reactivate/').status_code, 404)
         self.sign_in(self.member)
         self.assertEqual(self.client.get('/api/v1/auth/me/').json()['roles'], [])
+
+    def test_deactivated_accounts_show_when_who_and_former_profiles(self):
+        from .models import AccountProfile
+        AccountProfile.objects.create(user=self.admin, display_name='Administración de ejemplo', adult_declared_at=timezone.now())
+        self.sign_in(self.admin)
+        self.grant(self.member, 'voluntario')
+        self.grant(self.member, 'docente')
+        # A profile removed earlier is not one the deactivation took away.
+        self.post(f"/api/v1/admin/grants/{self.grant(self.member, 'caja').json()['id']}/revoke/")
+        self.post(f'/api/v1/admin/accounts/{self.member.id}/deactivate/')
+        row = self.client.get('/api/v1/admin/accounts/?status=inactive').json()['results'][0]
+        self.assertEqual({k: row[k] for k in ('roles', 'formerRoles', 'deactivatedBy', 'upcomingClasses')},
+                         {'roles': [], 'formerRoles': ['docente', 'voluntario'], 'deactivatedBy': 'Administración de ejemplo', 'upcomingClasses': 0})
+        self.assertIsNotNone(row['deactivatedAt'])
+        self.assertNotIn('formerRoles', self.client.get('/api/v1/admin/accounts/').json()['results'][0])
+        # Reactivating clears the record, so a later deactivation shows only what it took.
+        self.post(f'/api/v1/admin/accounts/{self.member.id}/reactivate/', {'roles': ['voluntario']})
+        self.post(f'/api/v1/admin/accounts/{self.member.id}/deactivate/')
+        self.assertEqual(self.client.get('/api/v1/admin/accounts/?status=inactive').json()['results'][0]['formerRoles'], ['voluntario'])
+
+    def test_reactivation_grants_chosen_profiles_and_privileged_ones_wait(self):
+        from django.core import mail
+        from .models import EmailIdentity, RoleGrant
+        EmailIdentity.objects.create(user=self.member, email='reactivada@example.invalid', verified_at=timezone.now())
+        self.sign_in(self.admin)
+        self.post(f'/api/v1/admin/accounts/{self.member.id}/deactivate/')
+        url = f'/api/v1/admin/accounts/{self.member.id}/reactivate/'
+        self.assertEqual(self.post(url, {'roles': ['joven']}).status_code, 400)
+        self.assertEqual(self.post(url, {'roles': ['docente'], 'confirmed_by': str(self.admin.id)}).status_code, 400)
+        self.assertFalse(User.objects.get(pk=self.member.pk).is_active)
+        with self.captureOnCommitCallbacks(execute=True):
+            response = self.post(url, {'roles': ['docente', 'coordinacion_kids']})
+        self.assertEqual(response.json(), {'roles': ['docente'], 'pendingRoles': ['coordinacion_kids'], 'notified': True, 'upcomingClasses': 0})
+        pending = RoleGrant.objects.get(user=self.member, role='coordinacion_kids', revoked_at__isnull=True)
+        self.assertEqual((pending.granted_by, pending.confirmed_by), (self.admin, None))
+        self.assertEqual(AuditEvent.objects.filter(action='role.grant', actor=self.admin).count(), 2)
+        message = mail.outbox[-1]
+        self.assertEqual((message.to, message.subject), (['reactivada@example.invalid'], 'Tu acceso a Shalom está activo de nuevo'))
+        # The notice says nothing about which profiles were granted.
+        self.assertNotIn('Docente', message.body)
+        self.assertNotIn('Coordinación', message.body)
+        self.sign_in(self.member)
+        self.assertEqual(self.client.get('/api/v1/auth/me/').json()['roles'], ['docente'])
+
+    def test_invitation_is_taken_only_by_the_invited_address(self):
+        from .models import EmailIdentity
+        EmailIdentity.objects.create(user=self.member, email='otra-direccion@example.invalid', verified_at=timezone.now())
+        self.sign_in(self.admin)
+        _, token = self.invite(roles=['voluntario'])
+        self.sign_in(self.member)
+        answer = self.post('/api/v1/invitations/accept/', {'token': token})
+        self.assertEqual(answer.status_code, 400)
+        self.assertIn('otro correo', answer.json()['detail'])
+        self.assertNotIn('invitada', answer.json()['detail'])
+        self.assertEqual(self.client.get('/api/v1/auth/me/').json()['roles'], [])
+        # Still pending: the right account can take it.
+        EmailIdentity.objects.create(user=self.second, email='invitada@example.invalid', verified_at=timezone.now())
+        self.sign_in(self.second)
+        self.assertEqual(self.post('/api/v1/invitations/accept/', {'token': token}).json()['roles'], ['voluntario'])
+
+    def test_reactivated_account_gets_back_no_group_second_factor_or_invitation(self):
+        from .models import Assignment, EmailIdentity, Group, Invitation, TotpDevice
+        group = Group.objects.create(name='Grupo sintético')
+        Assignment.objects.create(user=self.member, group=group)
+        TotpDevice.objects.create(user=self.member, sealed_secret='sintético', confirmed_at=timezone.now())
+        EmailIdentity.objects.create(user=self.member, email='invitada@example.invalid', verified_at=timezone.now())
+        self.sign_in(self.admin)
+        _, sent_to_them = self.invite(roles=['voluntario'])
+        _, to_someone_else = self.invite(email='otra@example.invalid')
+        self.sign_in(self.member)
+        self.assertEqual(self.client.get('/api/v1/groups/').json()['count'], 1)
+        self.sign_in(self.admin)
+        self.post(f'/api/v1/admin/accounts/{self.member.id}/deactivate/')
+        self.assertFalse(TotpDevice.objects.filter(user=self.member).exists())
+        self.assertIsNotNone(Invitation.objects.get(email='invitada@example.invalid').revoked_at)
+        self.assertIsNone(Invitation.objects.get(email='otra@example.invalid').revoked_at)
+        self.post(f'/api/v1/admin/accounts/{self.member.id}/reactivate/')
+        self.sign_in(self.member)
+        self.assertEqual(self.client.get('/api/v1/groups/').json()['count'], 0)
+        self.assertEqual(self.post('/api/v1/invitations/accept/', {'token': sent_to_them}).status_code, 400)
+        self.assertEqual(self.client.get('/api/v1/auth/me/').json()['roles'], [])
+        self.assertTrue(AuditEvent.objects.filter(action='invitation.revoke', actor=self.admin).exists())
+
+    def test_bootstrap_gives_the_first_admin_without_another_person(self):
+        from django.core.management import call_command
+        from .models import RoleGrant
+        RoleGrant.objects.update(revoked_at=timezone.now())
+        call_command('bootstrap_admin', self.member.username, stdout=StringIO())
+        grant = RoleGrant.objects.get(user=self.member, revoked_at__isnull=True)
+        self.assertEqual((grant.role, grant.confirmed_by_id), ('administracion', self.member.id))
+
+    def test_bootstrap_confirms_a_second_admin_only_while_one_is_missing(self):
+        from django.core.management import call_command
+        from django.core.management.base import CommandError
+        from .models import RoleGrant
+        self.sign_in(self.admin)
+        grant = self.grant(self.second, 'administracion').json()
+        # Nobody else can confirm it in the app: the only administrator granted it.
+        self.assertEqual(self.post(f"/api/v1/admin/grants/{grant['id']}/confirm/").status_code, 400)
+        with self.assertRaises(CommandError):
+            call_command('bootstrap_admin', self.member.username, stdout=StringIO())
+        call_command('bootstrap_admin', self.second.username, stdout=StringIO())
+        self.assertIsNotNone(RoleGrant.objects.get(pk=grant['id']).confirmed_by_id)
+        self.assertTrue(AuditEvent.objects.filter(action='role.bootstrap', target_id=grant['id']).exists())
+        self.sign_in(self.second)
+        self.assertEqual(self.client.get('/api/v1/admin/accounts/').status_code, 200)
+        # With two administrators every further confirmation happens in the app.
+        self.grant(self.member, 'administracion')
+        with self.assertRaises(CommandError):
+            call_command('bootstrap_admin', self.member.username, stdout=StringIO())
+        self.assertIsNone(RoleGrant.objects.get(user=self.member).confirmed_by_id)
 
     def test_admin_audit_lists_account_changes_only(self):
         self.sign_in(self.admin)

@@ -99,7 +99,7 @@ PGPASSWORD="$(gcloud secrets versions access latest --secret shalom-pgpassword -
   python backend/manage.py publish_consent_text aviso staging-1 texto-ficticio.txt
 ```
 
-La primera cuenta se crea entrando por enlace en la app de staging. Su nombre de cuenta aparece en `/api/v1/auth/me/` (campo `username`), y luego `python backend/manage.py bootstrap_admin <username>` le da Administración. Cierra el proxy y la terminal al terminar.
+La primera cuenta se crea entrando por enlace en la app de staging. Su nombre de cuenta aparece en `/api/v1/auth/me/` (campo `username`), y luego `python backend/manage.py bootstrap_admin <username>` le da Administración. Para la segunda persona: se asigna Administración en la app y se confirma con el mismo comando y su `username`. Cierra el proxy y la terminal al terminar.
 
 ## Cola de correo
 

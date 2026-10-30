@@ -80,7 +80,7 @@ button.shalom-secondary { background: #fff; color: #5e3821; border-color: #82552
 .shalom-facts { display: grid; gap: 12px; }
 .shalom-facts dt { font-weight: 650; }
 .shalom-confirm { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; border: 1px solid #d4c7b8; border-radius: 12px; padding: 12px; background: #fff; }
-.shalom-confirm p { flex-basis: 100%; margin: 0; }
+.shalom-confirm p, .shalom-confirm .shalom-roles { flex-basis: 100%; margin: 0; }
 .shalom-admin { display: grid; gap: 16px; }
 .shalom-list { display: grid; gap: 12px; }
 .shalom-list > li { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; justify-content: space-between; border: 1px solid #d4c7b8; border-radius: 16px; padding: 16px; background: #fff; }
