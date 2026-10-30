@@ -30,6 +30,10 @@ class Person(Identified):
 class Group(Identified):
     name = models.CharField(max_length=80)
     active = models.BooleanField(default=True)
+    # Kids configuration: an age range, never a list of children.
+    min_age = models.PositiveSmallIntegerField(null=True, blank=True)
+    max_age = models.PositiveSmallIntegerField(null=True, blank=True)
+    teachers_per_class = models.PositiveSmallIntegerField(default=2)
 
 
 class Assignment(models.Model):
@@ -198,3 +202,68 @@ class RateCounter(models.Model):
     key = models.CharField(max_length=100, primary_key=True)
     window_start = models.DateTimeField()
     hits = models.PositiveIntegerField()
+
+
+# ---------- Coordinación Kids: adults only (teachers, coordinators, volunteers) ----------
+
+class Service(Identified):
+    name = models.CharField(max_length=60)
+    # Python weekday: Monday is 0, Sunday is 6.
+    weekday = models.PositiveSmallIntegerField(default=6)
+    starts_at = models.TimeField()
+    ends_at = models.TimeField()
+    active = models.BooleanField(default=True)
+    class Meta:
+        constraints = [models.CheckConstraint(condition=models.Q(starts_at__lt=models.F('ends_at')), name='service_ends_after_start')]
+
+
+class RosterEntry(Identified):
+    """One teacher giving one group's class in one service on one date."""
+    date = models.DateField()
+    service = models.ForeignKey(Service, on_delete=models.PROTECT)
+    group = models.ForeignKey(Group, on_delete=models.PROTECT)
+    teacher = models.ForeignKey(User, on_delete=models.PROTECT, related_name='roster_entries')
+    created_by = models.ForeignKey(User, on_delete=models.PROTECT, related_name='+')
+    # Set once the reminder email is queued; cleared when the date or the teacher changes.
+    reminded_at = models.DateTimeField(null=True, blank=True)
+    class Meta:
+        constraints = [models.UniqueConstraint(fields=['date', 'service', 'group', 'teacher'], name='one_roster_entry_per_class')]
+        indexes = [models.Index(fields=['teacher', 'date'], name='roster_teacher_date'), models.Index(fields=['date'], name='roster_date')]
+
+
+class Lesson(Identified):
+    date = models.DateField()
+    group = models.ForeignKey(Group, on_delete=models.PROTECT)
+    unit = models.CharField(max_length=60, blank=True)
+    title = models.CharField(max_length=120)
+    manual_page = models.PositiveSmallIntegerField(null=True, blank=True)
+    objective = models.TextField(blank=True, max_length=1000)
+    materials = models.TextField(blank=True, max_length=1000)
+    class Meta:
+        constraints = [models.UniqueConstraint(fields=['group', 'date'], name='one_lesson_per_group_date')]
+
+
+class KidsEvent(Identified):
+    title = models.CharField(max_length=120)
+    date = models.DateField()
+    description = models.TextField(blank=True, max_length=1000)
+    active = models.BooleanField(default=True)
+
+
+class EventItem(Identified):
+    """A task or a material for an event. Assigning does not mean accepting: the assignee accepts."""
+    class Kind(models.TextChoices):
+        TAREA = 'tarea', 'Tarea'
+        MATERIAL = 'material', 'Material'
+    class Status(models.TextChoices):
+        PENDIENTE = 'pendiente', 'Pendiente de aceptar'
+        ACEPTADA = 'aceptada', 'Aceptada'
+        COMPLETADA = 'completada', 'Completada'
+    event = models.ForeignKey(KidsEvent, on_delete=models.CASCADE, related_name='items')
+    kind = models.CharField(max_length=10, choices=Kind.choices)
+    title = models.CharField(max_length=120)
+    assignee = models.ForeignKey(User, null=True, blank=True, on_delete=models.PROTECT, related_name='event_items')
+    due_date = models.DateField(null=True, blank=True)
+    quantity = models.PositiveIntegerField(null=True, blank=True)
+    received = models.PositiveIntegerField(default=0)
+    status = models.CharField(max_length=12, choices=Status.choices, default=Status.PENDIENTE)

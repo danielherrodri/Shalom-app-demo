@@ -128,7 +128,7 @@ Se extiende el [plan v1](plan-v1-kids.md). Cada fase es un PR con pruebas y dato
 4. **Datos de Kids** (tras la evaluación de impacto y el abogado): familias, tutores, niños, salud cifrada, autorizados e imagen.
 5. **Operación de Kids:** reservas, Recepción con QR y gafetes, salida validada, Mi grupo hoy, Mis hijos, avisos de entrada y salida por correo, Seguimiento.
 6. **Libros y pagos:** catálogo, inventario, Checkout Pro, webhook, conciliación, folio y entrega.
-7. **Coordinación:** rol de clases con recordatorio 2 días antes, Maestros, Lecciones, reportes y Configuración.
+7. **Coordinación:** ✅ rol de clases con recordatorio 2 días antes, Maestros, Lecciones, Eventos Kids, Mi agenda y Configuración (solo datos de adultos). Pendientes: reportes de asistencia (requieren Datos de Kids) y permutas.
 8. **Piloto y corte:** un grupo en paralelo al sistema vigente, migración conciliada desde Sheets (la ejecuta la iglesia con un script validado, nunca a través del repositorio) y corte con plan de regreso.
 
 La interfaz React avanza junto con cada fase, reutilizando el diseño de la demo.
