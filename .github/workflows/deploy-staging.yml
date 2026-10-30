@@ -1,0 +1,66 @@
+name: Deploy staging
+# Despliega a staging solo después de que «Security and backend» pasa en un push a main de este
+# repositorio. No usa secretos: entra a Google Cloud por Workload Identity Federation desde el
+# entorno protegido «staging» (infra/staging/06-github.sh). Sin las variables, no corre.
+on:
+  workflow_run:
+    workflows: ['Security and backend']
+    types: [completed]
+    branches: [main]
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: deploy-staging
+  cancel-in-progress: false
+jobs:
+  deploy:
+    if: >-
+      vars.GCP_PROJECT_ID != '' && (
+        (github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main') ||
+        (github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.event == 'push' &&
+         github.event.workflow_run.head_repository.full_name == github.repository))
+    runs-on: ubuntu-latest
+    environment: staging
+    permissions:
+      contents: read
+      id-token: write
+    env:
+      PROJECT: ${{ vars.GCP_PROJECT_ID }}
+      REGION: ${{ vars.GCP_REGION }}
+      SITE: ${{ vars.FIREBASE_SITE }}
+      REVISION: ${{ github.event.workflow_run.head_sha || github.sha }}
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          ref: ${{ env.REVISION }}
+          persist-credentials: false
+      - uses: google-github-actions/auth@7c6bc770dae815cd3e89ee6cdf493a5fab2cc093 # v3.0.0
+        with:
+          workload_identity_provider: ${{ vars.GCP_WORKLOAD_IDENTITY_PROVIDER }}
+          service_account: ${{ vars.GCP_DEPLOY_SERVICE_ACCOUNT }}
+      - uses: google-github-actions/setup-gcloud@aa5489c8933f4cc7a4f7d45035b3b1440c9c10db # v3.0.1
+      - name: Imagen de la API
+        run: |
+          image="$REGION-docker.pkg.dev/$PROJECT/shalom/api:$REVISION"
+          gcloud auth configure-docker "$REGION-docker.pkg.dev" --quiet
+          docker build -t "$image" backend
+          docker push "$image"
+          echo "IMAGE=$image" >> "$GITHUB_ENV"
+      - name: Migraciones (Cloud Run Job), antes de cambiar el servicio
+        run: |
+          gcloud run jobs update shalom-migrate --image "$IMAGE" --region "$REGION" --project "$PROJECT"
+          gcloud run jobs execute shalom-migrate --wait --region "$REGION" --project "$PROJECT"
+      - name: Servicio (conserva variables, secretos y tamaño)
+        run: gcloud run deploy shalom-api --image "$IMAGE" --region "$REGION" --project "$PROJECT" --quiet
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+      - name: Frontend en Firebase Hosting
+        run: |
+          npm ci --prefix frontend
+          npm run build --prefix frontend
+          npx --yes firebase-tools@15.34.0 target:apply hosting staging "$SITE" --project "$PROJECT"
+          npx --yes firebase-tools@15.34.0 deploy --only hosting:staging --project "$PROJECT" --non-interactive

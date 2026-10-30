@@ -23,7 +23,7 @@ class SessionDeadlineMiddleware:
         response = self.get_response(request)
         if request.user.is_authenticated and request.method not in {'GET', 'HEAD', 'OPTIONS'} and response.status_code < 400:
             request.session['active_at'] = time.time()
-        if request.path.startswith('/api/'):
+        if request.path.startswith(('/api/', '/internal/')):
             response['Cache-Control'] = 'no-store'
             response['Content-Security-Policy'] = "default-src 'none'; frame-ancestors 'none'"
         return response

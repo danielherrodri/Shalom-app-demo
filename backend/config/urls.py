@@ -1,5 +1,5 @@
 from django.urls import path
-from core import access, views, admin_api
+from core import access, views, admin_api, internal
 
 urlpatterns = [
     path('api/v1/auth/csrf/', views.csrf_token),
@@ -28,4 +28,7 @@ urlpatterns = [
     path('api/v1/admin/grants/<uuid:pk>/revoke/', admin_api.GrantRevoke.as_view()),
     path('api/v1/admin/invitations/', admin_api.InvitationList.as_view()),
     path('api/v1/admin/invitations/<uuid:pk>/revoke/', admin_api.InvitationRevoke.as_view()),
+    # Called directly on the Cloud Run URL by Cloud Scheduler; Firebase Hosting only forwards /api/.
+    path('internal/email/drain/', internal.drain_email),
+    path('internal/daily/', internal.daily),
 ]
