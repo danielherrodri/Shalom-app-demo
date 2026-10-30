@@ -14,6 +14,7 @@ from rest_framework.exceptions import ValidationError
 from rest_framework.permissions import BasePermission
 from rest_framework.response import Response
 from .admin_api import Strict, audit, display_name, effective_grants
+from .email_layout import Email, app_url
 from .emails import send_after_commit
 from .models import AuditEvent, DayLead, EmailIdentity, EventItem, Group, KidsEvent, Lesson, Role, RosterEntry, Service, Swap, User
 
@@ -429,7 +430,8 @@ class SwapList(generics.GenericAPIView):
                 swap.status, swap.decided_by, swap.decided_at = Swap.Status.CONFIRMADA, request.user, timezone.now()
             swap.save()
             audit(request.user, f'kids.swap.{"confirmada" if coordinator else "create"}', swap)
-        swap = Swap.objects.select_related(*SWAP_RELATED).get(pk=swap.pk)
+            swap = Swap.objects.select_related(*SWAP_RELATED).get(pk=swap.pk)
+            notify_swap(swap)
         return Response(swap_row(swap), status=201)
 
 
@@ -453,6 +455,7 @@ class SwapDecision(generics.GenericAPIView):
             swap.status, swap.decided_by, swap.decided_at = self.target, request.user, timezone.now()
             swap.save(update_fields=['status', 'decided_by', 'decided_at'])
             audit(request.user, f'kids.swap.{self.target}', swap)
+            notify_swap(swap)
         return Response(swap_row(swap))
 
 
@@ -734,17 +737,62 @@ class AuditLog(generics.GenericAPIView):
 
 # ---------- Recordatorio dos días antes ----------
 
-REMINDER = ('Recordatorio: tienes clase en Shalom Kids', """¡Hola, {name}!
+REMINDER = Email(
+    subject='Recordatorio: tienes clase en Shalom Kids', theme='kids', eyebrow='TU AGENDA · SHALOM KIDS', title='Nos preparamos para acompañar.',
+    intro='¡Hola, {name}! Te recordamos tus próximos turnos en Shalom Kids.',
+    blocks=(('Tus turnos', '{classes}'),
+            ('Si no puedes asistir', 'Registra una permuta en «Mi agenda» o avisa a coordinación lo antes posible.')),
+    cta='Abrir Mi agenda', cta_url='app',
+    closing='¡Gracias por servir!\nEquipo de Shalom Kids',
+    reason='Recibes este recordatorio porque tienes turnos asignados en el rol de Shalom Kids.',
+)
 
-Te recordamos tus próximos turnos en Shalom Kids:
+SWAP_CONFIRMED = Email(
+    subject='Cambio confirmado en tu rol de Shalom Kids', theme='kids', eyebrow='PERMUTA · SHALOM KIDS', title='Tu rol cambió.',
+    intro='¡Hola, {name}! Coordinación confirmó la permuta con {other}.',
+    blocks=(('Tus cambios', '{changes}'),
+            ('Recordatorio', 'Recibirás el recordatorio de siempre 2 días antes de cada clase.')),
+    cta='Abrir Mi agenda', cta_url='app',
+    closing='¡Gracias por servir!\nEquipo de Shalom Kids',
+    reason='Recibes este aviso porque participas en una permuta del rol de Shalom Kids.',
+)
 
-{classes}
+SWAP_REJECTED = Email(
+    subject='Tu permuta no se confirmó', theme='kids', eyebrow='PERMUTA · SHALOM KIDS', title='Tu clase sigue igual.',
+    intro='¡Hola, {name}! Coordinación no confirmó la permuta con {other}, así que la clase sigue a tu nombre.',
+    blocks=(('Clase', '{changes}'),),
+    cta='Abrir Mi agenda', cta_url='app',
+    note='Si no puedes darla, habla con coordinación lo antes posible.',
+    closing='Equipo de Shalom Kids',
+    reason='Recibes este aviso porque registraste una permuta en el rol de Shalom Kids.',
+)
 
-Si no puedes asistir, registra una permuta en «Mi agenda» o avisa a coordinación lo antes posible.
 
-¡Gracias por servir!
-Equipo de Shalom Kids
-""")
+def address_of(user_id):
+    """Verified address of an account, or None. Only the reminder and swap notices use it."""
+    return EmailIdentity.objects.filter(user_id=user_id).order_by('-verified_at').values_list('email', flat=True).first()
+
+
+def class_line(entry):
+    return f'{entry.date.strftime("%d/%m/%Y")} · {entry.service.name} ({entry.service.starts_at.strftime("%H:%M")}) · {entry.group.name}'
+
+
+def notify_swap(swap):
+    """After a decision, tells each teacher what changed for them. Sent once the transaction commits."""
+    given, back = class_line(swap.entry), class_line(swap.return_entry) if swap.return_entry_id else None
+    if swap.status == Swap.Status.CONFIRMADA:
+        notices = [(swap.from_teacher, swap.to_teacher, [f'• Ya no das: {given}'] + ([f'• Das a cambio: {back}'] if back else [])),
+                   (swap.to_teacher, swap.from_teacher, [f'• Das: {given}'] + ([f'• Ya no das: {back}'] if back else []))]
+        template = SWAP_CONFIRMED
+    elif swap.status == Swap.Status.RECHAZADA:
+        notices, template = [(swap.from_teacher, swap.to_teacher, [f'• {given}'])], SWAP_REJECTED
+    else:
+        return
+    for person, other, changes in notices:
+        address = address_of(person.id)
+        if address:
+            send_after_commit(f'swap_{swap.status}', address, template, retry=True, name=display_name(person),
+                              other=display_name(other), changes='\n'.join(changes), app=app_url('/'))
 
 
 def send_reminders():
@@ -765,14 +813,14 @@ def send_reminders():
             by_teacher.setdefault(lead.lead_id, ([], []))[1].append(lead)
         sent = skipped = 0
         for teacher_id, (own_entries, own_leads) in by_teacher.items():
-            address = EmailIdentity.objects.filter(user_id=teacher_id).order_by('-verified_at').values_list('email', flat=True).first()
+            address = address_of(teacher_id)
             if not address:
                 skipped += len(own_entries) + len(own_leads)
                 continue
             lines = [f'• {e.date.strftime("%d/%m/%Y")} · {e.service.name} ({e.service.starts_at.strftime("%H:%M")}) · {e.group.name}' for e in own_entries]
             lines += [f'• {l.date.strftime("%d/%m/%Y")} · Encargado(a) del día · {l.group.name}' for l in own_leads]
             person = (own_entries[0].teacher if own_entries else own_leads[0].lead)
-            send_after_commit('class_reminder', address, REMINDER, retry=True, name=display_name(person), classes='\n'.join(lines))
+            send_after_commit('class_reminder', address, REMINDER, retry=True, name=display_name(person), classes='\n'.join(lines), app=app_url('/'))
             now = timezone.now()
             RosterEntry.objects.filter(pk__in=[e.pk for e in own_entries]).update(reminded_at=now)
             DayLead.objects.filter(pk__in=[l.pk for l in own_leads]).update(reminded_at=now)

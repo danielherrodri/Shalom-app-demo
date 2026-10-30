@@ -74,6 +74,16 @@ Detalle, pasos y fuentes en [infraestructura de staging](infraestructura-staging
 - **CI:** `deploy-staging.yml` despliega tras «Security and backend» en `main`, con Workload Identity Federation y el entorno protegido `staging`; sin variables no corre. `security.yml` agrega la construcción de la imagen con `check --deploy`, la simulación de los scripts y `tests/hosting-staging.cjs`.
 - **Pendiente:** crear los recursos, confirmar en staging el número de proxies y el host que envía Hosting, procedimiento de rotación de la llave de campos y retención de `OutboundEmail` y `LoginLink`.
 
+## Correos con el diseño de Shalom
+
+- Los cuatro correos del servidor (enlace de acceso, invitación, recordatorio de Kids y avisos de permuta) se envían como `multipart/alternative`: texto plano y el HTML de la familia de [plantillas](plantillas-correo-v06.md) (`emails/*.html`). Una sola estructura (`core/email_layout.py`) genera ambas partes, así que nunca dicen cosas distintas.
+- Tema Shalom (Noche, Crema y cobre) para acceso e invitación; tema Kids (blanco, fuego y oro) para recordatorio y permutas. Tablas de 600 px, estilos en línea, consulta para celular y botón VML para Outlook clásico, como las plantillas.
+- Sin la franja «Demostración · sin envío», sin fuentes web, píxeles, scripts ni formularios. El único recurso remoto es el logo en el dominio de la app (`/correo/shalom-logo.png`, servido desde `frontend/public/`), con texto alternativo legible si se bloquean las imágenes.
+- Cada valor se escapa en el HTML y los botones solo pueden llevar a `SHALOM_PUBLIC_APP_URL`; cualquier otro destino es un error y no se envía. El acceso y la invitación muestran además el enlace escrito, por si el cliente no dibuja el botón.
+- La invitación conserva palabra por palabra el borrador legal (texto 6 de `docs/legal/textos-cuentas-borrador.md`), solo repartido en el diseño; sigue pendiente de revisión del abogado.
+- La cola guarda cifradas las dos partes mientras hay reintentos; los cuerpos encolados antes de este cambio se envían como solo texto.
+- Sin enlaces a preferencias ni a privacidad: son correos operativos y el aviso de privacidad aún no se publica. Faltan las pruebas de entrega en clientes reales (Gmail, Outlook, Apple Mail, imágenes bloqueadas y modo oscuro forzado) antes del piloto.
+
 ## Coordinación Kids · Uso (solo datos de adultos)
 
 El sistema vigente (Apps Script y Sheets) sigue siendo la fuente de verdad: este módulo no lo lee ni escribe en él, no hay doble captura ni sincronización. Se usa con datos ficticios en desarrollo y staging, y en el piloto según la fase de corte.
@@ -90,8 +100,9 @@ El sistema vigente (Apps Script y Sheets) sigue siendo la fuente de verdad: este
 - **Mi agenda docente** (`kids/agenda/`): solo las clases propias de las próximas 8 semanas con su lección y su encargado(a), los días propios como encargado(a), las permutas propias y las tareas propias pendientes.
 - **Bitácora** (`kids/audit/`): cada alta, cambio, baja, aceptación, cierre y decisión de permuta queda en `AuditEvent` con quién y cuándo; Coordinación consulta los últimos 200.
 - **Errores:** la API responde un solo mensaje legible por error de validación (`core/errors.py`).
+- **Aviso de permuta:** al confirmarse, cada docente recibe por correo lo que cambia para ella («Ya no das», «Das», «Das a cambio»); si Coordinación la rechaza, se avisa a quien la registró. Retirarla no envía correo. Va por la cola con reintentos y al correo verificado de la cuenta.
 - **Pruebas:** `core/tests_kids.py` (permisos por perfil, segundo factor, reglas del rol, cupo con asignaciones simultáneas, encargado(a), permutas e intercambios, recordatorios, bitácora y que ningún nombre de niño aparezca en las respuestas) y `tests/coordinacion-react.cjs` (recorrido completo a 360 px con axe, con dos dispositivos: la docente cede su clase y Coordinación confirma; corre en CI).
-- **Fuera de alcance:** reportes de asistencia con nombres de niños y cualquier dato de menores (fase Datos Kids). **Pendiente:** que «Mi clase de hoy» use el rol en lugar de las asignaciones actuales (fase Operación Kids) y avisar por correo al confirmar una permuta lejana (hoy llega con el recordatorio de 2 días antes).
+- **Fuera de alcance:** reportes de asistencia con nombres de niños y cualquier dato de menores (fase Datos Kids). **Pendiente:** que «Mi clase de hoy» use el rol en lugar de las asignaciones actuales (fase Operación Kids).
 
 ## Interfaz de las fases 1 y 2 (Fase 6, en curso)
 

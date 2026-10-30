@@ -266,6 +266,32 @@ class KidsSwapTests(KidsBase):
         actions = set(AuditEvent.objects.filter(target_id=swap['id']).values_list('action', flat=True))
         self.assertEqual(actions, {'kids.swap.create', 'kids.swap.confirmada'})
 
+    def test_decisions_are_emailed_to_each_teacher(self):
+        for user, address in ((self.teacher, 'docente-a@example.invalid'), (self.other_teacher, 'docente-b@example.invalid')):
+            EmailIdentity.objects.create(user=user, email=address, verified_at=timezone.now())
+        later = self.roster(teacher=self.other_teacher, day=self.sunday + timedelta(days=7)).json()['id']
+        swap = self.swap(return_entry=later).json()
+        self.assertEqual(len(mail.outbox), 0)
+        with self.captureOnCommitCallbacks(execute=True):
+            self.call(self.coordinator, 'post', f"swaps/{swap['id']}/confirm/")
+        sent = {m.to[0]: m for m in mail.outbox}
+        self.assertEqual(set(sent), {'docente-a@example.invalid', 'docente-b@example.invalid'})
+        self.assertIn('Ya no das: ' + self.sunday.strftime('%d/%m/%Y'), sent['docente-a@example.invalid'].body)
+        self.assertIn('Das a cambio: ', sent['docente-a@example.invalid'].body)
+        self.assertIn('Das: ' + self.sunday.strftime('%d/%m/%Y'), sent['docente-b@example.invalid'].body)
+        self.assertIn('Tu rol cambió.', sent['docente-b@example.invalid'].alternatives[0][0])
+        mail.outbox.clear()
+        again = self.swap(entry=later, to=self.third).json()
+        with self.captureOnCommitCallbacks(execute=True):
+            self.call(self.coordinator, 'post', f"swaps/{again['id']}/reject/")
+        self.assertEqual([m.to for m in mail.outbox], [['docente-a@example.invalid']])
+        self.assertIn('no confirmó la permuta con docente-c', mail.outbox[0].body)
+        mail.outbox.clear()
+        third = self.swap(entry=later, to=self.third).json()
+        with self.captureOnCommitCallbacks(execute=True):
+            self.call(self.teacher, 'post', f"swaps/{third['id']}/cancel/")
+        self.assertEqual(mail.outbox, [])
+
     def test_only_own_classes_and_only_teachers(self):
         self.assertEqual(self.swap(user=self.other_teacher, to=self.third).status_code, 404)
         self.assertEqual(self.swap(user=self.volunteer, to=self.third).status_code, 403)
