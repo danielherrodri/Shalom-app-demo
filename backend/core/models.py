@@ -115,12 +115,25 @@ class Invitation(Identified):
 
 
 class OutboundEmail(Identified):
-    # Delivery record only: no body, so emailed tokens are never persisted.
+    # Delivery record. Login links keep no body at all. Retryable messages (invitations) keep theirs
+    # sealed with the field key only while pending: it is erased on delivery, on giving up or at retry_until.
     kind = models.CharField(max_length=30)
     recipient = models.EmailField()
+    subject = models.CharField(max_length=200, blank=True)
+    sealed_body = models.TextField(blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     sent_at = models.DateTimeField(null=True, blank=True)
     failed = models.BooleanField(default=False)
+    attempts = models.PositiveSmallIntegerField(default=0)
+    next_attempt_at = models.DateTimeField(null=True, blank=True)
+    retry_until = models.DateTimeField(null=True, blank=True)
+    # Record the message delivers (an invitation); revoking it cancels pending retries.
+    reference = models.UUIDField(null=True, blank=True)
+    class Meta:
+        indexes = [
+            models.Index(fields=['next_attempt_at'], name='outbound_email_due'),
+            models.Index(fields=['reference'], name='outbound_email_reference'),
+        ]
 
 
 class EmailIdentity(Identified):
