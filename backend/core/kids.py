@@ -13,10 +13,10 @@ from rest_framework import generics, serializers
 from rest_framework.exceptions import ValidationError
 from rest_framework.permissions import BasePermission
 from rest_framework.response import Response
-from .admin_api import Strict, audit, display_name, effective_grants
+from .admin_api import Strict, address_of, audit, display_name, effective_grants
 from .email_layout import Email, app_url
 from .emails import send_after_commit
-from .models import AuditEvent, DayLead, EmailIdentity, EventItem, Group, KidsEvent, Lesson, Role, RosterEntry, Service, Swap, User
+from .models import AuditEvent, DayLead, EventItem, Group, KidsEvent, Lesson, Role, RosterEntry, Service, Swap, User
 
 # Profiles that work in Kids; Joven is never part of the team.
 TEAM_ROLES = {Role.DOCENTE, Role.VOLUNTARIO, Role.PREPARACION, Role.COORDINACION_KIDS}
@@ -766,11 +766,6 @@ SWAP_REJECTED = Email(
     closing='Equipo de Shalom Kids',
     reason='Recibes este aviso porque registraste una permuta en el rol de Shalom Kids.',
 )
-
-
-def address_of(user_id):
-    """Verified address of an account, or None. Only the reminder and swap notices use it."""
-    return EmailIdentity.objects.filter(user_id=user_id).order_by('-verified_at').values_list('email', flat=True).first()
 
 
 def class_line(entry):

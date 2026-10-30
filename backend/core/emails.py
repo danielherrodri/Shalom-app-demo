@@ -122,3 +122,15 @@ LOGIN_LINK = Email(
     closing='Equipo de Shalom',
     reason='Recibes este correo porque se pidió un enlace de acceso para esta dirección.',
 )
+
+
+REACTIVATED = Email(
+    subject='Tu acceso a Shalom está activo de nuevo', theme='shalom', eyebrow='ACCESO · SHALOM', title='¡Qué gusto tenerte de vuelta!',
+    intro='¡Hola, {name}! Administración de Shalom reactivó tu cuenta. Ya puedes entrar con este mismo correo.',
+    blocks=(('Cómo entrar', 'Abre Shalom y pide tu enlace de acceso con este correo. Es de un solo uso y vence en 15 minutos.'),
+            ('Tus perfiles', 'Administración te asigna los perfiles de las actividades en las que participas. Algunos necesitan la confirmación de una segunda persona y la verificación en dos pasos.')),
+    cta='Abrir Shalom', cta_url='app',
+    note='Si no esperabas este correo, avisa a administración de Shalom.',
+    closing='¡Bendiciones!\nEquipo de Shalom',
+    reason='Recibes este correo porque administración de Shalom reactivó la cuenta de esta dirección.',
+)

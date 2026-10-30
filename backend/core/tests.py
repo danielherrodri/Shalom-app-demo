@@ -375,10 +375,54 @@ class AdministrationTests(TestCase):
         self.sign_in(self.admin)
         self.grant(self.member, 'docente')
         self.post(f'/api/v1/admin/accounts/{self.member.id}/deactivate/')
-        self.assertEqual(self.post(f'/api/v1/admin/accounts/{self.member.id}/reactivate/').status_code, 204)
+        response = self.post(f'/api/v1/admin/accounts/{self.member.id}/reactivate/')
+        self.assertEqual(response.json(), {'roles': [], 'pendingRoles': [], 'notified': False, 'upcomingClasses': 0})
         self.assertEqual(self.post(f'/api/v1/admin/accounts/{self.member.id}/reactivate/').status_code, 404)
         self.sign_in(self.member)
         self.assertEqual(self.client.get('/api/v1/auth/me/').json()['roles'], [])
+
+    def test_deactivated_accounts_show_when_who_and_former_profiles(self):
+        from .models import AccountProfile
+        AccountProfile.objects.create(user=self.admin, display_name='Administración de ejemplo', adult_declared_at=timezone.now())
+        self.sign_in(self.admin)
+        self.grant(self.member, 'voluntario')
+        self.grant(self.member, 'docente')
+        # A profile removed earlier is not one the deactivation took away.
+        self.post(f"/api/v1/admin/grants/{self.grant(self.member, 'caja').json()['id']}/revoke/")
+        self.post(f'/api/v1/admin/accounts/{self.member.id}/deactivate/')
+        row = self.client.get('/api/v1/admin/accounts/?status=inactive').json()['results'][0]
+        self.assertEqual({k: row[k] for k in ('roles', 'formerRoles', 'deactivatedBy', 'upcomingClasses')},
+                         {'roles': [], 'formerRoles': ['docente', 'voluntario'], 'deactivatedBy': 'Administración de ejemplo', 'upcomingClasses': 0})
+        self.assertIsNotNone(row['deactivatedAt'])
+        self.assertNotIn('formerRoles', self.client.get('/api/v1/admin/accounts/').json()['results'][0])
+        # Reactivating clears the record, so a later deactivation shows only what it took.
+        self.post(f'/api/v1/admin/accounts/{self.member.id}/reactivate/', {'roles': ['voluntario']})
+        self.post(f'/api/v1/admin/accounts/{self.member.id}/deactivate/')
+        self.assertEqual(self.client.get('/api/v1/admin/accounts/?status=inactive').json()['results'][0]['formerRoles'], ['voluntario'])
+
+    def test_reactivation_grants_chosen_profiles_and_privileged_ones_wait(self):
+        from django.core import mail
+        from .models import EmailIdentity, RoleGrant
+        EmailIdentity.objects.create(user=self.member, email='reactivada@example.invalid', verified_at=timezone.now())
+        self.sign_in(self.admin)
+        self.post(f'/api/v1/admin/accounts/{self.member.id}/deactivate/')
+        url = f'/api/v1/admin/accounts/{self.member.id}/reactivate/'
+        self.assertEqual(self.post(url, {'roles': ['joven']}).status_code, 400)
+        self.assertEqual(self.post(url, {'roles': ['docente'], 'confirmed_by': str(self.admin.id)}).status_code, 400)
+        self.assertFalse(User.objects.get(pk=self.member.pk).is_active)
+        with self.captureOnCommitCallbacks(execute=True):
+            response = self.post(url, {'roles': ['docente', 'coordinacion_kids']})
+        self.assertEqual(response.json(), {'roles': ['docente'], 'pendingRoles': ['coordinacion_kids'], 'notified': True, 'upcomingClasses': 0})
+        pending = RoleGrant.objects.get(user=self.member, role='coordinacion_kids', revoked_at__isnull=True)
+        self.assertEqual((pending.granted_by, pending.confirmed_by), (self.admin, None))
+        self.assertEqual(AuditEvent.objects.filter(action='role.grant', actor=self.admin).count(), 2)
+        message = mail.outbox[-1]
+        self.assertEqual((message.to, message.subject), (['reactivada@example.invalid'], 'Tu acceso a Shalom está activo de nuevo'))
+        # The notice says nothing about which profiles were granted.
+        self.assertNotIn('Docente', message.body)
+        self.assertNotIn('Coordinación', message.body)
+        self.sign_in(self.member)
+        self.assertEqual(self.client.get('/api/v1/auth/me/').json()['roles'], ['docente'])
 
     def test_invitation_is_taken_only_by_the_invited_address(self):
         from .models import EmailIdentity

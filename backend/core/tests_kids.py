@@ -353,6 +353,10 @@ class KidsSwapTests(KidsBase):
         self.assertTrue(AuditEvent.objects.filter(action='kids.swap.cancelada', target_id=swap['id']).exists())
         # The class stays in the roster so coordination sees who must be replaced.
         self.assertTrue(RosterEntry.objects.filter(teacher=self.other_teacher).exists())
+        row = client.get('/api/v1/admin/accounts/?status=inactive').json()['results'][0]
+        self.assertEqual((row['formerRoles'], row['upcomingClasses']), (['docente'], 1))
+        response = client.post(f'/api/v1/admin/accounts/{self.other_teacher.id}/reactivate/', {'roles': ['docente']}, content_type='application/json')
+        self.assertEqual(response.json()['upcomingClasses'], 1)
 
     def test_options_list_teachers_and_their_classes_only(self):
         EmailIdentity.objects.create(user=self.other_teacher, email='docente-b@example.invalid', verified_at=timezone.now())
